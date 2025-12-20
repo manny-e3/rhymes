@@ -67,22 +67,24 @@
 
                                 <!-- Flash Messages -->
                                 @if(session('success'))
-                                    <div class="alert alert-success alert-dismissible">
-                                        <button class="close" data-bs-dismiss="alert"></button>
-                                        {{ session('success') }}
+                                    <div class="alert alert-success alert-dismissible fade show">
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <strong>Success!</strong> {{ session('success') }}
                                     </div>
                                 @endif
 
                                 @if(session('error'))
-                                    <div class="alert alert-danger alert-dismissible">
-                                        <button class="close" data-bs-dismiss="alert"></button>
-                                        {{ session('error') }}
+                                    <div class="alert alert-danger alert-dismissible fade show">
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <strong>Error!</strong> {{ session('error') }}
                                     </div>
                                 @endif
 
                                 @if($errors->any())
-                                    <div class="alert alert-danger">
-                                        <ul class="mb-0">
+                                    <div class="alert alert-danger alert-dismissible fade show">
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <strong>Whoops!</strong> Something went wrong:
+                                        <ul class="mb-0 mt-2">
                                             @foreach($errors->all() as $error)
                                                 <li>{{ $error }}</li>
                                             @endforeach

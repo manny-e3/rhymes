@@ -18,8 +18,12 @@ class CustomAuthController extends Controller
     /**
      * Display the registration view.
      */
-    public function showRegister(): View
+    public function showRegister(): View|RedirectResponse
     {
+        // If user is already authenticated, redirect to dashboard
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
         
         return view('auth.register');
     }
@@ -43,21 +47,26 @@ class CustomAuthController extends Controller
             'phone' => $request->phone,
         ]);
 
-        // Assign default 'user' role
-        $user->assignRole('user');
+        // Assign default 'author' role
+        $user->assignRole('author');
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false))->with('success', 'Welcome to Rhymes Platform! You can now submit books for review.');
+        return redirect(route('verification.notice', absolute: false))->with('success', 'Welcome to Rhymes Platform! Please verify your email address to continue.');
     }
 
     /**
      * Display the login view.
      */
-    public function showLogin(): View
+    public function showLogin(): View|RedirectResponse
     {
+        // If user is already authenticated, redirect to dashboard
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        
         return view('auth.login');
     }
 
@@ -71,6 +80,15 @@ class CustomAuthController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+        
+        // Check if user has verified their email
+        if (!$user->hasVerifiedEmail()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return back()->with('error', 'You must verify your email address before logging in. Please check your email for the verification link.');
+        }
         
         // Redirect based on user role
         if ($user->hasRole('admin')) {

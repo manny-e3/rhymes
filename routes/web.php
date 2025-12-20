@@ -505,6 +505,12 @@ Route::middleware('role:admin')->group(function () {
 });
 
 Route::get('/', function () {
+    // If user is authenticated, redirect to dashboard
+    if (\Illuminate\Support\Facades\Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    
+    // Otherwise, show login page
     return view('auth.login');
 });
 
@@ -535,5 +541,22 @@ Route::middleware('auth')->group(function () {
 Route::post('/webhook/erprev', [\App\Http\Controllers\Webhook\ERPRevWebhookController::class, 'handleWebhook'])
     ->name('webhook.erprev')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+// Error pages illustration route (for development/testing only)
+Route::get('/errors/illustration', function () {
+    return view('errors.illustration');
+})->name('errors.illustration');
+
+// Error pages preview routes (for development/testing only)
+Route::get('/errors/{code}', function ($code) {
+    // Only allow specific error codes for preview
+    $allowedCodes = ['404', '403', '500', '503'];
+    
+    if (!in_array($code, $allowedCodes)) {
+        abort(404);
+    }
+    
+    return response()->view("errors.{$code}", [], (int)$code);
+})->name('errors.show');
 
 require __DIR__.'/auth.php';

@@ -6,17 +6,27 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 
 class UserPasswordReset extends Notification
 {
     use Queueable;
 
     /**
-     * Create a new notification instance.
+     * The password reset token.
+     *
+     * @var string
      */
-    public function __construct()
+    public $token;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param  string  $token
+     */
+    public function __construct($token)
     {
-        //
+        $this->token = $token;
     }
 
     /**
@@ -34,10 +44,18 @@ class UserPasswordReset extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $resetUrl = url(route('password.reset', [
+            'token' => $this->token,
+            'email' => $notifiable->getEmailForPasswordReset(),
+        ], false));
+
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject(Lang::get('Reset Password Notification'))
+            ->view('emails.password-reset', [
+                'user' => $notifiable,
+                'resetUrl' => $resetUrl,
+                'count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire'),
+            ]);
     }
 
     /**

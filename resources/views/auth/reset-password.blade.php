@@ -7,7 +7,7 @@
 @section('page-description', 'Enter your email and new password to reset your account password.')
 
 @section('content')
-<form method="POST" action="{{ route('password.store') }}">
+<form method="POST" action="{{ route('password.store') }}" id="reset-password-form">
     @csrf
     <input type="hidden" name="token" value="{{ $request->route('token') }}">
     
@@ -16,7 +16,7 @@
             <label class="form-label" for="email">Email</label>
         </div>
         <div class="form-control-wrap">
-            <input type="email" name="email" class="form-control form-control-lg @error('email') is-invalid @enderror" id="email" placeholder="Enter your email address" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username">
+            <input readonly type="email" name="email" class="form-control form-control-lg @error('email') is-invalid @enderror" id="email" placeholder="Enter your email address" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username">
             @error('email')
                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
             @enderror
@@ -67,7 +67,7 @@ Remember your password? <a href="{{ route('login') }}"><strong>Sign in</strong><
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var form = document.querySelector('form[action="{{ route('password.store') }}"]');
+        var form = document.getElementById('reset-password-form');
         var btn = document.getElementById('reset-submit-btn');
         var btnText = document.getElementById('reset-btn-text');
         var btnSpinner = document.getElementById('reset-btn-spinner');
@@ -79,6 +79,32 @@ Remember your password? <a href="{{ route('login') }}"><strong>Sign in</strong><
                 btnText.textContent = 'Resetting...';
             });
         }
+        
+        // Auto-focus on email field
+        var emailField = document.getElementById('email');
+        if(emailField) {
+            emailField.focus();
+        }
+        
+        // Password visibility toggle
+        var passcodeSwitch = document.querySelectorAll('.passcode-switch');
+        passcodeSwitch.forEach(function(switchEl) {
+            switchEl.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.getElementById(this.getAttribute('data-target'));
+                if(target) {
+                    if(target.type === 'password') {
+                        target.type = 'text';
+                        this.querySelector('.icon-show').style.display = 'none';
+                        this.querySelector('.icon-hide').style.display = 'block';
+                    } else {
+                        target.type = 'password';
+                        this.querySelector('.icon-show').style.display = 'block';
+                        this.querySelector('.icon-hide').style.display = 'none';
+                    }
+                }
+            });
+        });
     });
 </script>
 @endpush

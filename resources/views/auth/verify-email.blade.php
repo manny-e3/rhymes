@@ -1,31 +1,42 @@
-<x-guest-layout>
+@extends('layouts.auth')
+
+@section('title', 'Email Verification | Rhymes Author Platform')
+
+@section('page-title', 'Email Verification')
+
+@section('page-description', 'Thanks for signing up! Before getting started, please verify your email address by clicking the link we just emailed to you.')
+
+@section('content')
+<div class="text-center mb-4">
     <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+        {{ __('If you didn\'t receive the email, we will gladly send you another.') }}
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <strong>Success!</strong> {{ __('A new verification link has been sent to the email address you provided during registration.') }}
         </div>
     @endif
+</div>
 
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
+<div class="mt-4 d-flex justify-content-between">
+    <form method="POST" action="{{ route('verification.send') }}" class="w-100 me-2">
+        @csrf
 
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
-        </form>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
+        <div>
+            <button type="submit" class="btn btn-lg btn-primary btn-block">
+                {{ __('Resend Verification Email') }}
             </button>
-        </form>
-    </div>
-</x-guest-layout>
+        </div>
+    </form>
+
+    <form method="POST" action="{{ route('logout') }}" class="w-100 ms-2">
+        @csrf
+
+        <button type="submit" class="btn btn-lg btn-light btn-block">
+            {{ __('Log Out') }}
+        </button>
+    </form>
+</div>
+@endsection

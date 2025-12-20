@@ -7,7 +7,7 @@
 @section('page-description', 'Forgot your password? No problem. Enter your email address and we\'ll send you a password reset link.')
 
 @section('content')
-<form method="POST" action="{{ route('password.email') }}">
+<form method="POST" action="{{ route('password.email') }}" id="forgot-password-form">
     @csrf
     <div class="form-group">
         <div class="form-label-group">
@@ -37,7 +37,7 @@ Remember your password? <a href="{{ route('login') }}"><strong>Sign in</strong><
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var form = document.querySelector('form[action="{{ route('password.email') }}"]');
+        var form = document.getElementById('forgot-password-form');
         var btn = document.getElementById('forgot-submit-btn');
         var btnText = document.getElementById('forgot-btn-text');
         var btnSpinner = document.getElementById('forgot-btn-spinner');
@@ -48,6 +48,12 @@ Remember your password? <a href="{{ route('login') }}"><strong>Sign in</strong><
                 btnSpinner.style.display = 'inline-block';
                 btnText.textContent = 'Sending...';
             });
+        }
+        
+        // Auto-focus on email field
+        var emailField = document.getElementById('email');
+        if(emailField) {
+            emailField.focus();
         }
     });
 </script>

@@ -28,7 +28,7 @@ class BookService
     public function createBook(User $user, array $data): Book
     {
         $data['user_id'] = $user->id;
-        $data['status'] = 'pending_review'; // Default status for new books
+        $data['status'] = 'pending_review'; 
 
         $book = Book::create($data);
         

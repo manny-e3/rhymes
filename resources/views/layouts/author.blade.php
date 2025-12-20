@@ -177,7 +177,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: '{{ session('success') }}',
+                    html: `{!! nl2br(e(session('success'))) !!}`,
                     timer: 3000,
                     timerProgressBar: true,
                     showConfirmButton: false,
@@ -191,7 +191,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: '{{ session('error') }}',
+                    html: `{!! nl2br(e(session('error'))) !!}`,
                     showConfirmButton: true,
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#e85347'
@@ -203,7 +203,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Warning!',
-                    text: '{{ session('warning') }}',
+                    html: `{!! nl2br(e(session('warning'))) !!}`,
                     showConfirmButton: true,
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#f4bd0e'
@@ -215,7 +215,7 @@
                 Swal.fire({
                     icon: 'info',
                     title: 'Info',
-                    text: '{{ session('info') }}',
+                    html: `{!! nl2br(e(session('info'))) !!}`,
                     timer: 3000,
                     timerProgressBar: true,
                     showConfirmButton: false,
@@ -229,7 +229,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: message,
+                    html: message.replace(/\n/g, '<br>'),
                     timer: 3000,
                     timerProgressBar: true,
                     showConfirmButton: false,
@@ -242,7 +242,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: message,
+                    html: message.replace(/\n/g, '<br>'),
                     showConfirmButton: true,
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#e85347'
@@ -253,7 +253,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Warning!',
-                    text: message,
+                    html: message.replace(/\n/g, '<br>'),
                     showConfirmButton: true,
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#f4bd0e'
@@ -264,7 +264,7 @@
                 Swal.fire({
                     icon: 'info',
                     title: 'Info',
-                    text: message,
+                    html: message.replace(/\n/g, '<br>'),
                     timer: 3000,
                     timerProgressBar: true,
                     showConfirmButton: false,
