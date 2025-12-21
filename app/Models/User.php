@@ -10,6 +10,8 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\UserPasswordReset;
 use App\Notifications\VerifyEmail;
+use App\Notifications\OTPNotification;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -32,6 +34,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'payment_details',
         'promoted_to_author_at',
+        'otp_code',
+        'otp_expires_at',
+        'otp_enabled',
     ];
 
     /**
@@ -42,10 +47,11 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'otp_code',
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -57,8 +63,19 @@ class User extends Authenticatable implements MustVerifyEmail
             'payment_details' => 'array',
             'promoted_to_author_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
+            'otp_enabled' => 'boolean',
         ];
     }
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'otp_enabled' => true,
+    ];
 
     /**
      * Send the password reset notification.
@@ -79,6 +96,67 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmail);
+    }
+
+    /**
+     * Generate and send OTP code to user
+     *
+     * @return string
+     */
+    public function generateOTP()
+    {
+        // Generate a 6-digit random number
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        // Set expiration time (10 minutes from now)
+        $expiresAt = now()->addMinutes(10);
+        
+        // Save to user record
+        $this->update([
+            'otp_code' => $otpCode,
+            'otp_expires_at' => $expiresAt,
+            'otp_enabled' => true,
+        ]);
+        
+        // Send OTP via email
+        $this->notify(new OTPNotification($otpCode));
+        
+        return $otpCode;
+    }
+
+    /**
+     * Verify OTP code
+     *
+     * @param string $otpCode
+     * @return bool
+     */
+    public function verifyOTP($otpCode)
+    {
+        // Check if OTP is enabled
+        if (!$this->otp_enabled) {
+            return false;
+        }
+        
+        // Check if OTP has expired
+        if ($this->otp_expires_at->isPast()) {
+            return false;
+        }
+        
+        // Check if OTP matches
+        return hash_equals($this->otp_code, $otpCode);
+    }
+
+    /**
+     * Clear OTP after successful verification
+     *
+     * @return void
+     */
+    public function clearOTP()
+    {
+        $this->update([
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
     }
 
     // Relationships

@@ -1,16 +1,14 @@
-@extends('layouts.author')
+<?php $__env->startSection('title', 'Payouts | Rhymes Author Platform'); ?>
 
-@section('title', 'Payouts | Rhymes Author Platform')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('page-title', 'Payouts')
+<?php $__env->startSection('page-title', 'Payouts'); ?>
 
-@section('page-description', 'Request payouts and track withdrawal history')
+<?php $__env->startSection('page-description', 'Request payouts and track withdrawal history'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
         <div class="nk-content-body">
@@ -25,7 +23,7 @@
                     <div class="nk-block-head-content">
                         <div class="nk-block-tools g-3">
                             <div class="nk-block-tools-opt">
-                                <a href="{{ route('author.wallet.index') }}" class="btn btn-outline-light">
+                                <a href="<?php echo e(route('author.wallet.index')); ?>" class="btn btn-outline-light">
                                     <em class="icon ni ni-wallet"></em><span>View Wallet</span>
                                 </a>
                             </div>
@@ -48,46 +46,54 @@
                                 </div>
 
 
-                                <form action="{{ route('author.payouts.store') }}" method="POST" id="payoutForm">
-                                    @csrf
+                                <form action="<?php echo e(route('author.payouts.store')); ?>" method="POST" id="payoutForm">
+                                    <?php echo csrf_field(); ?>
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-label" for="amount_requested">Payout Amount</label>
                                                 <div class="form-control-wrap">
                                                     <input type="number" 
-                                                           class="form-control @error('amount_requested') is-invalid @enderror" 
+                                                           class="form-control <?php $__errorArgs = ['amount_requested'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                            id="amount_requested" 
                                                            name="amount_requested" 
                                                            placeholder="0.00" 
                                                            step="0.01" 
-                                                           min="{{ $payoutInfo['minimum_amount']  }}" 
-                                                           max="{{ $availableBalance }}"
-                                                           value="{{ old('amount_requested') }}">
+                                                           min="<?php echo e($payoutInfo['minimum_amount']); ?>" 
+                                                           max="<?php echo e($availableBalance); ?>"
+                                                           value="<?php echo e(old('amount_requested')); ?>">
                                                     <div class="form-note">
-                                                        Minimum: ₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }} | Available: ₦{{ number_format($availableBalance, 2) }}
-                                                        @if($payoutStats['pending'] > 0)
-                                                            <br><small class="text-warning">(₦{{ number_format($payoutStats['pending'], 2) }} pending in other requests)</small>
-                                                        @endif
+                                                        Minimum: ₦<?php echo e(number_format($payoutInfo['minimum_amount'] ?? 300000, 2)); ?> | Available: ₦<?php echo e(number_format($availableBalance, 2)); ?>
+
+                                                        <?php if($payoutStats['pending'] > 0): ?>
+                                                            <br><small class="text-warning">(₦<?php echo e(number_format($payoutStats['pending'], 2)); ?> pending in other requests)</small>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <button type="submit" class="btn btn-primary" {{ $availableBalance < ($payoutInfo['minimum_amount'] ?? 300000) ? 'disabled' : '' }}>
+                                                <button type="submit" class="btn btn-primary" <?php echo e($availableBalance < ($payoutInfo['minimum_amount'] ?? 300000) ? 'disabled' : ''); ?>>
                                                     <em class="icon ni ni-wallet-out"></em>
                                                     <span>Request Payout</span>
                                                 </button>
-                                                @if($availableBalance < ($payoutInfo['minimum_amount'] ?? 300000))
+                                                <?php if($availableBalance < ($payoutInfo['minimum_amount'] ?? 300000)): ?>
                                                     <div class="form-note text-danger mt-2">
-                                                        @if($payoutStats['pending'] > 0)
-                                                            Insufficient available balance. You have ₦{{ number_format($payoutStats['pending'], 2) }} in pending payouts.
-                                                        @else
-                                                            Minimum balance of ₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }} required for payout
-                                                        @endif
+                                                        <?php if($payoutStats['pending'] > 0): ?>
+                                                            Insufficient available balance. You have ₦<?php echo e(number_format($payoutStats['pending'], 2)); ?> in pending payouts.
+                                                        <?php else: ?>
+                                                            Minimum balance of ₦<?php echo e(number_format($payoutInfo['minimum_amount'] ?? 300000, 2)); ?> required for payout
+                                                        <?php endif; ?>
                                                     </div>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
@@ -108,14 +114,14 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">₦{{ number_format($availableBalance, 2) }}</span>
+                                    <span class="amount">₦<?php echo e(number_format($availableBalance, 2)); ?></span>
                                 </div>
                                 <div class="card-note">
                                     <span class="text-soft">Ready for withdrawal</span>
-                                    @if($payoutStats['pending'] > 0)
-                                        <br><small class="text-warning">Total Balance: ₦{{ number_format($walletBalance, 2) }}</small>
-                                        <br><small class="text-warning">Pending: ₦{{ number_format($payoutStats['pending'], 2) }}</small>
-                                    @endif
+                                    <?php if($payoutStats['pending'] > 0): ?>
+                                        <br><small class="text-warning">Total Balance: ₦<?php echo e(number_format($walletBalance, 2)); ?></small>
+                                        <br><small class="text-warning">Pending: ₦<?php echo e(number_format($payoutStats['pending'], 2)); ?></small>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -126,38 +132,38 @@
                                 <ul class="list="list-group list-group-flush">
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Minimum Payout</span>
-                                        <strong>₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }}</strong>
+                                        <strong>₦<?php echo e(number_format($payoutInfo['minimum_amount'] ?? 300000, 2)); ?></strong>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Processing Time</span>
-                                        <strong>{{ $payoutInfo['processing_time_min'] ?? 3 }}-{{ $payoutInfo['processing_time_max'] ?? 5 }} days</strong>
+                                        <strong><?php echo e($payoutInfo['processing_time_min'] ?? 3); ?>-<?php echo e($payoutInfo['processing_time_max'] ?? 5); ?> days</strong>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Frequency Limit</span>
-                                        <strong>Once every {{ $payoutInfo['frequency_days'] ?? 30 }} days</strong>
+                                        <strong>Once every <?php echo e($payoutInfo['frequency_days'] ?? 30); ?> days</strong>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Payment Method</span>
-                                        <strong>{{ auth()->user()->payment_details ? 'Configured' : 'Not Set' }}</strong>
+                                        <strong><?php echo e(auth()->user()->payment_details ? 'Configured' : 'Not Set'); ?></strong>
                                     </li>
                                 </ul>
-                                @if(!auth()->user()->payment_details)
+                                <?php if(!auth()->user()->payment_details): ?>
                                     <div class="alert alert-warning mt-3" role="alert">
                                         <em class="icon ni ni-alert-circle"></em>
                                         Please configure your payment details to receive payouts.
                                         <div class="mt-2">
-                                            <a href="{{ route('author.payouts.payment-details') }}" class="btn btn-sm btn-warning">
+                                            <a href="<?php echo e(route('author.payouts.payment-details')); ?>" class="btn btn-sm btn-warning">
                                                 <em class="icon ni ni-setting"></em> Configure Payment Details
                                             </a>
                                         </div>
                                     </div>
-                                @else
+                                <?php else: ?>
                                     <div class="mt-3">
-                                        <a href="{{ route('author.payouts.payment-details') }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="<?php echo e(route('author.payouts.payment-details')); ?>" class="btn btn-sm btn-outline-primary">
                                             <em class="icon ni ni-edit"></em> Update Payment Details
                                         </a>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -192,31 +198,33 @@
                                     <div class="nk-tb-col tb-col-md"><span>Processed Date</span></div>
                                     <div class="nk-tb-col tb-col-sm"><span>Notes</span></div>
                                 </div>
-                                @forelse($payouts as $payout)
+                                <?php $__empty_1 = true; $__currentLoopData = $payouts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payout): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="nk-tb-item">
                                     <div class="nk-tb-col">
-                                        <span class="tb-date">{{ $payout->created_at->format('M d, Y') }}</span>
-                                        <span class="tb-sub">{{ $payout->created_at->format('H:i') }}</span>
+                                        <span class="tb-date"><?php echo e($payout->created_at->format('M d, Y')); ?></span>
+                                        <span class="tb-sub"><?php echo e($payout->created_at->format('H:i')); ?></span>
                                     </div>
                                     <div class="nk-tb-col tb-col-md">
-                                        <span class="tb-amount">₦{{ number_format($payout->amount_requested, 2) }}</span>
+                                        <span class="tb-amount">₦<?php echo e(number_format($payout->amount_requested, 2)); ?></span>
                                     </div>
                                     <div class="nk-tb-col tb-col-lg">
-                                        <span class="tb-status text-{{ $payout->status === 'approved' ? 'success' : ($payout->status === 'denied' ? 'danger' : 'warning') }}">
-                                            <em class="icon ni ni-{{ $payout->status === 'approved' ? 'check-circle' : ($payout->status === 'denied' ? 'cross-circle' : 'clock') }}"></em>
-                                            {{ ucfirst($payout->status) }}
+                                        <span class="tb-status text-<?php echo e($payout->status === 'approved' ? 'success' : ($payout->status === 'denied' ? 'danger' : 'warning')); ?>">
+                                            <em class="icon ni ni-<?php echo e($payout->status === 'approved' ? 'check-circle' : ($payout->status === 'denied' ? 'cross-circle' : 'clock')); ?>"></em>
+                                            <?php echo e(ucfirst($payout->status)); ?>
+
                                         </span>
                                     </div>
                                     <div class="nk-tb-col tb-col-md">
                                         <span class="tb-date">
-                                            {{ $payout->processed_at ? $payout->processed_at->format('M d, Y') : 'N/A' }}
+                                            <?php echo e($payout->processed_at ? $payout->processed_at->format('M d, Y') : 'N/A'); ?>
+
                                         </span>
                                     </div>
                                     <div class="nk-tb-col tb-col-sm">
-                                        <span class="tb-sub">{{ $payout->admin_notes ?? 'N/A' }}</span>
+                                        <span class="tb-sub"><?php echo e($payout->admin_notes ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="nk-tb-item">
                                     <div class="nk-tb-col text-center" colspan="5">
                                         <div class="py-4">
@@ -226,55 +234,56 @@
                                         </div>
                                     </div>
                                 </div>
-                                @endforelse
+                                <?php endif; ?>
                             </div>
                         </div>
-                        @if($payouts->hasPages())
+                        <?php if($payouts->hasPages()): ?>
                         <div class="card-inner">
-                            {{ $payouts->links() }}
+                            <?php echo e($payouts->links()); ?>
+
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const amountInput = document.getElementById('amount_requested');
     const form = document.getElementById('payoutForm');
 
     // Show success/error notifications
-    @if(session('success'))
+    <?php if(session('success')): ?>
         Swal.fire({
             icon: 'success',
             title: 'Success!',
-            text: '{{ session('success') }}',
+            text: '<?php echo e(session('success')); ?>',
             timer: 3000,
             showConfirmButton: false
         });
-    @endif
+    <?php endif; ?>
 
-    @if($errors->any())
+    <?php if($errors->any()): ?>
         Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: '{{ $errors->first() }}',
+            text: '<?php echo e($errors->first()); ?>',
             confirmButtonText: 'OK'
         });
-    @endif
+    <?php endif; ?>
 
     // Form validation and confirmation
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const amount = parseFloat(amountInput.value) || 0;
-        const maxAmount = {{ $availableBalance }};
-        const minPayoutAmount = {{ $payoutInfo['minimum_amount'] ?? 300000 }};
+        const maxAmount = <?php echo e($availableBalance); ?>;
+        const minPayoutAmount = <?php echo e($payoutInfo['minimum_amount'] ?? 300000); ?>;
         
         if (amount < minPayoutAmount) {
             Swal.fire({
@@ -346,8 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Real-time balance validation
     amountInput.addEventListener('input', function() {
         const amount = parseFloat(this.value) || 0;
-        const maxAmount = {{ $availableBalance }};
-        const minPayoutAmount = {{ $payoutInfo['minimum_amount'] ?? 300000 }};
+        const maxAmount = <?php echo e($availableBalance); ?>;
+        const minPayoutAmount = <?php echo e($payoutInfo['minimum_amount'] ?? 300000); ?>;
         const submitBtn = document.querySelector('button[type="submit"]');
         
         if (amount > maxAmount) {
@@ -360,4 +369,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.author', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/author/payouts/index.blade.php ENDPATH**/ ?>

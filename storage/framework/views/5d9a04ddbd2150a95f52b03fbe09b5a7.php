@@ -1,12 +1,10 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'System Settings | Admin Panel'); ?>
 
-@section('title', 'System Settings | Admin Panel')
+<?php $__env->startSection('page-title', 'System Settings'); ?>
 
-@section('page-title', 'System Settings')
+<?php $__env->startSection('page-description', 'Configure platform settings and preferences'); ?>
 
-@section('page-description', 'Configure platform settings and preferences')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
         <div class="nk-content-body">
@@ -21,38 +19,40 @@
                 </div>
             </div>
 
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 <div class="alert alert-success">
                     <em class="icon ni ni-check-circle"></em>
-                    <strong>Success!</strong> {{ session('success') }}
-                </div>
-            @endif
+                    <strong>Success!</strong> <?php echo e(session('success')); ?>
 
-            @if(session('error'))
+                </div>
+            <?php endif; ?>
+
+            <?php if(session('error')): ?>
                 <div class="alert alert-danger">
                     <em class="icon ni ni-cross-circle"></em>
-                    <strong>Error!</strong> {{ session('error') }}
-                </div>
-            @endif
+                    <strong>Error!</strong> <?php echo e(session('error')); ?>
 
-            @if($errors->any())
+                </div>
+            <?php endif; ?>
+
+            <?php if($errors->any()): ?>
                 <div class="alert alert-danger">
                     <em class="icon ni ni-cross-circle"></em>
                     <strong>Error!</strong>
                     <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
+                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <li><?php echo e($error); ?></li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="nk-block">
                 <div class="row g-gs">
                     <!-- General Settings -->
                     <div class="col-lg-8">
-                        <form id="settingsForm" action="{{ route('admin.settings.update') }}" method="POST">
-                            @csrf
+                        <form id="settingsForm" action="<?php echo e(route('admin.settings.update')); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <div class="card card-bordered">
                                 <div class="card-inner">
                                     <div class="card-title-group align-start mb-3">
@@ -65,31 +65,31 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Site Name</label>
-                                                <input type="text" class="form-control" name="site_name" value="{{ config('app.name') }}" required>
+                                                <input type="text" class="form-control" name="site_name" value="<?php echo e(config('app.name')); ?>" required>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Site URL</label>
-                                                <input type="url" class="form-control" name="site_url" value="{{ config('app.url') }}" required>
+                                                <input type="url" class="form-control" name="site_url" value="<?php echo e(config('app.url')); ?>" required>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label class="form-label">Site Description</label>
-                                                <textarea class="form-control" name="site_description" rows="3">{{ $settings['site_description'] ?? '' }}</textarea>
+                                                <textarea class="form-control" name="site_description" rows="3"><?php echo e($settings['site_description'] ?? ''); ?></textarea>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Contact Email</label>
-                                                <input type="email" class="form-control" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}" required>
+                                                <input type="email" class="form-control" name="contact_email" value="<?php echo e($settings['contact_email'] ?? ''); ?>" required>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Support Email</label>
-                                                <input type="email" class="form-control" name="support_email" value="{{ $settings['support_email'] ?? '' }}" required>
+                                                <input type="email" class="form-control" name="support_email" value="<?php echo e($settings['support_email'] ?? ''); ?>" required>
                                             </div>
                                         </div>
                                     </div>
@@ -109,28 +109,28 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Minimum Payout Amount (₦)</label>
-                                                <input type="number" class="form-control" name="min_payout_amount" value="{{ $settings['min_payout_amount'] ?? 300000 }}" min="1" step="0.01" required>
+                                                <input type="number" class="form-control" name="min_payout_amount" value="<?php echo e($settings['min_payout_amount'] ?? 300000); ?>" min="1" step="0.01" required>
                                                 <div class="form-note">Authors must have at least this amount to request a payout</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Payout Frequency Limit (Days)</label>
-                                                <input type="number" class="form-control" name="payout_frequency_days" value="{{ $settings['payout_frequency_days'] ?? 30 }}" min="1" max="365" required>
+                                                <input type="number" class="form-control" name="payout_frequency_days" value="<?php echo e($settings['payout_frequency_days'] ?? 30); ?>" min="1" max="365" required>
                                                 <div class="form-note">Authors can only request payouts once every X days</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Processing Time (Min Days)</label>
-                                                <input type="number" class="form-control" name="payout_processing_time_min" value="{{ $settings['payout_processing_time_min'] ?? 3 }}" min="1" max="30" required>
+                                                <input type="number" class="form-control" name="payout_processing_time_min" value="<?php echo e($settings['payout_processing_time_min'] ?? 3); ?>" min="1" max="30" required>
                                                 <div class="form-note">Minimum number of days for payout processing</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Processing Time (Max Days)</label>
-                                                <input type="number" class="form-control" name="payout_processing_time_max" value="{{ $settings['payout_processing_time_max'] ?? 5 }}" min="1" max="30" required>
+                                                <input type="number" class="form-control" name="payout_processing_time_max" value="<?php echo e($settings['payout_processing_time_max'] ?? 5); ?>" min="1" max="30" required>
                                                 <div class="form-note">Maximum number of days for payout processing</div>
                                             </div>
                                         </div>
@@ -188,15 +188,15 @@
                                 <ul class="nk-list-meta">
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Minimum Payout:</span>
-                                        <span class="nk-list-meta-value">₦{{ number_format($settings['min_payout_amount'] ?? 300000, 2) }}</span>
+                                        <span class="nk-list-meta-value">₦<?php echo e(number_format($settings['min_payout_amount'] ?? 300000, 2)); ?></span>
                                     </li>
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Processing Time:</span>
-                                        <span class="nk-list-meta-value">{{ $settings['payout_processing_time_min'] ?? 3 }}-{{ $settings['payout_processing_time_max'] ?? 5 }} days</span>
+                                        <span class="nk-list-meta-value"><?php echo e($settings['payout_processing_time_min'] ?? 3); ?>-<?php echo e($settings['payout_processing_time_max'] ?? 5); ?> days</span>
                                     </li>
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Frequency Limit:</span>
-                                        <span class="nk-list-meta-value">Once every {{ $settings['payout_frequency_days'] ?? 30 }} days</span>
+                                        <span class="nk-list-meta-value">Once every <?php echo e($settings['payout_frequency_days'] ?? 30); ?> days</span>
                                     </li>
                                 </ul>
                             </div>
@@ -221,7 +221,7 @@ function clearCache() {
         confirmButtonText: 'Yes, clear it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('{{ route('admin.settings.clear-cache') }}', {
+            fetch('<?php echo e(route('admin.settings.clear-cache')); ?>', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -273,7 +273,7 @@ function testEmail() {
         confirmButtonText: 'Send Test',
         showLoaderOnConfirm: true,
         preConfirm: (email) => {
-            return fetch('{{ route('admin.settings.test-email') }}', {
+            return fetch('<?php echo e(route('admin.settings.test-email')); ?>', {
                 method: 'POST',
                 body: JSON.stringify({email: email}),
                 headers: {
@@ -307,4 +307,5 @@ function testEmail() {
     });
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/settings/index.blade.php ENDPATH**/ ?>

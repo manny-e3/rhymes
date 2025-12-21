@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'otp' => \App\Http\Middleware\RequireOTP::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

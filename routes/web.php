@@ -23,6 +23,44 @@ use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Setting;
+use App\Services\PayoutService;
+use App\Services\WalletService;
+
+// Debug route to test settings
+Route::get('/debug-settings', function () {
+    // Test direct setting retrieval
+    $minPayout = Setting::get('min_payout_amount', 300000);
+    $payoutFee = Setting::get('payout_fee', 2.5);
+    $frequencyDays = Setting::get('payout_frequency_days', 30);
+    $processingMin = Setting::get('payout_processing_time_min', 3);
+    $processingMax = Setting::get('payout_processing_time_max', 5);
+    
+    // Test service retrieval
+    $payoutService = new PayoutService(new WalletService());
+    $payoutInfo = $payoutService->getPayoutInformation();
+    
+    return response()->json([
+        'direct_retrieval' => [
+            'min_payout_amount' => $minPayout,
+            'payout_fee' => $payoutFee,
+            'payout_frequency_days' => $frequencyDays,
+            'payout_processing_time_min' => $processingMin,
+            'payout_processing_time_max' => $processingMax,
+        ],
+        'service_retrieval' => $payoutInfo,
+        'all_settings' => Setting::all()->pluck('value', 'key')->toArray()
+    ]);
+});
+
+// Test route for settings
+Route::get('/test-settings-route', function () {
+    return response()->json([
+        'route_exists' => true,
+        'route_url' => route('admin.settings.update'),
+        'method' => 'POST'
+    ]);
+});
 
 // Test route for payout debugging
 Route::get('/test-payout-route/{id}', function ($id) {

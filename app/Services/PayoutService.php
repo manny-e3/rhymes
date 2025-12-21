@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Payout;
+use App\Models\Setting;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class PayoutService
 {
@@ -57,10 +59,11 @@ class PayoutService
             ]);
         }
 
-        // Validate minimum amount (₦300,000 as per new requirements)
-        if ($data['amount_requested'] < 300000) {
+        // Validate minimum amount from settings
+        $minPayoutAmount = $this->getSetting('min_payout_amount', 300000);
+        if ($data['amount_requested'] < $minPayoutAmount) {
             throw ValidationException::withMessages([
-                'amount_requested' => 'Minimum payout amount is ₦300,000.00'
+                'amount_requested' => 'Minimum payout amount is ₦' . number_format($minPayoutAmount, 2)
             ]);
         }
 
@@ -71,48 +74,50 @@ class PayoutService
     }
 
     /**
-     * Validate payout eligibility based on new rules:
-     * - Available balance must be at least ₦300,000
-     * - Minimum of 30 days must have elapsed since the last eligible transaction or payout
+     * Validate payout eligibility based on configurable rules
      */
     public function validatePayoutEligibility(User $user): array
     {
-        // Check available balance
+        // Check available balance from settings
+        $minPayoutAmount = $this->getSetting('min_payout_amount', 300000);
         $availableBalance = $this->walletService->getAvailableBalance($user);
         
-        if ($availableBalance < 300000) {
+        if ($availableBalance < $minPayoutAmount) {
             return [
                 'eligible' => false,
-                'reason' => 'Your available balance must be at least ₦300,000.00 to request a payout.'
+                'reason' => 'Your available balance must be at least ₦' . number_format($minPayoutAmount, 2) . ' to request a payout.'
             ];
         }
 
-        // Check if 30 days have elapsed since last eligible transaction
+        // Check frequency limit from settings
+        $frequencyDays = $this->getSetting('payout_frequency_days', 30);
+        
+        // Check if required days have elapsed since last eligible transaction
         $lastEligibleTransaction = $this->getLastEligibleTransactionDate($user);
         
         if ($lastEligibleTransaction) {
             $daysSinceLastTransaction = $lastEligibleTransaction->diffInDays(now());
             
-            if ($daysSinceLastTransaction < 30) {
-                $daysRemaining = 30 - $daysSinceLastTransaction;
+            if ($daysSinceLastTransaction < $frequencyDays) {
+                $daysRemaining = $frequencyDays - $daysSinceLastTransaction;
                 return [
                     'eligible' => false,
-                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every 30 days."
+                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
                 ];
             }
         }
 
-        // Check if 30 days have elapsed since last approved payout
+        // Check if required days have elapsed since last approved payout
         $lastApprovedPayout = $this->getLastApprovedPayoutDate($user);
         
         if ($lastApprovedPayout) {
             $daysSinceLastPayout = $lastApprovedPayout->diffInDays(now());
             
-            if ($daysSinceLastPayout < 30) {
-                $daysRemaining = 30 - $daysSinceLastPayout;
+            if ($daysSinceLastPayout < $frequencyDays) {
+                $daysRemaining = $frequencyDays - $daysSinceLastPayout;
                 return [
                     'eligible' => false,
-                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every 30 days."
+                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
                 ];
             }
         }
@@ -150,7 +155,7 @@ class PayoutService
      */
     public function calculatePayoutFee(float $amount): array
     {
-        $feePercentage = 2.5; // 2.5%
+        $feePercentage = $this->getSetting('payout_fee', 2.5); // Get from settings
         $fee = ($amount * $feePercentage) / 100;
         $netAmount = $amount - $fee;
 
@@ -198,145 +203,66 @@ class PayoutService
      */
     public function updatePaymentDetails(User $user, array $paymentDetails): bool
     {
-        // Validate payment method specific fields
-        $this->validatePaymentDetails($paymentDetails);
-
         return $user->update(['payment_details' => $paymentDetails]);
     }
 
     /**
-     * Validate payment details based on payment method
+     * Get paginated payouts for a user
      */
-    private function validatePaymentDetails(array $paymentDetails): void
+    public function getPaginatedPayoutsByUser(int $userId, array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        $method = $paymentDetails['payment_method'] ?? null;
-
-        if (!$method) {
-            throw ValidationException::withMessages([
-                'payment_method' => 'Payment method is required'
-            ]);
-        }
-
-        switch ($method) {
-            case 'bank_transfer':
-                if (empty($paymentDetails['bank_name']) || 
-                    empty($paymentDetails['account_number'])) {
-                    throw ValidationException::withMessages([
-                        'bank_details' => 'Bank transfer requires bank name and account number'
-                    ]);
-                }
-                break;
-            case 'paypal':
-                if (empty($paymentDetails['paypal_email'])) {
-                    throw ValidationException::withMessages([
-                        'paypal_email' => 'PayPal requires email address'
-                    ]);
-                }
-                break;
-            case 'stripe':
-                if (empty($paymentDetails['stripe_account_id'])) {
-                    throw ValidationException::withMessages([
-                        'stripe_account_id' => 'Stripe requires account ID'
-                    ]);
-                }
-                break;
-            default:
-                throw ValidationException::withMessages([
-                    'payment_method' => 'Invalid payment method selected'
-                ]);
-        }
-    }
-
-    /**
-     * Get total payouts for user
-     */
-    public function getTotalPayouts(int $userId): float
-    {
-        return Payout::where('user_id', $userId)
-            ->where('status', 'approved')
-            ->sum('amount_requested');
-    }
-
-    /**
-     * Get pending payouts for user
-     */
-    public function getPendingPayouts(int $userId): float
-    {
-        return $this->getPendingPayoutsSum($userId);
-    }
-
-    /**
-     * Get completed payouts for user
-     */
-    public function getCompletedPayouts(int $userId): float
-    {
-        return Payout::where('user_id', $userId)
-            ->where('status', 'approved')
-            ->sum('amount_requested');
-    }
-
-    /**
-     * Get recent payouts for user
-     */
-    public function getRecentPayouts(int $userId, int $limit = 3): Collection
-    {
-        return Payout::where('user_id', $userId)
-            ->latest()
-            ->limit($limit)
-            ->get();
-    }
-
-    /**
-     * Get paginated payouts by user
-     */
-    public function getPaginatedPayoutsByUser(int $userId, array $filters = []): LengthAwarePaginator
-    {
-        $query = Payout::where('user_id', $userId)
-            ->with(['user'])
-            ->latest();
-
-        if (!empty($filters['status'])) {
+        $query = Payout::where('user_id', $userId)->latest();
+        
+        if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-
-        if (!empty($filters['date_from'])) {
-            $query->whereDate('created_at', '>=', $filters['date_from']);
-        }
-
-        if (!empty($filters['date_to'])) {
-            $query->whereDate('created_at', '<=', $filters['date_to']);
-        }
-
-        return $query->paginate($filters['per_page'] ?? 10);
+        
+        return $query->paginate($perPage);
     }
 
     /**
-     * Get payout stats for user
+     * Get payout statistics for a user
      */
     public function getPayoutStats(int $userId): array
     {
-        $totalPayouts = Payout::where('user_id', $userId)->count();
-        $pendingPayouts = Payout::where('user_id', $userId)->where('status', 'pending')->count();
-        $approvedPayouts = Payout::where('user_id', $userId)->where('status', 'approved')->count();
-        $deniedPayouts = Payout::where('user_id', $userId)->where('status', 'denied')->count();
-        $pendingAmount = Payout::where('user_id', $userId)->where('status', 'pending')->sum('amount_requested');
-
         return [
-            'total' => $totalPayouts,
-            'pending' => $pendingPayouts,
-            'approved' => $approvedPayouts,
-            'denied' => $deniedPayouts,
-            'pending_amount' => $pendingAmount,
+            'total' => Payout::where('user_id', $userId)->count(),
+            'pending' => Payout::where('user_id', $userId)->where('status', 'pending')->count(),
+            'approved' => Payout::where('user_id', $userId)->where('status', 'approved')->count(),
+            'denied' => Payout::where('user_id', $userId)->where('status', 'denied')->count(),
         ];
     }
 
     /**
-     * Get pending payouts sum for user
+     * Get sum of pending payouts for a user
      */
     public function getPendingPayoutsSum(int $userId): float
     {
         return Payout::where('user_id', $userId)
             ->where('status', 'pending')
             ->sum('amount_requested');
+    }
+
+    /**
+     * Get formatted payout information for display
+     */
+    public function getPayoutInformation(): array
+    {
+        return [
+            'minimum_amount' => $this->getSetting('min_payout_amount', 300000),
+            'processing_time_min' => $this->getSetting('payout_processing_time_min', 3),
+            'processing_time_max' => $this->getSetting('payout_processing_time_max', 5),
+            'frequency_days' => $this->getSetting('payout_frequency_days', 30),
+            'fee_percentage' => $this->getSetting('payout_fee', 2.5),
+        ];
+    }
+
+    /**
+     * Get setting value from database or fallback to default
+     */
+    private function getSetting(string $key, $default = null)
+    {
+        $value = Setting::get($key, $default);
+        return $value !== null ? $value : $default;
     }
 }

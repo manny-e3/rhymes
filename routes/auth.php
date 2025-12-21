@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\OTPController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,26 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('login', [CustomAuthController::class, 'login']);
+
+    // OTP Routes
+    Route::get('otp', [OTPController::class, 'showOTPForm'])
+        ->name('otp.show');
+        
+    Route::post('otp/verify', [OTPController::class, 'verifyOTP'])
+        ->name('otp.verify');
+        
+    Route::post('otp/resend', [OTPController::class, 'resendOTP'])
+        ->name('otp.resend');
+        
+    // Payout OTP Routes
+    Route::get('otp/payout', [OTPController::class, 'showPayoutOTPForm'])
+        ->name('otp.payout.show');
+        
+    Route::post('otp/payout/verify', [OTPController::class, 'verifyPayoutOTP'])
+        ->name('otp.payout.verify');
+        
+    Route::post('otp/payout/resend', [OTPController::class, 'resendPayoutOTP'])
+        ->name('otp.payout.resend');
 
     // Keep password reset functionality from Breeze
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])

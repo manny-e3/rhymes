@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class SettingsController extends Controller
 {
@@ -18,18 +20,15 @@ class SettingsController extends Controller
 
     public function index()
     {
-        // Get current settings from cache or database
+        // Get current settings from database
         $settings = [
-            'site_description' => config('app.description', ''),
-            'contact_email' => config('mail.from.address', ''),
-            'support_email' => config('app.support_email', ''),
-            'platform_commission' => config('app.platform_commission', 15),
-            'min_payout_amount' => config('app.min_payout_amount', 50),
-            'payout_fee' => config('app.payout_fee', 2.50),
-            'currency' => config('app.currency', 'USD'),
-            'auto_approve_books' => config('app.auto_approve_books', false),
-            'max_file_size' => config('app.max_file_size', 50),
-            'allowed_file_types' => config('app.allowed_file_types', 'pdf,epub,mobi'),
+            'site_description' => Setting::get('site_description', ''),
+            'contact_email' => Setting::get('contact_email', ''),
+            'support_email' => Setting::get('support_email', ''),
+            'min_payout_amount' => Setting::get('min_payout_amount', 50),
+            'payout_frequency_days' => Setting::get('payout_frequency_days', 30),
+            'payout_processing_time_min' => Setting::get('payout_processing_time_min', 3),
+            'payout_processing_time_max' => Setting::get('payout_processing_time_max', 5),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -37,56 +36,91 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
-        $validated = $request->validate([
-            'site_name' => 'required|string|max:255',
-            'site_url' => 'required|url',
-            'site_description' => 'nullable|string|max:1000',
-            'contact_email' => 'required|email',
-            'support_email' => 'required|email',
-            'platform_commission' => 'required|numeric|min:0|max:100',
-            'min_payout_amount' => 'required|numeric|min:1',
-            'payout_fee' => 'required|numeric|min:0',
-            'currency' => 'required|in:USD,EUR,GBP',
-            'auto_approve_books' => 'boolean',
-            'max_file_size' => 'required|integer|min:1|max:500',
-            'allowed_file_types' => 'required|string',
+        // Log the incoming request data for debugging
+        Log::info('Settings update request received', [
+            'input_data' => $request->all()
         ]);
 
         try {
+            $validated = $request->validate([
+                'site_name' => 'required|string|max:255',
+                'site_url' => 'required|url',
+                'site_description' => 'nullable|string|max:1000',
+                'contact_email' => 'required|email',
+                'support_email' => 'required|email',
+                'min_payout_amount' => 'required|numeric|min:1',
+                'payout_frequency_days' => 'required|integer|min:1|max:365',
+                'payout_processing_time_min' => 'required|integer|min:1|max:30',
+                'payout_processing_time_max' => 'required|integer|min:1|max:30',
+            ]);
+
+            Log::info('Settings validation passed', ['validated_data' => $validated]);
+
+            // Additional validation to ensure max is >= min
+            if ($validated['payout_processing_time_max'] < $validated['payout_processing_time_min']) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Maximum processing time must be greater than or equal to minimum processing time.'
+                    ], 422);
+                }
+                return back()->withErrors([
+                    'payout_processing_time_max' => 'Maximum processing time must be greater than or equal to minimum processing time.'
+                ])->withInput();
+            }
+
             // Update environment variables
             $this->updateEnvFile([
-                'APP_NAME' => '"' . $validated['site_name'] . '"',
+                'APP_NAME' => '"' . addslashes($validated['site_name']) . '"',
                 'APP_URL' => $validated['site_url'],
             ]);
 
-            // Store other settings in cache/database
-            $settingsToCache = [
-                'site_description' => $validated['site_description'],
-                'contact_email' => $validated['contact_email'],
-                'support_email' => $validated['support_email'],
-                'platform_commission' => $validated['platform_commission'],
-                'min_payout_amount' => $validated['min_payout_amount'],
-                'payout_fee' => $validated['payout_fee'],
-                'currency' => $validated['currency'],
-                'auto_approve_books' => $request->has('auto_approve_books'),
-                'max_file_size' => $validated['max_file_size'],
-                'allowed_file_types' => $validated['allowed_file_types'],
-            ];
+            // Store other settings in database
+            Setting::set('site_description', $validated['site_description']);
+            Setting::set('contact_email', $validated['contact_email']);
+            Setting::set('support_email', $validated['support_email']);
+            Setting::set('min_payout_amount', $validated['min_payout_amount']);
+            Setting::set('payout_frequency_days', $validated['payout_frequency_days']);
+            Setting::set('payout_processing_time_min', $validated['payout_processing_time_min']);
+            Setting::set('payout_processing_time_max', $validated['payout_processing_time_max']);
 
-            foreach ($settingsToCache as $key => $value) {
-                Cache::forever("settings.{$key}", $value);
+            // Clear cache to apply new settings
+            Artisan::call('config:clear');
+            Artisan::call('cache:clear');
+
+            Log::info('Settings updated successfully in database');
+
+            // Check if this is an AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Settings updated successfully!'
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Settings updated successfully!'
-            ]);
+            // For traditional form submission
+            return back()->with('success', 'Settings updated successfully!');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update settings: ' . $e->getMessage()
-            ], 500);
+            // Log the error for debugging
+            Log::error('Settings update failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'input' => $request->except(['_token'])
+            ]);
+
+            // Check if this is an AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update settings: ' . $e->getMessage()
+                ], 500);
+            }
+
+            // For traditional form submission
+            return back()->withErrors([
+                'error' => 'Failed to update settings: ' . $e->getMessage()
+            ])->withInput();
         }
     }
 
@@ -104,6 +138,12 @@ class SettingsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Cache clear failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to clear cache: ' . $e->getMessage()
@@ -129,6 +169,13 @@ class SettingsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Test email failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'email' => $request->email
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send test email: ' . $e->getMessage()
@@ -139,12 +186,39 @@ class SettingsController extends Controller
     private function updateEnvFile($data)
     {
         $envFile = base_path('.env');
+        
+        // Check if file exists and is writable
+        if (!file_exists($envFile)) {
+            throw new \Exception('Environment file (.env) not found');
+        }
+        
+        if (!is_writable($envFile)) {
+            throw new \Exception('Environment file (.env) is not writable. Please check file permissions.');
+        }
+        
         $str = file_get_contents($envFile);
-
-        foreach ($data as $key => $value) {
-            $str = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $str);
+        
+        if ($str === false) {
+            throw new \Exception('Failed to read environment file');
         }
 
-        file_put_contents($envFile, $str);
+        foreach ($data as $key => $value) {
+            // Escape special characters in the value properly
+            $escapedValue = '"' . addslashes(trim($value, '"')) . '"';
+            
+            // Check if the key already exists
+            if (preg_match("/^{$key}=.*/m", $str)) {
+                $str = preg_replace("/^{$key}=.*/m", "{$key}={$escapedValue}", $str);
+            } else {
+                // If key doesn't exist, append it to the file
+                $str .= "\n{$key}={$escapedValue}";
+            }
+        }
+
+        $result = file_put_contents($envFile, $str);
+        
+        if ($result === false) {
+            throw new \Exception('Failed to write to environment file');
+        }
     }
 }

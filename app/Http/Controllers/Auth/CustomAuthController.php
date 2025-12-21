@@ -75,29 +75,29 @@ class CustomAuthController extends Controller
      */
     public function login(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
-
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-        
-        // Check if user has verified their email
-        if (!$user->hasVerifiedEmail()) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return back()->with('error', 'You must verify your email address before logging in. Please check your email for the verification link.');
+        // First, validate credentials without actually logging in
+        $credentials = $request->only('email', 'password');
+        if (!Auth::validate($credentials)) {
+            // This will trigger the normal authentication failure
+            $request->authenticate();
+            // We shouldn't reach here, but just in case:
+            return back()->withErrors([
+                'email' => 'Invalid credentials.',
+            ]);
         }
-        
-        // Redirect based on user role
-        if ($user->hasRole('admin')) {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back, Admin!');
-        } elseif ($user->hasRole('author')) {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back to your Author Dashboard!');
-        } else {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back! Ready to submit your next book?');
-        }
+
+        // Get the user
+        $user = User::where('email', $request->email)->first();
+
+        // Generate and send OTP
+        $user->generateOTP();
+
+        // Store pending login data in session
+        $request->session()->put('pending_login_email', $request->email);
+        $request->session()->put('pending_login_remember', $request->boolean('remember'));
+
+        // Redirect to OTP verification page
+        return redirect()->route('otp.show');
     }
 
     /**

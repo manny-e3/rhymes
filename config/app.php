@@ -131,4 +131,46 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payout Settings
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options control the payout system behavior.
+    |
+    */
+
+    'min_payout_amount' => env('MIN_PAYOUT_AMOUNT', 300000),
+    'payout_fee' => env('PAYOUT_FEE', 2.5),
+    'payout_frequency_days' => env('PAYOUT_FREQUENCY_DAYS', 30),
+    'payout_processing_time_min' => env('PAYOUT_PROCESSING_TIME_MIN', 3),
+    'payout_processing_time_max' => env('PAYOUT_PROCESSING_TIME_MAX', 5),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Platform Settings
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options control general platform behavior.
+    |
+    */
+
+    'platform_commission' => env('PLATFORM_COMMISSION', 15),
+    'currency' => env('CURRENCY', 'USD'),
+    'auto_approve_books' => env('AUTO_APPROVE_BOOKS', false),
+    'max_file_size' => env('MAX_FILE_SIZE', 50),
+    'allowed_file_types' => env('ALLOWED_FILE_TYPES', 'pdf,epub,mobi'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contact Information
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options store contact information for the platform.
+    |
+    */
+
+    'description' => env('SITE_DESCRIPTION', 'Rhymes Platform - Submit your books to Rovingheights for stocking consideration'),
+    'support_email' => env('SUPPORT_EMAIL', 'support@rhymesplatform.com'),
+
 ];
