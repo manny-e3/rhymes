@@ -88,6 +88,8 @@ class PayoutStatusChanged extends Notification implements ShouldQueue
             'new_status' => $this->newStatus,
             'message' => $this->getStatusMessage(),
             'action_url' => route('author.payouts.index'),
+            'title' => 'Payout Status Changed',
+            'icon' => 'ni ni-wallet-out'
         ];
     }
 

@@ -9,10 +9,19 @@ use App\Models\User;
 use App\Models\Book;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\BookSubmitted;
+use Database\Seeders\RolePermissionSeeder;
 
 class BookSubmissionNotificationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Seed the roles and permissions
+        $this->seed(RolePermissionSeeder::class);
+    }
 
     /** @test */
     public function it_sends_notification_to_user_and_admins_when_book_is_submitted()

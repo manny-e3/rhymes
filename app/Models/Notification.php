@@ -22,6 +22,9 @@ class Notification extends DatabaseNotification
         'read_at' => 'datetime'
     ];
 
+    // Make sure formatted_data is included in JSON responses
+    protected $appends = ['formatted_data'];
+
     public function markAsRead(): void
     {
         $this->update(['read_at' => now()]);
@@ -45,13 +48,13 @@ class Notification extends DatabaseNotification
 
     public function getFormattedDataAttribute()
     {
-        $data = $this->data;
+        $data = $this->data ?? [];
         return [
-            'title' => $this->title ?? $data['title'] ?? 'Notification',
-            'message' => $this->message ?? $data['message'] ?? '',
-            'icon' => $this->icon ?? $data['icon'] ?? 'ni ni-bell',
+            'title' => $this->title ?? ($data['title'] ?? 'Notification'),
+            'message' => $this->message ?? ($data['message'] ?? ($data['text'] ?? '')),
+            'icon' => $this->icon ?? ($data['icon'] ?? 'ni ni-bell'),
             'type' => $this->getNotificationType(),
-            'time' => $this->created_at->diffForHumans(),
+            'time' => $this->created_at ? $this->created_at->diffForHumans() : '',
         ];
     }
 
@@ -62,8 +65,20 @@ class Notification extends DatabaseNotification
             'App\Notifications\BookSold' => 'info',
             'App\Notifications\PayoutProcessed' => 'success',
             'App\Notifications\SystemAlert' => 'warning',
+            'App\Notifications\BookSubmitted' => 'info',
+            'App\Notifications\BookStatusChanged' => 'info',
+            'App\Notifications\PayoutRequested' => 'warning',
+            'App\Notifications\PayoutStatusChanged' => 'info',
         ];
 
         return $typeMap[$this->type] ?? 'info';
+    }
+
+    // Ensure formatted_data is always serialized
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['formatted_data'] = $this->formatted_data;
+        return $array;
     }
 }

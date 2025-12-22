@@ -92,6 +92,9 @@ class NotificationManager {
         const container = document.getElementById('notificationsList');
         if (!container) return;
 
+        // Debug: Log notifications to console
+        console.log('Notifications received:', notifications);
+
         if (notifications.length === 0) {
             container.innerHTML = `
                 <div class="nk-notification-item text-center py-4">
@@ -104,16 +107,26 @@ class NotificationManager {
         }
 
         container.innerHTML = notifications.map(notification => {
-            const data = notification.formatted_data || this.formatNotificationData(notification);
+            // Try both approaches for getting notification data
+            let data;
+            if (notification.formatted_data) {
+                data = notification.formatted_data;
+            } else {
+                data = this.formatNotificationData(notification);
+            }
+            
+            // Debug: Log individual notification data
+            console.log('Notification data:', notification, 'Formatted data:', data);
+            
             return `
                 <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}">
                     <div class="nk-notification-icon">
                         <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
                     </div>
                     <div class="nk-notification-content">
-                        <div class="nk-notification-text">${data.title}</div>
-                        <div class="nk-notification-text text-muted small">${data.message}</div>
-                        <div class="nk-notification-time">${data.time}</div>
+                        <div class="nk-notification-text">${data.title || 'Notification'}</div>
+                        <div class="nk-notification-text text-muted small">${data.message || ''}</div>
+                        <div class="nk-notification-time">${data.time || ''}</div>
                     </div>
                 </div>
             `;
@@ -124,7 +137,7 @@ class NotificationManager {
         const data = notification.data || {};
         return {
             title: notification.title || data.title || 'Notification',
-            message: notification.message || data.message || '',
+            message: notification.message || data.message || data.text || '',
             icon: notification.icon || data.icon || 'ni ni-bell',
             type: this.getNotificationType(notification.type),
             time: this.formatTime(notification.created_at)
@@ -137,11 +150,17 @@ class NotificationManager {
             'App\\Notifications\\BookSold': 'info',
             'App\\Notifications\\PayoutProcessed': 'success',
             'App\\Notifications\\SystemAlert': 'warning',
+            'App\\Notifications\\BookSubmitted': 'info',
+            'App\\Notifications\\BookStatusChanged': 'info',
+            'App\\Notifications\\PayoutRequested': 'warning',
+            'App\\Notifications\\PayoutStatusChanged': 'info',
         };
         return typeMap[type] || 'info';
     }
 
     formatTime(dateString) {
+        if (!dateString) return '';
+        
         const date = new Date(dateString);
         const now = new Date();
         const diffInMinutes = Math.floor((now - date) / (1000 * 60));

@@ -88,6 +88,8 @@ class BookSubmitted extends Notification implements ShouldQueue
                 'author_name' => $this->book->user->name,
                 'message' => 'New book submission: "' . $this->book->title . '" by ' . $this->book->user->name,
                 'action_url' => url('/admin/books/' . $this->book->id),
+                'title' => 'New Book Submission',
+                'icon' => 'ni ni-book'
             ];
         } else {
             return [
@@ -96,6 +98,8 @@ class BookSubmitted extends Notification implements ShouldQueue
                 'book_title' => $this->book->title,
                 'message' => 'Your book "' . $this->book->title . '" has been submitted for review',
                 'action_url' => url('/dashboard'),
+                'title' => 'Book Submitted',
+                'icon' => 'ni ni-book'
             ];
         }
     }

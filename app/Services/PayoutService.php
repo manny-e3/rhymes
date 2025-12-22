@@ -5,11 +5,15 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Payout;
 use App\Models\Setting;
+use App\Notifications\PayoutRequested;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
+use App\Models\Book;
+use Illuminate\Support\Facades\Log;
 
 class PayoutService
 {
@@ -70,7 +74,64 @@ class PayoutService
         $data['user_id'] = $user->id;
         $data['status'] = 'pending';
 
-        return Payout::create($data);
+        $payout = Payout::create($data);
+        
+        // Notify all admins about the new payout request
+        $this->notifyAdminsAboutNewPayout($payout, $user);
+        
+        return $payout;
+    }
+
+    /**
+     * Notify all admins about a new payout request
+     */
+    private function notifyAdminsAboutNewPayout(Payout $payout, User $author): void
+    {
+        try {
+            // Get all admins
+            $admins = User::whereHas('roles', function ($query) {
+                $query->where('name', 'admin');
+            })->get();
+            
+            Log::info('Notifying admins about new payout request', [
+                'payout_id' => $payout->id,
+                'amount_requested' => $payout->amount_requested,
+                'author_id' => $author->id,
+                'author_name' => $author->name,
+                'admin_count' => $admins->count()
+            ]);
+            
+            // Notify each admin
+            foreach ($admins as $admin) {
+                try {
+                    $admin->notify(new PayoutRequested($payout));
+                    Log::info('Payout request notification sent to admin', [
+                        'admin_id' => $admin->id,
+                        'admin_name' => $admin->name,
+                        'admin_email' => $admin->email,
+                        'payout_id' => $payout->id,
+                        'amount_requested' => $payout->amount_requested
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send payout request notification to admin', [
+                        'admin_id' => $admin->id,
+                        'admin_name' => $admin->name,
+                        'admin_email' => $admin->email,
+                        'payout_id' => $payout->id,
+                        'amount_requested' => $payout->amount_requested,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to notify admins about new payout request', [
+                'payout_id' => $payout->id,
+                'amount_requested' => $payout->amount_requested,
+                'author_id' => $author->id,
+                'author_name' => $author->name,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**

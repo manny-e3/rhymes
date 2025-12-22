@@ -93,6 +93,8 @@ class BookStatusChanged extends Notification implements ShouldQueue
             'new_status' => $this->newStatus,
             'message' => $this->getStatusMessage(),
             'action_url' => $this->getActionUrl(),
+            'title' => 'Book Status Changed',
+            'icon' => 'ni ni-book'
         ];
     }
 
