@@ -38,6 +38,7 @@
                                         
                                                         <th>Price</th>
                                                         <th>Status</th>
+                                                        <th>Quantity</th>
                                                         <th>Submitted</th>
                                                         <th>Action</th>
                                                     </tr>
@@ -90,6 +91,14 @@
                                                                     <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
                                                                 <?php endif; ?>
                                                             </ul>
+                                                        </td>
+                                            
+                                                        <td class="nk-tb-col tb-col-lg">
+                                                            <?php if($book->status === 'stocked' && $book->quantity): ?>
+                                                                <span class="tb-amount"><?php echo e($book->quantity); ?></span>
+                                                            <?php else: ?>
+                                                                <span class="tb-sub">N/A</span>
+                                                            <?php endif; ?>
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-lg">
@@ -585,6 +594,16 @@ unset($__errorArgs, $__bag); ?>
                                                 </div>
                                             </div>
                                         </div>
+                                        <?php if($book->status === 'stocked' && $book->quantity): ?>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Quantity</label>
+                                                <div class="form-control-wrap">
+                                                    <input type="text" class="form-control" value="<?php echo e($book->quantity); ?> copies" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label class="form-label">Description</label>

@@ -21,6 +21,7 @@ class Book extends Model
         'status',
         'admin_notes',
         'rev_book_id',
+        'quantity', // Added quantity field
     ];
 
     protected function casts(): array

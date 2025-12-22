@@ -39,6 +39,7 @@
                                         
                                                         <th>Price</th>
                                                         <th>Status</th>
+                                                        <th>Quantity</th>
                                                         <th>Submitted</th>
                                                         <th>Action</th>
                                                     </tr>
@@ -91,6 +92,14 @@
                                                                     <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
                                                                 @endif
                                                             </ul>
+                                                        </td>
+                                            
+                                                        <td class="nk-tb-col tb-col-lg">
+                                                            @if($book->status === 'stocked' && $book->quantity)
+                                                                <span class="tb-amount">{{ $book->quantity }}</span>
+                                                            @else
+                                                                <span class="tb-sub">N/A</span>
+                                                            @endif
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-lg">
@@ -502,6 +511,16 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @if($book->status === 'stocked' && $book->quantity)
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Quantity</label>
+                                                <div class="form-control-wrap">
+                                                    <input type="text" class="form-control" value="{{$book->quantity}} copies" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endif
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label class="form-label">Description</label>

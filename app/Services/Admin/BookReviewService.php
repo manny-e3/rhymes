@@ -80,7 +80,17 @@ class BookReviewService
             ]);
             
             if ($updated) {
-                // If book is stocked, register it as a product in ERPREV
+                // Save quantity if provided and status is stocked
+                if ($data['status'] === 'stocked' && isset($data['quantity'])) {
+                    $book->update(['quantity' => $data['quantity']]);
+                    Log::info('BookReviewService: Quantity saved', [
+                        'book_id' => $book->id,
+                        'quantity' => $data['quantity'],
+                        'admin_id' => $admin->id,
+                    ]);
+                }
+                
+                // If book is stocked, register it as a product in ERPREV (without quantity)
                 if ($data['status'] === 'stocked') {
                     Log::info('BookReviewService: Registering book in ERPREV', [
                         'book_id' => $book->id,
@@ -97,6 +107,7 @@ class BookReviewService
                         'admin_id' => $admin->id,
                     ]);
                     
+                    // Register product without quantity
                     $result = $this->revService->registerProduct($book);
                     
                     Log::info('BookReviewService: ERPREV registration result', [

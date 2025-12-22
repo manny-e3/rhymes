@@ -90,6 +90,7 @@
                                     <div class="nk-tb-col tb-col-mb"><span class="sub-text">Author</span></div>
                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Sales</span></div>
+                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Quantity</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Submitted</span></div>
                                     <div class="nk-tb-col nk-tb-col-tools text-end">
                                         <div class="dropdown">
@@ -179,6 +180,13 @@
                                             <span class="tb-sub">₦<?php echo e(number_format($revenue, 2)); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
+                                            <?php if($book->status === 'stocked' && $book->quantity): ?>
+                                                <span class="tb-lead"><?php echo e($book->quantity); ?></span>
+                                            <?php else: ?>
+                                                <span class="tb-sub">N/A</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-lg">
                                             <span><?php echo e($book->created_at->format('M d, Y')); ?></span>
                                             <span class="tb-sub"><?php echo e($book->created_at->diffForHumans()); ?></span>
                                         </div>
@@ -230,17 +238,13 @@
                                                                                 <?php echo csrf_field(); ?>
                                                                                 <?php echo method_field('PATCH'); ?>
                                                                                 <input type="hidden" name="status" value="rejected">
-                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to reject this book?')"><em class="icon ni ni-cross"></em><span>Reject</span></button>
+                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to reject this book?')')"><em class="icon ni ni-cross"></em><span>Reject</span></button>
                                                                             </form>
                                                                         </li>
                                                                     <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
                                                                         <li>
-                                                                            <form method="POST" action="<?php echo e(route('admin.books.review', $book)); ?>" style="display:inline;">
-                                                                                <?php echo csrf_field(); ?>
-                                                                                <?php echo method_field('PATCH'); ?>
-                                                                                <input type="hidden" name="status" value="stocked">
-                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to stock this book? This will register it with the ERP system.')"><em class="icon ni ni-package"></em><span>Stock Book</span></button>
-                                                                            </form>
+                                                                            <!-- Button to trigger the quantity modal instead of directly stocking -->
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#quantityModal-<?php echo e($book->id); ?>"><em class="icon ni ni-package"></em><span>Stock Book</span></button>
                                                                         </li>
                                                                     <?php else: ?>
                                                                         <li><a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></a></li>
@@ -334,6 +338,9 @@
                                     <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                 <?php endif; ?>
                             </p>
+                            <?php if($book->status === 'stocked' && $book->quantity): ?>
+                            <p><strong>Quantity:</strong> <?php echo e($book->quantity); ?> copies</p>
+                            <?php endif; ?>
                             <p><strong>Sales:</strong> <?php echo e($book->getSalesCount()); ?></p>
                             <p><strong>Revenue:</strong> ₦<?php echo e(number_format($book->getTotalSales(), 2)); ?></p>
                             <p><strong>Submitted:</strong> <?php echo e($book->created_at->format('M d, Y')); ?></p>
@@ -470,6 +477,12 @@
                                 <td class="text-muted">Revenue:</td>
                                 <td>₦<?php echo e(number_format($book->getTotalSales(), 2)); ?></td>
                             </tr>
+                            <?php if($book->status === 'stocked' && $book->quantity): ?>
+                            <tr>
+                                <td class="text-muted">Quantity:</td>
+                                <td><?php echo e($book->quantity); ?> copies</td>
+                            </tr>
+                            <?php endif; ?>
                             <tr>
                                 <td class="text-muted">Submitted:</td>
                                 <td><?php echo e($book->created_at->format('M d, Y')); ?></td>
@@ -565,16 +578,46 @@
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this book?')">Reject</button>
                 </form>
                 <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
-                <form method="POST" action="<?php echo e(route('admin.books.review', $book)); ?>" style="display:inline;">
-                    <?php echo csrf_field(); ?>
-                    <?php echo method_field('PATCH'); ?>
-                    <input type="hidden" name="status" value="stocked">
-                    <button type="submit" class="btn btn-info" onclick="return confirm('Are you sure you want to stock this book? This will register it with the ERP system.')">Stock Book</button>
-                </form>
+                <!-- Button to trigger the quantity modal instead of directly stocking -->
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#quantityModal-<?php echo e($book->id); ?>">Stock Book</button>
                 <?php else: ?>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>" data-bs-dismiss="modal">Edit Status</button>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+<!-- Quantity Modal for each book -->
+<?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" tabindex="-1" id="quantityModal-<?php echo e($book->id); ?>" aria-labelledby="quantityModalLabel-<?php echo e($book->id); ?>" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quantityModalLabel-<?php echo e($book->id); ?>">Enter Quantity for <?php echo e($book->title); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?php echo e(route('admin.books.review', $book)); ?>">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PATCH'); ?>
+                <input type="hidden" name="status" value="stocked">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-control" name="quantity" placeholder="Enter quantity" min="1" required>
+                        <div class="form-note">Enter the number of copies being stocked in inventory.</div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="3" placeholder="Optional notes for the author..."><?php echo e($book->admin_notes); ?></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Stock Book</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -589,13 +632,16 @@ function toggleRevBookIdField(bookId) {
     
     const statusInputs = modal.querySelectorAll('input[name="status"]');
     const revBookIdGroup = document.getElementById(`revBookIdGroup-${bookId}`);
+    const quantityGroup = document.getElementById(`quantityGroup-${bookId}`); // Added quantity group
     
     statusInputs.forEach(input => {
         input.addEventListener('change', function() {
             if (this.value === 'stocked') {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'block';
+                if (quantityGroup) quantityGroup.style.display = 'block'; // Show quantity field
             } else {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'none';
+                if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field
             }
         });
     });

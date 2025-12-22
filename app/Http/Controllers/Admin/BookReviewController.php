@@ -116,6 +116,7 @@ class BookReviewController extends Controller
                 'status' => 'required|in:pending_review,send_review_copy,rejected,approved_awaiting_delivery,stocked',
                 'admin_notes' => 'nullable|string',
                 'rev_book_id' => 'nullable|string|unique:books,rev_book_id,' . $book->id . ',id',
+                'quantity' => 'nullable|integer|min:1', // Keep quantity validation
             ]);
             
             // Log the validated data

@@ -75,9 +75,6 @@ class RevService
                 ]
             ];
 
-
-
-
             Log::info('ERPREV registerProduct - Sending request', [
                 'book_id' => $book->id,
                 'book_title' => $book->title,
