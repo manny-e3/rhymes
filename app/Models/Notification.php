@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Notifications\DatabaseNotification;
+use App\Events\NotificationEvent;
+use Illuminate\Support\Facades\Event;
 
 class Notification extends DatabaseNotification
 {
+    // UUID primary key configuration
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $fillable = [
+        'id',  // Added to allow UUID assignment
         'type',
         'notifiable_type',
         'notifiable_id',
@@ -80,5 +87,16 @@ class Notification extends DatabaseNotification
         $array = parent::toArray();
         $array['formatted_data'] = $this->formatted_data;
         return $array;
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::created(function ($notification) {
+            // Dispatch the NotificationEvent when a new notification is created
+            Event::dispatch(new NotificationEvent($notification));
+        });
     }
 }

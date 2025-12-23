@@ -1,8 +1,33 @@
+// Get the base URL from the current page (handles subdirectory installations)
+const getBaseUrl = () => {
+    const base = document.querySelector('base');
+    if (base && base.href) {
+        return base.href.replace(/\/$/, ''); // Remove trailing slash
+    }
+    return window.location.origin;
+};
+
+// Pusher configuration - these should match your .env values
+const pusherConfig = {
+    cluster: window.pusherCluster || 'mt1', // Use cluster from Laravel config or default
+    forceTLS: true,
+    authEndpoint: `${getBaseUrl()}/broadcasting/auth`, // Use absolute path for auth endpoint
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    }
+};
+
+// Initialize Pusher
+const pusher = new Pusher(window.pusherKey || 'your-pusher-key', pusherConfig);
+
 // Notifications and UI functionality
 class NotificationManager {
     constructor() {
         this.unreadCount = 0;
         this.darkMode = localStorage.getItem('darkMode') === 'true';
+        this.pusherChannel = null;
         this.init();
     }
 
@@ -10,9 +35,115 @@ class NotificationManager {
         this.loadUnreadNotifications();
         this.setupEventListeners();
         this.applyDarkMode();
-        
-        // Refresh notifications every 30 seconds
+        this.setupPusher();
+
+        // Refresh notifications every 30 seconds as fallback
         setInterval(() => this.loadUnreadNotifications(), 30000);
+    }
+
+    setupPusher() {
+        if (!window.userId) {
+            console.warn('User ID not available for Pusher channel');
+            return;
+        }
+
+        // Subscribe to the user's private notification channel
+        // Using the same channel name format as defined in routes/channels.php
+        // Laravel automatically prefixes with 'private-' for private channels
+        this.pusherChannel = pusher.subscribe(`private-notifications.${window.userId}`);
+
+        // Listen for the notification.created event
+        this.pusherChannel.bind('notification.created', (data) => {
+            console.log('New notification received via Pusher:', data);
+            // Update the UI with the new notification
+            this.handleNewNotification(data);
+        });
+
+        // Handle Pusher connection events
+        pusher.connection.bind('connected', () => {
+            console.log('Pusher connected');
+        });
+
+        pusher.connection.bind('disconnected', () => {
+            console.log('Pusher disconnected');
+        });
+
+        // Handle authentication failures
+        this.pusherChannel.bind('pusher:subscription_error', (status) => {
+            console.error('Pusher subscription error:', status);
+        });
+    }
+
+    handleNewNotification(notification) {
+        // Update the unread count
+        this.unreadCount++;
+        this.updateNotificationBadge();
+
+        // Update the notification dropdown with the new notification
+        this.prependNotificationToDropdown(notification);
+
+        // Show a desktop notification if permissions are granted
+        this.showDesktopNotification(notification);
+    }
+
+    prependNotificationToDropdown(notification) {
+        const container = document.getElementById('notificationsList');
+        if (!container) return;
+
+        // Try both approaches for getting notification data
+        let data;
+        if (notification.formatted_data) {
+            data = notification.formatted_data;
+        } else {
+            data = this.formatNotificationData(notification);
+        }
+
+        // Create the notification element
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'nk-notification-item dropdown-inner notification-item';
+        notificationElement.dataset.notificationId = notification.id;
+        if (data.url) notificationElement.dataset.notificationUrl = data.url;
+        notificationElement.innerHTML = `
+            <div class="nk-notification-icon">
+                <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
+            </div>
+            <div class="nk-notification-content">
+                <div class="nk-notification-text">${data.title || 'Notification'}</div>
+                <div class="nk-notification-text text-muted small">${data.message || ''}</div>
+                <div class="nk-notification-time">${data.time || ''}</div>
+            </div>
+        `;
+
+        // Prepend to the container (add to the top)
+        if (container.firstChild) {
+            container.insertBefore(notificationElement, container.firstChild);
+        } else {
+            container.appendChild(notificationElement);
+        }
+    }
+
+    showDesktopNotification(notification) {
+        if (!("Notification" in window)) {
+            return; // Notifications not supported
+        }
+
+        if (Notification.permission === "granted") {
+            const data = notification.formatted_data || this.formatNotificationData(notification);
+            new Notification(data.title || 'New Notification', {
+                body: data.message || '',
+                icon: '/favicon.ico' // Use your app's favicon or notification icon
+            });
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    const data = notification.formatted_data || this.formatNotificationData(notification);
+                    new Notification(data.title || 'New Notification', {
+                        body: data.message || '',
+                        icon: '/favicon.ico'
+                    });
+                }
+            });
+        }
     }
 
     setupEventListeners() {
@@ -35,11 +166,15 @@ class NotificationManager {
         }
 
         // Individual notification clicks
+        // Individual notification clicks
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.notification-item')) {
-                const notificationId = e.target.closest('.notification-item').dataset.notificationId;
+            const item = e.target.closest('.notification-item');
+            if (item) {
+                const notificationId = item.dataset.notificationId;
+                const notificationUrl = item.dataset.notificationUrl;
+
                 if (notificationId) {
-                    this.markAsRead(notificationId);
+                    this.handleNotificationClick(notificationId, notificationUrl);
                 }
             }
         });
@@ -65,9 +200,9 @@ class NotificationManager {
 
     async loadUnreadNotifications() {
         try {
-            const response = await fetch('/notifications/unread');
+            const response = await fetch(`${getBaseUrl()}/notifications/unread`);
             const data = await response.json();
-            
+
             this.unreadCount = data.unread_count;
             this.updateNotificationBadge();
             this.updateNotificationDropdown(data.notifications);
@@ -78,13 +213,23 @@ class NotificationManager {
 
     updateNotificationBadge() {
         const badge = document.querySelector('.notification-badge');
-        if (badge) {
-            if (this.unreadCount > 0) {
-                badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
+        const headerCount = document.querySelector('.header-notification-count');
+
+        if (this.unreadCount > 0) {
+            const countText = this.unreadCount > 99 ? '99+' : this.unreadCount;
+
+            if (badge) {
+                badge.textContent = countText;
+                badge.style.display = 'flex'; // Use flex to match the inline style
             }
+
+            if (headerCount) {
+                headerCount.textContent = countText;
+                headerCount.style.display = 'inline-block';
+            }
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (headerCount) headerCount.style.display = 'none';
         }
     }
 
@@ -114,12 +259,12 @@ class NotificationManager {
             } else {
                 data = this.formatNotificationData(notification);
             }
-            
+
             // Debug: Log individual notification data
             console.log('Notification data:', notification, 'Formatted data:', data);
-            
+
             return `
-                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}">
+                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}" data-notification-url="${data.url || ''}">
                     <div class="nk-notification-icon">
                         <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
                     </div>
@@ -140,7 +285,8 @@ class NotificationManager {
             message: notification.message || data.message || data.text || '',
             icon: notification.icon || data.icon || 'ni ni-bell',
             type: this.getNotificationType(notification.type),
-            time: this.formatTime(notification.created_at)
+            time: this.formatTime(notification.created_at),
+            url: data.action_url || data.url || null
         };
     }
 
@@ -160,11 +306,11 @@ class NotificationManager {
 
     formatTime(dateString) {
         if (!dateString) return '';
-        
+
         const date = new Date(dateString);
         const now = new Date();
         const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-        
+
         if (diffInMinutes < 1) return 'Just now';
         if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
         if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -173,7 +319,7 @@ class NotificationManager {
 
     async markAllAsRead() {
         try {
-            const response = await fetch('/notifications/mark-all-read', {
+            const response = await fetch(`${getBaseUrl()}/notifications/mark-all-read`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -191,9 +337,10 @@ class NotificationManager {
         }
     }
 
-    async markAsRead(notificationId) {
+    async handleNotificationClick(notificationId, url) {
         try {
-            const response = await fetch(`/notifications/${notificationId}/mark-read`, {
+            // Mark as read
+            await fetch(`${getBaseUrl()}/notifications/${notificationId}/mark-read`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -201,20 +348,32 @@ class NotificationManager {
                 }
             });
 
-            if (response.ok) {
+            // If we have a URL, navigate to it
+            if (url && url !== 'null' && url !== 'undefined' && url !== '#') {
+                window.location.href = url;
+            } else {
+                // otherwise just refresh the list
                 this.loadUnreadNotifications();
             }
         } catch (error) {
-            console.error('Error marking as read:', error);
+            console.error('Error handling notification click:', error);
+            // Even if mark as read fails, try to navigate if URL exists
+            if (url && url !== 'null' && url !== 'undefined' && url !== '#') {
+                window.location.href = url;
+            }
         }
+    }
+
+    async markAsRead(notificationId) {
+        return this.handleNotificationClick(notificationId, null);
     }
 
     async toggleDarkMode() {
         this.darkMode = !this.darkMode;
         localStorage.setItem('darkMode', this.darkMode);
-        
+
         try {
-            await fetch('/toggle-dark-mode', {
+            await fetch(`${getBaseUrl()}/toggle-dark-mode`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -232,7 +391,7 @@ class NotificationManager {
     applyDarkMode() {
         const body = document.body;
         const darkModeIcon = document.getElementById('darkModeIcon');
-        
+
         if (this.darkMode) {
             body.classList.add('dark-mode');
             if (darkModeIcon) {
@@ -323,6 +482,6 @@ class NotificationManager {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     window.notificationManager = new NotificationManager();
 });

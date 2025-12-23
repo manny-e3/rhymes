@@ -2,7 +2,7 @@
 <html lang="zxx" class="js">
 
 <head>
-    <base href="../">
+    <base href="{{ url('/') }}/">
     <meta charset="utf-8">
     <meta name="author" content="Softnio">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -189,11 +189,11 @@
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 
-                                {{-- <li class="nk-menu-heading">
-                                    <h6 class="overline-title text-primary-alt">Analytics</h6>
+                                <li class="nk-menu-heading">
+                                    <h6 class="overline-title text-primary-alt">ERPREV Integration</h6>
                                 </li>
                                 
-                                <li class="nk-menu-item">
+                                {{-- <li class="nk-menu-item">
                                     <a href="{{ route('admin.reports.sales-dashboard') }}" class="nk-menu-link">
                                         <span class="nk-menu-icon"><em class="icon ni ni-dashboard"></em></span>
                                         <span class="nk-menu-text">Sales Dashboard</span>
@@ -212,16 +212,16 @@
                                         <span class="nk-menu-icon"><em class="icon ni ni-bar-chart-fill"></em></span>
                                         <span class="nk-menu-text">Analytics</span>
                                     </a>
-                                </li>
+                                </li> --}}
                                 
                                 <li class="nk-menu-item">
                                     <a href="{{ route('admin.users.activity') }}" class="nk-menu-link">
                                         <span class="nk-menu-icon"><em class="icon ni ni-activity-alt"></em></span>
                                         <span class="nk-menu-text">User Activities</span>
                                     </a>
-                                </li> --}}
+                                </li>
                                 
-                                {{-- <li class="nk-menu-heading">
+                                <li class="nk-menu-heading">
                                     <h6 class="overline-title text-primary-alt">System</h6>
                                 </li>
                                 
@@ -232,7 +232,7 @@
                                     </a>
                                 </li>
                                 
-                                <li class="nk-menu-item">
+                                {{-- <li class="nk-menu-item">
                                     <a href="{{ route('admin.notifications.index') }}" class="nk-menu-link">
                                         <span class="nk-menu-icon"><em class="icon ni ni-bell-fill"></em></span>
                                         <span class="nk-menu-text">Notifications</span>
@@ -282,16 +282,22 @@
                                         </a>
                                     </li>
                                    
+                                    @php
+                                        $unreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
+                                    @endphp
                                     <li class="dropdown notification-dropdown">
                                         <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-bs-toggle="dropdown">
-                                            <div class="icon-status icon-status-info">
+                                            <div style="position: relative; display: inline-block;">
                                                 <em class="icon ni ni-bell"></em>
-                                                <span class="notification-badge" style="display: none;">0</span>
+                                                <span class="notification-badge" style="{{ $unreadCount > 0 ? 'display: flex;' : 'display: none;' }} position: absolute; top: -6px; right: -6px; background: #e85347; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                             </div>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
                                             <div class="dropdown-head">
-                                                <span class="sub-title nk-dropdown-title">Admin Notifications</span>
+                                                <span class="sub-title nk-dropdown-title">
+                                                    Admin Notifications
+                                                    <span class="badge bg-primary rounded-pill header-notification-count ms-1" style="{{ $unreadCount > 0 ? '' : 'display: none;' }}">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                                                </span>
                                                 <a href="#" id="markAllAsRead">Mark All as Read</a>
                                             </div>
                                             <div class="dropdown-body">
@@ -328,7 +334,7 @@
                                                         @if(auth()->user()->avatar)
                                                             <img src="{{ asset('storage/images/avatar/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}">
                                                         @else
-                                                            <span>{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
+                                                            <img src="{{ asset('storage/images/avatar/default.png') }}" alt="{{ auth()->user()->name }}">
                                                         @endif
                                                     </div>
                                                     <div class="user-info">
@@ -388,6 +394,17 @@
         <!-- main @e -->
     </div>
     <!-- app-root @e -->
+    
+    <!-- Pusher JS library -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
+    <script>
+        // Pusher configuration from Laravel
+        window.pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        window.pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        window.userId = {{ auth()->check() ? auth()->user()->id : 'null' }};
+    </script>
+    
     <!-- JavaScript -->
     <script src="{{ asset('assets/js/bundle.js?ver=3.2.3') }}"></script>
     <script src="{{ asset('assets/js/scripts.js?ver=3.2.3') }}"></script>

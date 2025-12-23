@@ -115,6 +115,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Broadcasting Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define the configuration for broadcasting across the application.
+    | Laravel's built-in broadcasting features are supported by default.
+    |
+    */
+
+    'broadcasting' => [
+        'default' => env('BROADCAST_CONNECTION', 'null'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |

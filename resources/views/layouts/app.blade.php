@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="js">
 <head>
-    <base href="../">
+    <base href="{{ url('/') }}/">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -102,7 +102,7 @@
                                                         @if(Auth::user()->avatar)
                                                             <img src="{{ asset('storage/images/avatar/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
                                                         @else
-                                                            <span>{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</span>
+                                                            <img src="{{ asset('storage/images/avatar/default.png') }}" alt="{{ Auth::user()->name }}">
                                                         @endif
                                                     </div>
                                                     <div class="user-info">
@@ -170,7 +170,17 @@
         </div>
     </div>
     
-     <script src="{{ asset('assets/js/bundle.js?ver=3.2.3') }}"></script>
+    <!-- Pusher JS library -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
+    <script>
+        // Pusher configuration from Laravel
+        window.pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        window.pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        window.userId = {{ auth()->check() ? auth()->user()->id : 'null' }};
+    </script>
+    
+    <script src="{{ asset('assets/js/bundle.js?ver=3.2.3') }}"></script>
     <script src="{{ asset('assets/js/scripts.js?ver=3.2.3') }}"></script>
     <script src="{{ asset('assets/js/charts/chart-ecommerce.js?ver=3.2.3') }}"></script>
     

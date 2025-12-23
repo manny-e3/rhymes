@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -17,44 +19,16 @@ class NotificationController extends Controller
 
     public function index(Request $request)
     {
-        // Mock notification data - in a real app, you'd have a notifications table
-        $notifications = collect([
-            (object) [
-                'id' => 1,
-                'type' => 'announcement',
-                'title' => 'Platform Update Released',
-                'message' => 'We have released a new update with improved performance and new features.',
-                'read_at' => null,
-                'created_at' => now()->subHours(2),
-            ],
-            (object) [
-                'id' => 2,
-                'type' => 'system',
-                'title' => 'Scheduled Maintenance',
-                'message' => 'System maintenance is scheduled for this weekend.',
-                'read_at' => now()->subHour(),
-                'created_at' => now()->subDays(1),
-            ],
-            (object) [
-                'id' => 3,
-                'type' => 'promotion',
-                'title' => 'Special Offer Available',
-                'message' => 'Limited time offer on featured books.',
-                'read_at' => null,
-                'created_at' => now()->subDays(2),
-            ],
-        ]);
-
-        // Filter by type if specified
-        if ($request->filled('type')) {
-            $notifications = $notifications->where('type', $request->type);
-        }
+        // Get actual notifications from the database for admin user
+        $notifications = Notification::forUser(Auth::id())
+            ->latest()
+            ->paginate(20);
 
         // Calculate stats
         $stats = [
-            'total' => $notifications->count(),
-            'unread' => $notifications->whereNull('read_at')->count(),
-            'today' => $notifications->where('created_at', '>=', now()->startOfDay())->count(),
+            'total' => $notifications->total(),
+            'unread' => $notifications->getCollection()->whereNull('read_at')->count(),
+            'today' => $notifications->getCollection()->where('created_at', '>=', now()->startOfDay())->count(),
             'active_users' => User::where('last_login_at', '>=', now()->subDays(30))->count(),
         ];
 
@@ -101,8 +75,10 @@ class NotificationController extends Controller
     public function markAllAsRead()
     {
         try {
-            // In a real app, you'd update the notifications table
-            // For now, we'll just return success
+            // Update all notifications for the admin user
+            Notification::forUser(Auth::id())
+                ->unread()
+                ->update(['read_at' => now()]);
             
             return response()->json([
                 'success' => true,
@@ -174,11 +150,26 @@ class NotificationController extends Controller
 
     private function sendInAppNotifications($users, $data)
     {
-        // In a real app, you'd create notification records in the database
-        // For now, we'll just simulate the process
+        // Create in-app notification records for each user
         foreach ($users as $user) {
-            // Create in-app notification record
-            // This would typically be stored in a notifications table
+            Notification::create([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\\Notifications\\SystemAlert',
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $user->id,
+                'data' => [
+                    'title' => $data['title'],
+                    'message' => $data['message'],
+                    'type' => $data['type'],
+                    'priority' => $data['priority'],
+                    'icon' => 'ni ni-bell',
+                    'action_url' => '#'
+                ],
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'icon' => 'ni ni-bell',
+                'read_at' => null,
+            ]);
         }
     }
 }

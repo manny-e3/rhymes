@@ -27,6 +27,117 @@ use App\Models\Setting;
 use App\Services\PayoutService;
 use App\Services\WalletService;
 
+// Notification Test Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/test-notifications-page', function () {
+        return view('test-notifications');
+    })->name('test.notifications.page');
+    
+    Route::get('/test-notifications-db', function () {
+        try {
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Not authenticated',
+                    'message' => 'Please log in to view notifications'
+                ], 401);
+            }
+            
+            $notifications = \App\Models\Notification::latest()->limit(10)->get();
+            $unreadCount = \App\Models\Notification::whereNull('read_at')->count();
+            $totalCount = \App\Models\Notification::count();
+            
+            return response()->json([
+                'success' => true,
+                'total_notifications' => $totalCount,
+                'unread_count' => $unreadCount,
+                'recent_notifications' => $notifications,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+    
+    Route::get('/test-current-user', function () {
+        try {
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Not authenticated',
+                    'message' => 'Please log in first'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            $unreadNotifications = $user->unreadNotifications;
+            
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->roles->pluck('name'),
+                ],
+                'unread_notifications_count' => $unreadNotifications->count(),
+                'unread_notifications' => $unreadNotifications,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+    
+    Route::post('/test-create-notification', function () {
+        try {
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Not authenticated',
+                    'message' => 'Please log in first'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            
+            // Create a test notification directly in the database
+            $notification = \App\Models\Notification::create([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\\Notifications\\TestNotification',
+                'notifiable_type' => 'App\\Models\\User',
+                'notifiable_id' => $user->id,
+                'data' => [
+                    'type' => 'test',
+                    'title' => 'Test Notification',
+                    'message' => 'This is a test notification created at ' . now()->format('Y-m-d H:i:s'),
+                    'icon' => 'ni ni-bell',
+                    'action_url' => '#',
+                ],
+                'read_at' => null,
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Test notification created successfully',
+                'notification' => $notification,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+});
+
 // Debug route to test settings
 Route::get('/debug-settings', function () {
     // Test direct setting retrieval

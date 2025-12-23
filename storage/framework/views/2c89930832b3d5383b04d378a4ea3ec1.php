@@ -2,7 +2,7 @@
 <html lang="zxx" class="js">
 
 <head>
-    <base href="../">
+    <base href="<?php echo e(url('/')); ?>/">
     <meta charset="utf-8">
     <meta name="author" content="Softnio">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -173,7 +173,29 @@
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 
+                                <li class="nk-menu-heading">
+                                    <h6 class="overline-title text-primary-alt">ERPREV Integration</h6>
+                                </li>
                                 
+                                
+                                
+                                <li class="nk-menu-item">
+                                    <a href="<?php echo e(route('admin.users.activity')); ?>" class="nk-menu-link">
+                                        <span class="nk-menu-icon"><em class="icon ni ni-activity-alt"></em></span>
+                                        <span class="nk-menu-text">User Activities</span>
+                                    </a>
+                                </li>
+                                
+                                <li class="nk-menu-heading">
+                                    <h6 class="overline-title text-primary-alt">System</h6>
+                                </li>
+                                
+                                <li class="nk-menu-item">
+                                    <a href="<?php echo e(route('admin.settings')); ?>" class="nk-menu-link">
+                                        <span class="nk-menu-icon"><em class="icon ni ni-setting-fill"></em></span>
+                                        <span class="nk-menu-text">Settings</span>
+                                    </a>
+                                </li>
                                 
                                 
                             </ul><!-- .nk-menu -->
@@ -220,16 +242,22 @@
                                         </a>
                                     </li>
                                    
+                                    <?php
+                                        $unreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
+                                    ?>
                                     <li class="dropdown notification-dropdown">
                                         <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-bs-toggle="dropdown">
-                                            <div class="icon-status icon-status-info">
+                                            <div style="position: relative; display: inline-block;">
                                                 <em class="icon ni ni-bell"></em>
-                                                <span class="notification-badge" style="display: none;">0</span>
+                                                <span class="notification-badge" style="<?php echo e($unreadCount > 0 ? 'display: flex;' : 'display: none;'); ?> position: absolute; top: -6px; right: -6px; background: #e85347; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; align-items: center; justify-content: center;"><?php echo e($unreadCount > 99 ? '99+' : $unreadCount); ?></span>
                                             </div>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
                                             <div class="dropdown-head">
-                                                <span class="sub-title nk-dropdown-title">Admin Notifications</span>
+                                                <span class="sub-title nk-dropdown-title">
+                                                    Admin Notifications
+                                                    <span class="badge bg-primary rounded-pill header-notification-count ms-1" style="<?php echo e($unreadCount > 0 ? '' : 'display: none;'); ?>"><?php echo e($unreadCount > 99 ? '99+' : $unreadCount); ?></span>
+                                                </span>
                                                 <a href="#" id="markAllAsRead">Mark All as Read</a>
                                             </div>
                                             <div class="dropdown-body">
@@ -266,7 +294,7 @@
                                                         <?php if(auth()->user()->avatar): ?>
                                                             <img src="<?php echo e(asset('storage/images/avatar/' . auth()->user()->avatar)); ?>" alt="<?php echo e(auth()->user()->name); ?>">
                                                         <?php else: ?>
-                                                            <span><?php echo e(strtoupper(substr(auth()->user()->name, 0, 2))); ?></span>
+                                                            <img src="<?php echo e(asset('storage/images/avatar/default.png')); ?>" alt="<?php echo e(auth()->user()->name); ?>">
                                                         <?php endif; ?>
                                                     </div>
                                                     <div class="user-info">
@@ -326,6 +354,17 @@
         <!-- main @e -->
     </div>
     <!-- app-root @e -->
+    
+    <!-- Pusher JS library -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
+    <script>
+        // Pusher configuration from Laravel
+        window.pusherKey = '<?php echo e(config("broadcasting.connections.pusher.key")); ?>';
+        window.pusherCluster = '<?php echo e(config("broadcasting.connections.pusher.options.cluster")); ?>';
+        window.userId = <?php echo e(auth()->check() ? auth()->user()->id : 'null'); ?>;
+    </script>
+    
     <!-- JavaScript -->
     <script src="<?php echo e(asset('assets/js/bundle.js?ver=3.2.3')); ?>"></script>
     <script src="<?php echo e(asset('assets/js/scripts.js?ver=3.2.3')); ?>"></script>
