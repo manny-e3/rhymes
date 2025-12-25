@@ -102,7 +102,6 @@ class NotificationManager {
         const notificationElement = document.createElement('div');
         notificationElement.className = 'nk-notification-item dropdown-inner notification-item';
         notificationElement.dataset.notificationId = notification.id;
-        if (data.url) notificationElement.dataset.notificationUrl = data.url;
         notificationElement.innerHTML = `
             <div class="nk-notification-icon">
                 <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
@@ -166,15 +165,11 @@ class NotificationManager {
         }
 
         // Individual notification clicks
-        // Individual notification clicks
         document.addEventListener('click', (e) => {
-            const item = e.target.closest('.notification-item');
-            if (item) {
-                const notificationId = item.dataset.notificationId;
-                const notificationUrl = item.dataset.notificationUrl;
-
+            if (e.target.closest('.notification-item')) {
+                const notificationId = e.target.closest('.notification-item').dataset.notificationId;
                 if (notificationId) {
-                    this.handleNotificationClick(notificationId, notificationUrl);
+                    this.markAsRead(notificationId);
                 }
             }
         });
@@ -264,7 +259,7 @@ class NotificationManager {
             console.log('Notification data:', notification, 'Formatted data:', data);
 
             return `
-                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}" data-notification-url="${data.url || ''}">
+                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}">
                     <div class="nk-notification-icon">
                         <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
                     </div>
@@ -285,8 +280,7 @@ class NotificationManager {
             message: notification.message || data.message || data.text || '',
             icon: notification.icon || data.icon || 'ni ni-bell',
             type: this.getNotificationType(notification.type),
-            time: this.formatTime(notification.created_at),
-            url: data.action_url || data.url || null
+            time: this.formatTime(notification.created_at)
         };
     }
 
@@ -337,10 +331,9 @@ class NotificationManager {
         }
     }
 
-    async handleNotificationClick(notificationId, url) {
+    async markAsRead(notificationId) {
         try {
-            // Mark as read
-            await fetch(`${getBaseUrl()}/notifications/${notificationId}/mark-read`, {
+            const response = await fetch(`${getBaseUrl()}/notifications/${notificationId}/mark-read`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -348,24 +341,12 @@ class NotificationManager {
                 }
             });
 
-            // If we have a URL, navigate to it
-            if (url && url !== 'null' && url !== 'undefined' && url !== '#') {
-                window.location.href = url;
-            } else {
-                // otherwise just refresh the list
+            if (response.ok) {
                 this.loadUnreadNotifications();
             }
         } catch (error) {
-            console.error('Error handling notification click:', error);
-            // Even if mark as read fails, try to navigate if URL exists
-            if (url && url !== 'null' && url !== 'undefined' && url !== '#') {
-                window.location.href = url;
-            }
+            console.error('Error marking as read:', error);
         }
-    }
-
-    async markAsRead(notificationId) {
-        return this.handleNotificationClick(notificationId, null);
     }
 
     async toggleDarkMode() {

@@ -102,35 +102,35 @@
                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="action" value="pending_review">
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to set all selected books to Pending Review?')"><span>Set Pending Review</span></button>
+                                                            <button type="submit" class="dropdown-item sweet-alert-button" data-message="Are you sure you want to set all selected books to Pending Review?"><span>Set Pending Review</span></button>
                                                         </form>
                                                     </li>
                                                     <li>
                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="action" value="send_review_copy">
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to request review copies for all selected books?')"><span>Request Review Copies</span></button>
+                                                            <button type="submit" class="dropdown-item sweet-alert-button" data-message="Are you sure you want to send review copies for all selected books?"><span>Send Review Copies</span></button>
                                                         </form>
                                                     </li>
                                                     <li>
                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="action" value="approve_delivery">
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to approve all selected books for delivery?')"><span>Approve for Delivery</span></button>
+                                                            <button type="submit" class="dropdown-item sweet-alert-button" data-message="Are you sure you want to approve all selected books for delivery?"><span>Approve for Delivery</span></button>
                                                         </form>
                                                     </li>
                                                     <li>
                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="action" value="stock">
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to stock all selected books? This will register them with the ERP system.')"><span>Stock Books</span></button>
+                                                            <button type="submit" class="dropdown-item sweet-alert-button" data-message="Are you sure you want to stock all selected books? This will register them with the ERP system."><span>Stock Books</span></button>
                                                         </form>
                                                     </li>
                                                     <li>
                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="action" value="reject">
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to reject all selected books?')"><span>Bulk Reject</span></button>
+                                                            <button type="submit" class="dropdown-item sweet-alert-button" data-message="Are you sure you want to reject all selected books?"><span>Bulk Reject</span></button>
                                                         </form>
                                                     </li>
                                                 </ul>
@@ -209,7 +209,7 @@
                                                                         </form>
                                                                     </li>
                                                                     <li>
-                                                                        <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;" onsubmit="return confirm('This action cannot be undone! The book will be permanently removed from the system.')">
+                                                                        <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;" class="sweet-alert-form" data-message="This action cannot be undone! The book will be permanently removed from the system.">
                                                                             @csrf
                                                                             <input type="hidden" name="action" value="forceDelete">
                                                                             <input type="hidden" name="book_ids[]" value="{{ $book->id }}">
@@ -219,40 +219,38 @@
                                                                 @else
                                                                     @if($book->status === 'pending_review')
                                                                         <li>
-                                                                            <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                                                                                @csrf
-                                                                                @method('PATCH')
-                                                                                <input type="hidden" name="status" value="send_review_copy">
-                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to request a review copy for this book?')"><em class="icon ni ni-mail"></em><span>Request Review Copy</span></button>
-                                                                            </form>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}"><em class="icon ni ni-mail"></em><span>Send Review Copy</span></button>
+                                                                        </li>
+                                                                        {{-- <li>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}"><em class="icon ni ni-check"></em><span>Approve for Delivery</span></button>
+                                                                        </li> --}}
+                                                                        <li>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}"><em class="icon ni ni-cross"></em><span>Reject</span></button>
+                                                                        </li>
+                                                                    @elseif($book->status === 'send_review_copy')
+                                                                        <li>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}"><em class="icon ni ni-check"></em><span>Approve for Delivery</span></button>
                                                                         </li>
                                                                         <li>
-                                                                            <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                                                                                @csrf
-                                                                                @method('PATCH')
-                                                                                <input type="hidden" name="status" value="approved_awaiting_delivery">
-                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to approve this book for delivery?')"><em class="icon ni ni-check"></em><span>Approve for Delivery</span></button>
-                                                                            </form>
-                                                                        </li>
-                                                                        <li>
-                                                                            <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                                                                                @csrf
-                                                                                @method('PATCH')
-                                                                                <input type="hidden" name="status" value="rejected">
-                                                                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to reject this book?')')"><em class="icon ni ni-cross"></em><span>Reject</span></button>
-                                                                            </form>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}"><em class="icon ni ni-cross"></em><span>Reject</span></button>
                                                                         </li>
                                                                     @elseif($book->status === 'approved_awaiting_delivery')
+                                                                        <!-- Button to trigger the quantity modal instead of directly stocking -->
+                                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#quantityModal-{{$book->id}}"><em class="icon ni ni-package"></em><span>Stock Book</span></button>
+                                                                    @elseif($book->status === 'rejected')
                                                                         <li>
-                                                                            <!-- Button to trigger the quantity modal instead of directly stocking -->
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#quantityModal-{{$book->id}}"><em class="icon ni ni-package"></em><span>Stock Book</span></button>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
+                                                                        </li>
+                                                                    @elseif($book->status === 'stocked')
+                                                                        <li>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
                                                                     @else
                                                                         <li><a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></a></li>
                                                                     @endif
                                                                     <li class="divider"></li>
                                                                     <li>
-                                                                        <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;" onsubmit="return confirm('This action will soft delete the book. You can restore it later.')">
+                                                                        <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;" class="sweet-alert-form" data-message="This action will soft delete the book. You can restore it later.">
                                                                             @csrf
                                                                             <input type="hidden" name="action" value="delete">
                                                                             <input type="hidden" name="book_ids[]" value="{{ $book->id }}">
@@ -387,10 +385,13 @@
                         </div>
                     </div>
                     
-                    <div class="form-group mb-3">
+                    <div class="form-group mb-3" id="adminNotesGroup-{{$book->id}}">
                         <label class="form-label">Admin Notes</label>
                         <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes for the author...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author (except for Rejected status).</div>
                     </div>
+                    
+                    
                     
                     <div class="form-group mb-3" id="revBookIdGroup-{{$book->id}}" style="{{ $book->status !== 'stocked' ? 'display: none;' : '' }}">
                         <label class="form-label">REV Book ID</label>
@@ -559,27 +560,25 @@
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
                 @if($book->status === 'pending_review')
-                <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="send_review_copy">
-                    <button type="submit" class="btn btn-info" onclick="return confirm('Are you sure you want to request a review copy for this book?')">Request Review Copy</button>
-                </form>
-                <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="approved_awaiting_delivery">
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to approve this book for delivery?')">Approve for Delivery</button>
-                </form>
-                <form method="POST" action="{{ route('admin.books.review', $book) }}" style="display:inline;">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="rejected">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this book?')">Reject</button>
-                </form>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}">Reject</button>
+                @elseif($book->status === 'send_review_copy')
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}">Reject</button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
                 @elseif($book->status === 'approved_awaiting_delivery')
                 <!-- Button to trigger the quantity modal instead of directly stocking -->
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#quantityModal-{{$book->id}}">Stock Book</button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
+                @elseif($book->status === 'rejected')
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#stockBookModal-{{$book->id}}">Stock Book</button>
+                @elseif($book->status === 'stocked')
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
                 @else
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}" data-bs-dismiss="modal">Edit Status</button>
                 @endif
@@ -623,9 +622,175 @@
 </div>
 @endforeach
 
-@push('scripts')
+<!-- Send Review Copy Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="sendReviewCopyModal-{{$book->id}}" aria-labelledby="sendReviewCopyModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendReviewCopyModalLabel-{{$book->id}}">Send Review Copy for {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="send_review_copy">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <p>This will send a review copy of the book to the author and update the book status to "Send Review Copy".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Review Copy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Approve for Delivery Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="approveForDeliveryModal-{{$book->id}}" aria-labelledby="approveForDeliveryModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveForDeliveryModalLabel-{{$book->id}}">Approve for Delivery - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="approved_awaiting_delivery">
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <p>This will approve the book for delivery and update the book status to "Approved - Awaiting Delivery".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Approve for Delivery</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Reject Book Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="rejectBookModal-{{$book->id}}" aria-labelledby="rejectBookModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectBookModalLabel-{{$book->id}}">Reject Book - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="rejected">
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <p>Are you sure you want to reject this book? This will update the book status to "Rejected".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Required for rejection)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reasons for rejection...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Pending Review Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="pendingReviewModal-{{$book->id}}" aria-labelledby="pendingReviewModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pendingReviewModalLabel-{{$book->id}}">Set to Pending Review - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="pending_review">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <p>This will set the book status back to "Pending Review".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Set Pending Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Stock Book Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="stockBookModal-{{$book->id}}" aria-labelledby="stockBookModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stockBookModalLabel-{{$book->id}}">Stock Book - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="stocked">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <p>This will stock the book in inventory and update the book status to "Stocked".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Stock Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-// Show/hide REV Book ID field based on status selection
+// Show/hide REV Book ID and admin notes fields based on status selection
 function toggleRevBookIdField(bookId) {
     const modal = document.getElementById(`reviewModal-${bookId}`);
     if (!modal) return;
@@ -633,15 +798,24 @@ function toggleRevBookIdField(bookId) {
     const statusInputs = modal.querySelectorAll('input[name="status"]');
     const revBookIdGroup = document.getElementById(`revBookIdGroup-${bookId}`);
     const quantityGroup = document.getElementById(`quantityGroup-${bookId}`); // Added quantity group
+    const adminNotesGroup = document.getElementById(`adminNotesGroup-${bookId}`);
     
     statusInputs.forEach(input => {
         input.addEventListener('change', function() {
+            // Handle REV Book ID field
             if (this.value === 'stocked') {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'block';
                 if (quantityGroup) quantityGroup.style.display = 'block'; // Show quantity field
             } else {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'none';
                 if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field
+            }
+            
+            // Hide admin notes field only for rejected status
+            if (this.value === 'rejected') {
+                if (adminNotesGroup) adminNotesGroup.style.display = 'none';
+            } else {
+                if (adminNotesGroup) adminNotesGroup.style.display = 'block';
             }
         });
     });
@@ -657,6 +831,133 @@ document.addEventListener('shown.bs.modal', function (event) {
         }
     }
 });
+
+// Function to show SweetAlert confirmation
+function showSweetAlert(title, text, callback) {
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, continue',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            callback();
+        }
+    });
+}
+
+// Function to handle form submission with SweetAlert
+function handleFormSubmit(event, title, text) {
+    event.preventDefault();
+    
+    const form = event.target;
+    
+    showSweetAlert(title, text, function() {
+        form.submit();
+    });
+}
+
+// Convert all confirm dialogs to SweetAlert
+function convertConfirmToSweetAlert() {
+    // Bulk action confirmations
+    document.querySelectorAll('button[onclick*="confirm"]').forEach(button => {
+        const originalOnClick = button.getAttribute('onclick');
+        if (originalOnClick && originalOnClick.includes('return confirm')) {
+            const match = originalOnClick.match(/confirm\(['"](.*)['"]\)/);
+            if (match) {
+                const message = match[1];
+                
+                button.removeAttribute('onclick');
+                
+                // Find the parent form
+                let form = button.closest('form');
+                if (form) {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        showSweetAlert('Confirm Action', message, function() {
+                            form.submit();
+                        });
+                    });
+                }
+            }
+        }
+    });
+    
+    // Form submit confirmations
+    document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+        const originalOnsubmit = form.getAttribute('onsubmit');
+        if (originalOnsubmit && originalOnsubmit.includes('return confirm')) {
+            const match = originalOnsubmit.match(/confirm\(['"](.*)['"]\)/);
+            if (match) {
+                const message = match[1];
+                
+                form.removeAttribute('onsubmit');
+                
+                form.addEventListener('submit', function(e) {
+                    handleFormSubmit(e, 'Confirm Action', message);
+                });
+            }
+        }
+    });
+    
+    // Handle forms with sweet-alert-form class
+    document.querySelectorAll('form.sweet-alert-form').forEach(form => {
+        const message = form.getAttribute('data-message');
+        
+        // Remove any existing submit listeners to avoid duplicates
+        form.removeEventListener('submit', form.submitHandler);
+        
+        form.submitHandler = function(e) {
+            handleFormSubmit(e, 'Confirm Action', message);
+        };
+        
+        form.addEventListener('submit', form.submitHandler);
+    });
+    
+    // Handle buttons with sweet-alert-button class
+    document.querySelectorAll('button.sweet-alert-button').forEach(button => {
+        const message = button.getAttribute('data-message');
+        
+        // Find the parent form
+        let form = button.closest('form');
+        if (form && message) {
+            // Remove any existing click listeners to avoid duplicates
+            button.removeEventListener('click', button.clickHandler);
+            
+            button.clickHandler = function(e) {
+                e.preventDefault();
+                
+                showSweetAlert('Confirm Action', message, function() {
+                    form.submit();
+                });
+            };
+            
+            button.addEventListener('click', button.clickHandler);
+        }
+    });
+}
+
+// Re-run conversion when DOM changes (for dynamically added content)
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList') {
+            convertConfirmToSweetAlert();
+        }
+    });
+});
+
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Run after DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', convertConfirmToSweetAlert);
+} else {
+    convertConfirmToSweetAlert();
+}
 </script>
-@endpush
 @endsection

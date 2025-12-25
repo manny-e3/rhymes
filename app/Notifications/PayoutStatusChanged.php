@@ -15,15 +15,17 @@ class PayoutStatusChanged extends Notification implements ShouldQueue
     public $payout;
     public $oldStatus;
     public $newStatus;
+    public $adminNotes;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Payout $payout, $oldStatus, $newStatus)
+    public function __construct(Payout $payout, $oldStatus, $newStatus, $adminNotes = null)
     {
         $this->payout = $payout;
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
+        $this->adminNotes = $adminNotes;
     }
 
     /**
@@ -42,35 +44,15 @@ class PayoutStatusChanged extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $subject = 'Payout Request Update - ₦' . number_format($this->payout->amount_requested, 2);
-        $greeting = 'Hello ' . $notifiable->name . ',';
         
-        $message = (new MailMessage)
+        return (new MailMessage)
             ->subject($subject)
-            ->greeting($greeting)
-            ->line('Your payout request of ₦' . number_format($this->payout->amount_requested, 2) . ' has been updated.');
-
-        switch ($this->newStatus) {
-            case 'approved':
-                $message->line('✅ Great news! Your payout request has been approved.')
-                        ->line('The payment will be processed within 3-5 business days.')
-                        ->line('You will receive the funds via your registered payment method.')
-                        ->action('View Payout History', route('author.payouts.index'));
-                break;
-            case 'denied':
-                $message->line('❌ Unfortunately, your payout request was denied.')
-                        ->line('Reason: ' . ($this->payout->admin_notes ?: 'No specific reason provided.'))
-                        ->line('You can submit a new payout request if you meet the requirements.')
-                        ->action('Submit New Request', route('author.payouts.index'));
-                break;
-            case 'completed':
-                $message->line('🎉 Your payout has been completed!')
-                        ->line('The payment of ₦' . number_format($this->payout->amount_requested, 2) . ' has been sent.')
-                        ->line('Please check your payment method for the funds.')
-                        ->action('View Wallet', route('author.wallet.index'));
-                break;
-        }
-
-        return $message->line('Thank you for being part of the Rhymes platform!');
+            ->view('emails.payout-status-changed', [
+                'user' => $notifiable,
+                'payout' => $this->payout,
+                'newStatus' => $this->newStatus,
+                'adminNotes' => $this->adminNotes,
+            ]);
     }
 
     /**

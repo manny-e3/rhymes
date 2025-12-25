@@ -16,15 +16,17 @@ class BookStatusChanged extends Notification implements ShouldQueue
     public $book;
     public $oldStatus;
     public $newStatus;
+    public $adminNotes;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Book $book, $oldStatus, $newStatus)
+    public function __construct(Book $book, $oldStatus, $newStatus, $adminNotes = null)
     {
         $this->book = $book;
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
+        $this->adminNotes = $adminNotes;
     }
 
     /**
@@ -66,6 +68,7 @@ class BookStatusChanged extends Notification implements ShouldQueue
                 'user' => $notifiable,
                 'book' => $this->book,
                 'newStatus' => $this->newStatus,
+                'adminNotes' => $this->adminNotes,
             ]);
     }
 

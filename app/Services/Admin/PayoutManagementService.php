@@ -43,7 +43,7 @@ class PayoutManagementService
             $this->createPayoutTransaction($payout, $admin);
             
             // Send notification
-            $payout->user->notify(new PayoutStatusChanged($payout, $oldStatus, 'approved'));
+            $payout->user->notify(new PayoutStatusChanged($payout, $oldStatus, 'approved', $adminNotes));
         }
         
         return $updated;
@@ -75,7 +75,35 @@ class PayoutManagementService
             $payout->update(['processed_at' => now()]);
             
             // Send notification
-            $payout->user->notify(new PayoutStatusChanged($payout, $oldStatus, 'denied'));
+            $payout->user->notify(new PayoutStatusChanged($payout, $oldStatus, 'denied', $adminNotes));
+        }
+        
+        return $updated;
+    }
+
+    /**
+     * Mark a payout as completed
+     */
+    public function completePayout(Payout $payout, ?string $adminNotes, User $admin): bool
+    {
+        if ($payout->status !== 'approved') {
+            throw new \InvalidArgumentException('Only approved payouts can be marked as completed');
+        }
+
+        $oldStatus = $payout->status;
+        
+        // Update payout status
+        $updated = $payout->update([
+            'status' => 'completed',
+            'admin_notes' => $adminNotes
+        ]);
+        
+        if ($updated) {
+            // Update completed timestamp
+            $payout->update(['completed_at' => now()]);
+            
+            // Send notification
+            $payout->user->notify(new PayoutStatusChanged($payout, $oldStatus, 'completed', $adminNotes));
         }
         
         return $updated;
@@ -109,6 +137,7 @@ class PayoutManagementService
             'pending_payouts' => Payout::where('status', 'pending')->count(),
             'approved_payouts' => Payout::where('status', 'approved')->count(),
             'denied_payouts' => Payout::where('status', 'denied')->count(),
+            'completed_payouts' => Payout::where('status', 'completed')->count(),
             'total_amount_requested' => Payout::sum('amount_requested'),
             'total_amount_approved' => Payout::where('status', 'approved')->sum('amount_requested'),
             'pending_amount' => Payout::where('status', 'pending')->sum('amount_requested'),

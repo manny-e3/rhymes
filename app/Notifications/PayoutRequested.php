@@ -38,16 +38,13 @@ class PayoutRequested extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $subject = 'New Payout Request - ₦' . number_format($this->payout->amount_requested, 2);
-        $greeting = 'Hello ' . $notifiable->name . ',';
         
         return (new MailMessage)
             ->subject($subject)
-            ->greeting($greeting)
-            ->line('A new payout request has been submitted.')
-            ->line('Author: ' . $this->payout->user->name)
-            ->line('Amount Requested: ₦' . number_format($this->payout->amount_requested, 2))
-            ->action('Review Payout Request', url('/admin/payouts/' . $this->payout->id))
-            ->line('Please review this payout request at your earliest convenience.');
+            ->view('emails.admin-payout-requested', [
+                'admin' => $notifiable,
+                'payout' => $this->payout,
+            ]);
     }
 
     /**

@@ -151,6 +151,54 @@ class PayoutManagementController extends Controller
         }
     }
 
+    public function complete(Request $request, Payout $payout)
+    {
+        $request->validate([
+            'admin_notes' => 'nullable|string',
+        ]);
+
+        try {
+            $admin = Auth::user();
+            $completed = $this->payoutManagementService->completePayout(
+                $payout, 
+                $request->admin_notes, 
+                $admin
+            );
+
+            if ($completed) {
+                // Return JSON response for AJAX requests
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Payout marked as completed successfully! Author has been notified.'
+                    ]);
+                }
+                
+                return back()->with('success', 'Payout marked as completed successfully! Author has been notified.');
+            }
+            
+            // Return JSON response for AJAX requests
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to mark payout as completed.'
+                ]);
+            }
+            
+            return back()->with('error', 'Failed to mark payout as completed.');
+        } catch (\InvalidArgumentException $e) {
+            // Return JSON response for AJAX requests
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     public function deny(Request $request, Payout $payout)
     {
         $request->validate([

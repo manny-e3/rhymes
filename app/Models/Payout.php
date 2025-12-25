@@ -15,6 +15,7 @@ class Payout extends Model
         'status',
         'admin_notes',
         'processed_at',
+        'completed_at',
     ];
 
     protected function casts(): array
@@ -22,6 +23,7 @@ class Payout extends Model
         return [
             'amount_requested' => 'decimal:2',
             'processed_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 

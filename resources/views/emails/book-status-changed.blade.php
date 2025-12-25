@@ -20,6 +20,13 @@
                 <div style="background: #dcfce7; border-radius: 6px; padding: 20px; margin: 25px 0;">
                     <h3 style="color: #1f2937; margin-top: 0;">📦 Please Deliver Physical Copies</h3>
                     <p>Your book has been approved and you need to deliver the physical copies as instructed.</p>
+                    @if(isset($adminNotes))
+                        @if($adminNotes)
+                            <p><strong>Admin notes:</strong> {{ $adminNotes }}</p>
+                        @endif
+                    @elseif($book->admin_notes)
+                        <p><strong>Admin notes:</strong> {{ $book->admin_notes }}</p>
+                    @endif
                     {{-- <p>You have been promoted to Author status and can now access your author dashboard.</p> --}}
                 </div>
                 
@@ -36,7 +43,11 @@
                     <h3 style="color: #1f2937; margin-top: 0;">📚 Your Book is Now Available!</h3>
                     <p>Your book is now available in our inventory.</p>
                     <p>Sales tracking is now active and you can monitor your earnings.</p>
-                    @if($book->admin_notes)
+                    @if(isset($adminNotes))
+                        @if($adminNotes)
+                            <p><strong>Admin notes:</strong> {{ $adminNotes }}</p>
+                        @endif
+                    @elseif($book->admin_notes)
                         <p><strong>Admin notes:</strong> {{ $book->admin_notes }}</p>
                     @endif
                 </div>
@@ -68,7 +79,11 @@
                 <div style="background: #eff6ff; border-radius: 6px; padding: 20px; margin: 25px 0;">
                     <h3 style="color: #1f2937; margin-top: 0;">📧 Review Copy Requested</h3>
                     <p>Our team has requested a review copy of your book "<strong>{{ $book->title }}</strong>".</p>
-                    @if($book->admin_notes)
+                    @if(isset($adminNotes))
+                        @if($adminNotes)
+                            <p><strong>Admin notes:</strong> {{ $adminNotes }}</p>
+                        @endif
+                    @elseif($book->admin_notes)
                         <p><strong>Admin notes:</strong> {{ $book->admin_notes }}</p>
                     @endif
                     <p>Please check your dashboard for instructions on how to provide the review copy.</p>
@@ -86,7 +101,13 @@
                 <div style="background: #fee2e2; border-radius: 6px; padding: 20px; margin: 25px 0;">
                     <h3 style="color: #1f2937; margin-top: 0;">⚠️ Book Rejected</h3>
                     <p>Unfortunately, your book submission was not accepted at this time.</p>
-                    @if($book->admin_notes)
+                    @if(isset($adminNotes))
+                        @if($adminNotes)
+                            <p><strong>Admin notes:</strong> {{ $adminNotes }}</p>
+                        @else
+                            <p>No additional notes provided.</p>
+                        @endif
+                    @elseif($book->admin_notes)
                         <p><strong>Admin notes:</strong> {{ $book->admin_notes }}</p>
                     @else
                         <p>No additional notes provided.</p>

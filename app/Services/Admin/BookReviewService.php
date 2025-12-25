@@ -75,6 +75,8 @@ class BookReviewService
                 'updated' => $updated,
                 'old_status' => $oldStatus,
                 'new_status' => $data['status'] ?? null,
+                'admin_notes_provided' => $data['admin_notes'] ?? 'NOT_PROVIDED',
+                'admin_notes_in_db_before_refresh' => $book->admin_notes ?? 'NULL_IN_DB',
                 'admin_id' => $admin->id,
                 'timestamp' => now()->toISOString(),
             ]);
@@ -151,6 +153,15 @@ class BookReviewService
                     $this->promoteUserToAuthor($book->user);
                 }
                 
+                // Refresh the book model to ensure we have the latest data
+                $book->refresh();
+                
+                Log::info('BookReviewService: Book model after refresh', [
+                    'book_id' => $book->id,
+                    'admin_notes_after_refresh' => $book->admin_notes ?? 'NULL_AFTER_REFRESH',
+                    'admin_id' => $admin->id,
+                ]);
+                
                 // Send notification to the author
                 Log::info('BookReviewService: Sending notification to author', [
                     'user_id' => $book->user->id,
@@ -159,9 +170,11 @@ class BookReviewService
                     'book_title' => $book->title,
                     'old_status' => $oldStatus,
                     'new_status' => $data['status'],
+                    'admin_notes' => $data['admin_notes'] ?? null,
+                    'admin_notes_from_db' => $book->admin_notes ?? null,
                     'admin_id' => $admin->id,
                 ]);
-                $book->user->notify(new BookStatusChanged($book, $oldStatus, $data['status']));
+                $book->user->notify(new BookStatusChanged($book, $oldStatus, $data['status'], $data['admin_notes'] ?? null));
                 
                 Log::info('BookReviewService: reviewBook process completed successfully', [
                     'book_id' => $book->id,
