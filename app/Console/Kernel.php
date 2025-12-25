@@ -38,18 +38,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+
+         $schedule->command('queue:work --tries=3 --timeout=90')
+             ->everyMinute()
+             ->withoutOverlapping()
+             ->runInBackground();
+
+             
         // Run the inventory sync with sales value processing every minute
         $schedule->command('rev:sync-inventory --process-sales-value')->everyMinute();
         
-        // Schedule sales sync - Change this line to adjust frequency
-        // Options:
-        // ->everyMinute() - Every minute
-        // ->everyFiveMinutes() - Every 5 minutes
-        // ->everyTenMinutes() - Every 10 minutes
-        // ->everyFifteenMinutes() - Every 15 minutes
-        // ->everyThirtyMinutes() - Every 30 minutes (current)
-        // ->hourly() - Every hour
-        // ->hourlyAt(15) - Every hour at 15 minutes past the hour
+  
             $schedule->command('rev:sync-inventory --process-sales-value')->everyMinute();
 
         //$schedule->command('rev:periodic-sync --type=sales --days=1')->everyMinute();
