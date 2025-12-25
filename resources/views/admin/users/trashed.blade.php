@@ -136,7 +136,7 @@
                                                                     </form>
                                                                 </li>
                                                                 <li class="divider"></li>
-                                                                <li><span class="text-muted small">Note: Hard delete not implemented</span></li>
+                                                                
                                                             </ul>
                                                         </div>
                                                     </div>

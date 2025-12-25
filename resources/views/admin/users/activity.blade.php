@@ -43,7 +43,7 @@
             </div><!-- .nk-block-head -->
 
             <div class="nk-block">
-                <div class="card card-bordered card-full">
+                <div class="card card-bordered">
                     <div class="card-inner">
                         <div class="card-title-group align-start mb-3">
                             <div class="card-title">
@@ -53,19 +53,57 @@
                         </div>
 
                         @if($paginatedActivities->count() > 0)
-                            <ul class="nk-activity">
-                                @foreach($paginatedActivities as $activity)
-                                    <li class="nk-activity-item">
-                                        <div class="nk-activity-media user-avatar bg-primary">
-                                            <em class="icon ni ni-activity-round"></em>
-                                        </div>
-                                        <div class="nk-activity-data">
-                                            <div class="label">{{ $activity->description }}</div>
-                                            <span class="time">{{ $activity->created_at->diffForHumans() }}</span>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            </ul>
+                            <div class="table-responsive">
+                                                                              <table class="datatable-init-export nowrap table" data-export-title="Export">
+    <thead>
+                                        <tr>
+                                            <th class="tb-col-date">Date</th>
+                                            <th class="tb-col-user">User</th>
+                                            <th class="tb-col-type">Activity Type</th>
+                                            <th class="tb-col-desc">Description</th>
+                                            <th class="tb-col-ip">IP Address</th>
+                                            <th class="tb-col-agent">User Agent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($paginatedActivities as $activity)
+                                        <tr>
+                                            <td class="tb-col-date">
+                                                <span class="sub-text">{{ $activity->created_at->format('M d, Y H:i') }}</span>
+                                                <br>
+                                                <span class="sub-text sub-date">{{ $activity->created_at->diffForHumans() }}</span>
+                                            </td>
+                                            <td class="tb-col-user">
+                                                @if($activity->user)
+                                                    <a href="{{ route('admin.users.show', $activity->user) }}" class="text-primary">
+                                                        {{ $activity->user->name }}
+                                                    </a>
+                                                    <br>
+                                                    <span class="sub-text">{{ $activity->user->email }}</span>
+                                                @else
+                                                    <span class="sub-text">System</span>
+                                                @endif
+                                            </td>
+                                            <td class="tb-col-type">
+                                                <span class="badge bg-primary">{{ ucfirst(str_replace('_', ' ', $activity->activity_type)) }}</span>
+                                            </td>
+                                            <td class="tb-col-desc">
+                                                <span>{{ $activity->description }}</span>
+                                                @if($activity->metadata)
+                                                   
+                                                @endif
+                                            </td>
+                                            <td class="tb-col-ip">
+                                                <span class="sub-text">{{ $activity->ip_address ?? 'N/A' }}</span>
+                                            </td>
+                                            <td class="tb-col-agent">
+                                                <span class="sub-text" style="font-size: 0.75rem;">{{ Illuminate\Support\Str::limit($activity->user_agent ?? 'N/A', 50) }}</span>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
 
                             <div class="mt-4">
                                 {{ $paginatedActivities->appends(['period' => request('period')])->links() }}
@@ -84,3 +122,23 @@
 </div>
 <!-- content @e -->
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('#user-activities-table').DataTable({
+        "pageLength": 25,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        "order": [[0, "desc"]],
+        "columnDefs": [
+            { "orderable": true, "targets": [0, 1, 2, 3, 4, 5] },
+            { "orderable": false, "targets": [] }
+        ],
+        "responsive": true,
+        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+               '<"row"<"col-sm-12"tr>>' +
+               '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+    });
+});
+</script>
+@endpush

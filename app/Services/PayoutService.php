@@ -159,13 +159,13 @@ class PayoutService
         if ($lastEligibleTransaction) {
             $daysSinceLastTransaction = $lastEligibleTransaction->diffInDays(now());
             
-            // if ($daysSinceLastTransaction < $frequencyDays) {
-            //     $daysRemaining = $frequencyDays - $daysSinceLastTransaction;
-            //     return [
-            //         'eligible' => false,
-            //         'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
-            //     ];
-            // }
+            if ($daysSinceLastTransaction < $frequencyDays) {
+                $daysRemaining = $frequencyDays - $daysSinceLastTransaction;
+                return [
+                    'eligible' => false,
+                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
+                ];
+            }
         }
 
         // Check if required days have elapsed since last approved payout
@@ -174,13 +174,13 @@ class PayoutService
         if ($lastApprovedPayout) {
             $daysSinceLastPayout = $lastApprovedPayout->diffInDays(now());
             
-            // if ($daysSinceLastPayout < $frequencyDays) {
-            //     $daysRemaining = $frequencyDays - $daysSinceLastPayout;
-            //     return [
-            //         'eligible' => false,
-            //         'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
-            //     ];
-            // }
+            if ($daysSinceLastPayout < $frequencyDays) {
+                $daysRemaining = $frequencyDays - $daysSinceLastPayout;
+                return [
+                    'eligible' => false,
+                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
+                ];
+            }
         }
 
         return [

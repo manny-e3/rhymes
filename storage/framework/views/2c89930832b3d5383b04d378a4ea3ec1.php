@@ -97,14 +97,12 @@
                                         <li class="nk-menu-item">
                                             <a href="<?php echo e(route('admin.users.index')); ?>" class="nk-menu-link"><span class="nk-menu-text">All Users</span></a>
                                         </li>
-                                        <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.users.authors')); ?>" class="nk-menu-link"><span class="nk-menu-text">Authors</span></a>
-                                        </li>
+                                       
                                         <li class="nk-menu-item">
                                             <a href="<?php echo e(route('admin.users.trashed')); ?>" class="nk-menu-link"><span class="nk-menu-text">Trashed Users</span></a>
                                         </li>
                                         <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.users.create')); ?>" class="nk-menu-link"><span class="nk-menu-text">Add User</span></a>
+                                            <a href="<?php echo e(route('admin.users.activity')); ?>" class="nk-menu-link"><span class="nk-menu-text">User Activity</span></a>
                                         </li>
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
@@ -189,6 +187,7 @@
                                 <li class="nk-menu-heading">
                                     <h6 class="overline-title text-primary-alt">System</h6>
                                 </li>
+                                
                                 
                                 <li class="nk-menu-item">
                                     <a href="<?php echo e(route('admin.settings')); ?>" class="nk-menu-link">
@@ -371,6 +370,8 @@
     <script src="<?php echo e(asset('assets/js/charts/chart-ecommerce.js?ver=3.2.3')); ?>"></script>
     <script src="<?php echo e(asset('js/notifications.js')); ?>"></script>
     <script src="<?php echo e(asset('js/admin.js')); ?>"></script>
+    <script src="<?php echo e(asset('/assets/js/libs/datatable-btns.js')); ?>"></script>
+
     
     <!-- SweetAlert2 Initialization -->
     <script>

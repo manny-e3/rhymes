@@ -56,29 +56,29 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+                                        <label class="form-label" for="password">Password</label>
                                         <div class="form-control-wrap">
                                             <a href="#" class="form-icon form-icon-right passcode-switch lg" data-target="password">
                                                 <em class="passcode-icon icon-show icon ni ni-eye"></em>
                                                 <em class="passcode-icon icon-hide icon ni ni-eye-off"></em>
                                             </a>
-                                            <input type="password" class="form-control @error('password') error @enderror" id="password" name="password" required>
+                                            <input type="password" class="form-control @error('password') error @enderror" id="password" name="password" value="{{ old('password') }}">
                                             @error('password')
                                                 <span class="form-note-error">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        <div class="form-note">Password must be at least 8 characters long.</div>
+                                        <div class="form-note">Password will be auto-generated if left empty. Minimum 8 characters.</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label class="form-label" for="password_confirmation">Confirm Password <span class="text-danger">*</span></label>
+                                        <label class="form-label" for="password_confirmation">Confirm Password</label>
                                         <div class="form-control-wrap">
                                             <a href="#" class="form-icon form-icon-right passcode-switch lg" data-target="password_confirmation">
                                                 <em class="passcode-icon icon-show icon ni ni-eye"></em>
                                                 <em class="passcode-icon icon-hide icon ni ni-eye-off"></em>
                                             </a>
-                                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" value="{{ old('password_confirmation') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -111,28 +111,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="form-label" for="bio">Bio/Description</label>
-                                        <div class="form-control-wrap">
-                                            <textarea class="form-control @error('bio') error @enderror" id="bio" name="bio" rows="4" placeholder="Brief description about the user">{{ old('bio') }}</textarea>
-                                            @error('bio')
-                                                <span class="form-note-error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="form-label" for="website">Website URL</label>
-                                        <div class="form-control-wrap">
-                                            <input type="url" class="form-control @error('website') error @enderror" id="website" name="website" value="{{ old('website') }}" placeholder="https://example.com">
-                                            @error('website')
-                                                <span class="form-note-error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
+                                
+                                
                                 <div class="col-12">
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-lg btn-primary">Create User</button>

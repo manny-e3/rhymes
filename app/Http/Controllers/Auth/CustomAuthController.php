@@ -89,6 +89,13 @@ class CustomAuthController extends Controller
         // Get the user
         $user = User::where('email', $request->email)->first();
 
+        // Check if the user account is active
+        if (!$user->isActive()) {
+            return back()->withErrors([
+                'email' => 'Your account has been deactivated. Please contact support.',
+            ]);
+        }
+
         // Generate and send OTP
         $user->generateOTP();
 

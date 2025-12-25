@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\BookReviewController;
 use App\Http\Controllers\Admin\PayoutManagementController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\EmailController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Setting;
@@ -602,6 +603,9 @@ Route::middleware('role:admin')->group(function () {
         Route::post('users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('users/{user}/send-verification', [UserManagementController::class, 'sendVerificationEmail'])->name('users.send-verification');
         Route::get('users/{user}/login-as', [UserManagementController::class, 'loginAsUser'])->name('users.login-as');
+        Route::get('users/{user}/activities', [UserManagementController::class, 'userActivities'])->name('users.activities');
+        Route::post('users/{user}/activate', [UserManagementController::class, 'activate'])->name('users.activate');
+        Route::post('users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('users.deactivate');
         Route::get('users/export/csv', [UserManagementController::class, 'exportCsv'])->name('users.export.csv');
         Route::get('users/export/pdf', [UserManagementController::class, 'exportPdf'])->name('users.export.pdf');
         
@@ -643,6 +647,22 @@ Route::middleware('role:admin')->group(function () {
         Route::post('notifications', [AdminNotificationController::class, 'store'])->name('notifications.store');
         Route::post('notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
         Route::post('notifications/send-message', [AdminNotificationController::class, 'sendMessage'])->name('notifications.send-message');
+        
+        // Email Management
+        Route::get('emails', [EmailController::class, 'index'])->name('emails.index');
+        Route::get('emails/create', [EmailController::class, 'create'])->name('emails.create');
+        Route::post('emails/bulk', [EmailController::class, 'sendBulk'])->name('emails.bulk.send');
+        Route::post('emails/authors', [EmailController::class, 'sendToAuthors'])->name('emails.authors.send');
+        Route::get('emails/personal/{userId?}', [EmailController::class, 'showPersonalForm'])->name('emails.personal.form');
+        Route::post('emails/personal', [EmailController::class, 'sendPersonal'])->name('emails.personal.send');
+        
+        // Enhanced Email Features
+        Route::post('emails/newsletter', [EmailController::class, 'sendNewsletter'])->name('emails.newsletter.send');
+        Route::post('emails/announcement', [EmailController::class, 'sendAnnouncement'])->name('emails.announcement.send');
+        Route::post('emails/sales-report', [EmailController::class, 'sendSalesReport'])->name('emails.sales-report.send');
+        Route::post('emails/bulk-sales-reports', [EmailController::class, 'sendBulkSalesReports'])->name('emails.bulk-sales-reports.send');
+        Route::get('emails/logs', [EmailController::class, 'logs'])->name('emails.logs');
+        Route::get('emails/logs/{id}', [EmailController::class, 'showLog'])->name('emails.logs.show');
         
         // Admin Profile
         Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');

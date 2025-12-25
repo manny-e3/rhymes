@@ -150,6 +150,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <br>
                         </div>
 
                         <div class="card-inner p-0">
@@ -166,17 +167,7 @@
                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Payment Method</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Requested</span></div>
-                                    <div class="nk-tb-col nk-tb-col-tools text-end">
-                                        <div class="dropdown">
-                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-bs-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <ul class="link-list-opt no-bdr">
-                                                    <li><a href="javascript:void(0)" onclick="bulkAction('approve'); return false;"><span>Bulk Approve</span></a></li>
-                                                    <li><a href="javascript:void(0)" onclick="bulkAction('deny'); return false;"><span>Bulk Deny</span></a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
 
                                 <?php $__empty_1 = true; $__currentLoopData = $payouts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payout): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>

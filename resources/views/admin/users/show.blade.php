@@ -183,7 +183,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                     <!-- Recent Books -->
+                            </div>
+                            
+                            <!-- Recent Books -->
                             @if($user->books->count() > 0)
                                 <div class="card card-bordered card-full mb-4">
                                     <div class="card-inner">
@@ -298,6 +300,31 @@
                             </div>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Activities Section -->
+<div class="nk-content nk-content-fluid mt-4">
+    <div class="container-xl wide-xl">
+        <div class="nk-content-body">
+            <div class="card card-bordered">
+                <div class="card-inner">
+                    <div class="card-title-group align-start mb-3">
+                        <div class="card-title">
+                            <h6 class="title">User Activities</h6>
+                            <p>View detailed activity log for this user</p>
+                        </div>
+                        <div class="card-tools">
+                            <a href="{{ route('admin.users.activities', $user) }}" class="btn btn-primary">
+                                <em class="icon ni ni-activity"></em>
+                                <span>View All Activities</span>
+                            </a>
+                        </div>
+                    </div>
+                    <p class="text-soft">This section shows all activities performed by this user. Click the button above to view the complete activity log with detailed information.</p>
                 </div>
             </div>
         </div>

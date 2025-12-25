@@ -82,6 +82,8 @@
                                     </div>
                                 </div>
                             </div>
+                                                    <br>
+
                         </div>
 
                         <div class="card-inner p-0">
@@ -94,7 +96,7 @@
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Quantity</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Submitted</span></div>
                                     <div class="nk-tb-col nk-tb-col-tools text-end">
-                                        <div class="dropdown">
+                                        {{-- <div class="dropdown">
                                             <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-bs-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
                                             <div class="dropdown-menu dropdown-menu-end">
                                                 <ul class="link-list-opt no-bdr">
@@ -135,7 +137,7 @@
                                                     </li>
                                                 </ul>
                                             </div>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
 

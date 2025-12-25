@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'website',
         'bio',
         'email_verified_at',
+        'is_active',
         'payment_details',
         'promoted_to_author_at',
         'otp_code',
@@ -65,6 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'deleted_at' => 'datetime',
             'otp_expires_at' => 'datetime',
             'otp_enabled' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -189,5 +191,57 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getWalletBalance()
     {
         return $this->walletTransactions()->sum('amount');
+    }
+
+    /**
+     * Activate the user account
+     *
+     * @return bool
+     */
+    public function activate()
+    {
+        return $this->update(['is_active' => true]);
+    }
+
+    /**
+     * Deactivate the user account
+     *
+     * @return bool
+     */
+    public function deactivate()
+    {
+        return $this->update(['is_active' => false]);
+    }
+
+    /**
+     * Check if the user account is active
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->is_active ?? true; // Default to active if not set
+    }
+
+    /**
+     * Scope to get only active users
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope to get only inactive users
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 }

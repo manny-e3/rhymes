@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\NewUserCreated;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class UserService
@@ -46,10 +48,13 @@ class UserService
      */
     public function createUser(array $data)
     {
+        // Auto-generate password if not provided in data
+        $password = $data['password'] ?? Str::random(12);
+        
         $userData = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($password),
             'phone' => $data['phone'] ?? null,
             'bio' => $data['bio'] ?? null,
             'website' => $data['website'] ?? null,
@@ -58,6 +63,9 @@ class UserService
 
         $user = User::create($userData);
         $user->assignRole($data['role']);
+
+        // Send notification with login details to the user
+        $user->notify(new NewUserCreated($password));
 
         return $user;
     }

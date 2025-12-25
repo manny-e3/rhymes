@@ -86,17 +86,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-12">
-            <div class="form-group">
-                <label class="form-label" for="bio">Bio/Description</label>
-                <div class="form-control-wrap">
-                    <textarea class="form-control @error('bio') error @enderror" id="bio" name="bio" rows="4" placeholder="Brief description about the user">{{ old('.bio', $user->bio) }}</textarea>
-                    @error('bio')
-                        <span class="form-note-error">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
-        </div>
+      
         
         <!-- Role Management -->
         <div class="col-12">
@@ -129,6 +119,25 @@
                         <input type="checkbox" class="custom-control-input" id="email_verified" name="email_verified" 
                             {{ $user->email_verified_at ? 'checked' : '' }}>
                         <label class="custom-control-label" for="email_verified">Email Verified</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label class="form-label">Account Status</label>
+                <div class="form-control-wrap">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" 
+                            {{ $user->isActive() ? 'checked' : '' }} disabled>
+                        <label class="custom-control-label" for="account_active">
+                            @if($user->isActive())
+                                <span class="badge badge-sm badge-dim bg-outline-success">Active</span>
+                            @else
+                                <span class="badge badge-sm badge-dim bg-outline-danger">Deactivated</span>
+                            @endif
+                        </label>
                     </div>
                 </div>
             </div>
@@ -222,6 +231,25 @@
                                             <em class="icon ni ni-signin"></em><span>Login as User</span>
                                         </a>
                                     </div>
+                    
+                                    <!-- Account Status Management -->
+                                    <div class="col-12">
+                                        @if($user->isActive())
+                                            <form method="POST" action="{{ route('admin.users.deactivate', $user) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-warning btn-block" data-confirm-deactivate data-confirm-message="Are you sure you want to deactivate {{ $user->name }}? This will prevent them from logging in.">
+                                                    <em class="icon ni ni-user-cross"></em><span>Deactivate Account</span>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.users.activate', $user) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-block" data-confirm-activate data-confirm-message="Are you sure you want to activate {{ $user->name }}? This will allow them to log in.">
+                                                    <em class="icon ni ni-user-check"></em><span>Activate Account</span>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -260,15 +288,8 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const passwordResetForm = document.getElementById('passwordResetForm');
-    
-    if (passwordResetForm) {
-        passwordResetForm.addEventListener('submit', function(e) {
-            console.log('Password reset form submitted');
-            // The confirmation dialog is handled by our admin.js script
-            // which looks for elements with data-confirm-reset attribute
-        });
-    }
+    // The confirmation dialogs are handled by our admin.js script
+    // which looks for elements with data-confirm attributes
 });
 </script>
 @endpush

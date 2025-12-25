@@ -53,6 +53,11 @@ class OTPController extends Controller
             return redirect()->route('login')->with('error', 'Invalid login attempt.');
         }
 
+        // Check if the user account is active
+        if (!$user->isActive()) {
+            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
+        }
+
         // Verify OTP
         if (!$user->verifyOTP($request->otp)) {
             throw ValidationException::withMessages([
@@ -110,6 +115,11 @@ class OTPController extends Controller
             return redirect()->route('login')->with('error', 'Invalid login attempt.');
         }
 
+        // Check if the user account is active
+        if (!$user->isActive()) {
+            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
+        }
+
         // Generate new OTP
         $user->generateOTP();
 
@@ -150,6 +160,11 @@ class OTPController extends Controller
             return redirect()->route('login')->with('error', 'Authentication required.');
         }
 
+        // Check if the user account is active
+        if (!$user->isActive()) {
+            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
+        }
+
         // Verify OTP
         if (!$user->verifyOTP($request->otp)) {
             throw ValidationException::withMessages([
@@ -187,6 +202,11 @@ class OTPController extends Controller
         
         if (!$user) {
             return redirect()->route('login')->with('error', 'Authentication required.');
+        }
+
+        // Check if the user account is active
+        if (!$user->isActive()) {
+            return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
         }
 
         // Generate new OTP

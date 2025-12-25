@@ -152,6 +152,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <br>
                         </div>
 
                         <div class="card-inner p-0">
@@ -168,7 +169,7 @@
                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Payment Method</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Requested</span></div>
-                                    <div class="nk-tb-col nk-tb-col-tools text-end">
+                                    {{-- <div class="nk-tb-col nk-tb-col-tools text-end">
                                         <div class="dropdown">
                                             <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-bs-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
                                             <div class="dropdown-menu dropdown-menu-end">
@@ -178,7 +179,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
 
                                 @forelse($payouts as $payout)

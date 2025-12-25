@@ -114,7 +114,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|exists:roles,name',
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
@@ -290,6 +290,36 @@ class UserManagementController extends Controller
         }
     }
 
+    public function activate(User $user)
+    {
+        try {
+            if ($user->isActive()) {
+                return back()->with('error', 'User account is already active!');
+            }
+
+            $user->activate();
+
+            return back()->with('success', 'User account activated successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to activate user account: ' . $e->getMessage());
+        }
+    }
+
+    public function deactivate(User $user)
+    {
+        try {
+            if (!$user->isActive()) {
+                return back()->with('error', 'User account is already deactivated!');
+            }
+
+            $user->deactivate();
+
+            return back()->with('success', 'User account deactivated successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to deactivate user account: ' . $e->getMessage());
+        }
+    }
+
     public function exportCsv(Request $request)
     {
         // Get all users with filters applied
@@ -406,5 +436,26 @@ class UserManagementController extends Controller
         $filename = 'users_export_' . now()->format('Y-m-d_H-i-s') . '.pdf';
         
         return $pdf->download($filename);
+    }
+
+    public function userActivities(User $user, Request $request)
+    {
+        // Get the period from request or default to 30 days
+        $period = $request->get('period', 30);
+        
+        // Calculate the start date based on period
+        $startDate = now()->subDays($period);
+        
+        // Fetch activities for the specific user from the database
+        $activitiesQuery = \App\Models\UserActivity::where('user_id', $user->id)
+            ->where('created_at', '>=', $startDate)
+            ->with('user')
+            ->orderBy('created_at', 'desc');
+        
+        // Paginate the results (15 per page)
+        $paginatedActivities = $activitiesQuery->paginate(15)->appends(['period' => $period, 'user' => $user->id]);
+        
+        // Pass the user and paginated activities to the view
+        return view('admin.users.user-activities', compact('paginatedActivities', 'user'));
     }
 }

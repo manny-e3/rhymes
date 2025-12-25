@@ -81,12 +81,15 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="card-tools me-n1">
+                                <br>
+                                <br>
+                               
+                                {{-- <div class="card-tools me-n1">
                                     <ul class="btn-toolbar gx-1">
-                                        <li>
+                                     <li>
                                             <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
-                                        </li>
-                                        <li class="btn-toolbar-sep"></li>
+                                        </li> 
+                                         <li class="btn-toolbar-sep"></li> 
                                         <li>
                                             <div class="toggle-wrap">
                                                 <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
@@ -100,7 +103,7 @@
                                             </div>
                                         </li>
                                     </ul>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
 
@@ -109,15 +112,16 @@
                                 <div class="nk-tb-item nk-tb-head">
                                     <div class="nk-tb-col"><span class="sub-text">User</span></div>
                                     <div class="nk-tb-col tb-col-mb"><span class="sub-text">Role</span></div>
-                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
+                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Email Status</span></div>
+                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Account Status</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Joined</span></div>
                                     <div class="nk-tb-col nk-tb-col-tools text-end">
                                         <div class="dropdown">
-                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-bs-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
+                                            {{-- <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-bs-toggle="dropdown"><em class="icon ni ni-plus"></em></a> --}}
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <ul class="link-list-opt no-bdr">
+                                                {{-- <ul class="link-list-opt no-bdr">
                                                     <li><a href="{{ route('admin.users.create') }}"><span>Add User</span></a></li>
-                                                </ul>
+                                                </ul> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -153,6 +157,13 @@
                                             @endif
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
+                                            @if($user->isActive())
+                                                <span class="tb-status text-success">Active</span>
+                                            @else
+                                                <span class="tb-status text-danger">Deactivated</span>
+                                            @endif
+                                        </div>
+                                        <div class="nk-tb-col tb-col-lg">
                                             <span>{{ $user->created_at->format('M d, Y') }}</span>
                                         </div>
                                         <div class="nk-tb-col nk-tb-col-tools">
@@ -162,18 +173,18 @@
                                                         <em class="icon ni ni-eye-fill"></em>
                                                     </a>
                                                 </li>
-                                                <li class="nk-tb-action-hidden">
+                                                {{-- <li class="nk-tb-action-hidden">
                                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-trigger btn-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                                                         <em class="icon ni ni-edit-fill"></em>
                                                     </a>
-                                                </li>
+                                                </li> --}}
                                                 <li>
                                                     <div class="drodown">
                                                         <a href="#" class="dropdown-toggle btn btn-icon btn-trigger" data-bs-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="{{ route('admin.users.show', $user) }}"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
-                                                                <li><a href="{{ route('admin.users.edit', $user) }}"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li>
+                                                                {{-- <li><a href="{{ route('admin.users.edit', $user) }}"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li> --}}
                                                                 @if(!$user->hasRole('author'))
                                                                     <li>
                                                                         <form method="POST" action="{{ route('admin.users.promote-author', $user) }}">
@@ -184,6 +195,26 @@
                                                                         </form>
                                                                     </li>
                                                                 @endif
+                                                                
+                                                                <!-- Account Status Management -->
+                                                                <li>
+                                                                    @if($user->isActive())
+                                                                        <form method="POST" action="{{ route('admin.users.deactivate', $user) }}">
+                                                                            @csrf
+                                                                            <button type="submit" class="btn btn-link text-start w-100 text-warning" data-confirm-deactivate data-confirm-message="Are you sure you want to deactivate {{ $user->name }}? This will prevent them from logging in.">
+                                                                                <em class="icon ni ni-user-cross"></em><span>Deactivate Account</span>
+                                                                            </button>
+                                                                        </form>
+                                                                    @else
+                                                                        <form method="POST" action="{{ route('admin.users.activate', $user) }}">
+                                                                            @csrf
+                                                                            <button type="submit" class="btn btn-link text-start w-100 text-success" data-confirm-activate data-confirm-message="Are you sure you want to activate {{ $user->name }}? This will allow them to log in.">
+                                                                                <em class="icon ni ni-user-check"></em><span>Activate Account</span>
+                                                                            </button>
+                                                                        </form>
+                                                                    @endif
+                                                                </li>
+                                                                
                                                                 <li class="divider"></li>
                                                                 <li>
                                                                     <form method="POST" action="{{ route('admin.users.destroy', $user) }}">
@@ -237,7 +268,8 @@
 
 @push('scripts')
 <script>
-// Remove the inline JavaScript functions since we're now using the global functions from admin.js
+// The confirmation dialog is handled by our admin.js script
+// which looks for elements with data-confirm-activate and data-confirm-deactivate attributes
 </script>
 @endpush
 @endsection
