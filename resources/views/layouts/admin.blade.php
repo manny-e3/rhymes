@@ -260,11 +260,12 @@
                             </div>
                             <div class="nk-header-brand d-xl-none">
                                
+                                    <img class="logo-light logo-img" width="100px" src="{{asset('/images/rovingHeights-logo.png')}}" srcset="{{asset('/images/rovingHeights-logo.png')}} 2x" alt="logo">
                                  
                                
                             </div><!-- .nk-header-brand -->
                             <div class="nk-header-news d-none d-xl-block">
-                                <div class="nk-news-list">
+                                {{-- <div class="nk-news-list">
                                     <a class="nk-news-item" href="#">
                                         <div class="nk-news-icon">
                                             <em class="icon ni ni-card-view"></em>
@@ -274,7 +275,7 @@
                                             <em class="icon ni ni-external"></em>
                                         </div>
                                     </a>
-                                </div>
+                                </div> --}}
                             </div><!-- .nk-header-news -->
                             <div class="nk-header-tools">
                                 <ul class="nk-quick-nav">

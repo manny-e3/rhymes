@@ -41,7 +41,7 @@
                             <div class="nk-header-brand d-xl-none">
                                
                                     
-                                    <img class="logo-light logo-img" width="100px" src="{{ asset('images/logo.png') }}" srcset="{{ asset('images/logo2x.png') }} 2x" alt="logo">
+                                    <img class="logo-light logo-img" width="100px" src="{{asset('/images/rovingHeights-logo.png')}}" srcset="{{asset('/images/rovingHeights-logo.png')}} 2x" alt="logo">
                             </div><!-- .nk-header-brand -->
                            
                             <div class="nk-header-tools">

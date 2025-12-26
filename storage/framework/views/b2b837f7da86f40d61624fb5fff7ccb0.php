@@ -41,7 +41,7 @@
                             <div class="nk-header-brand d-xl-none">
                                
                                     
-                                    <img class="logo-light logo-img" width="100px" src="<?php echo e(asset('images/logo.png')); ?>" srcset="<?php echo e(asset('images/logo2x.png')); ?> 2x" alt="logo">
+                                    <img class="logo-light logo-img" width="100px" src="<?php echo e(asset('/images/rovingHeights-logo.png')); ?>" srcset="<?php echo e(asset('/images/rovingHeights-logo.png')); ?> 2x" alt="logo">
                             </div><!-- .nk-header-brand -->
                            
                             <div class="nk-header-tools">

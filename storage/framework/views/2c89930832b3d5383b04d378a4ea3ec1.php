@@ -214,21 +214,12 @@
                             </div>
                             <div class="nk-header-brand d-xl-none">
                                
+                                    <img class="logo-light logo-img" width="100px" src="<?php echo e(asset('/images/rovingHeights-logo.png')); ?>" srcset="<?php echo e(asset('/images/rovingHeights-logo.png')); ?> 2x" alt="logo">
                                  
                                
                             </div><!-- .nk-header-brand -->
                             <div class="nk-header-news d-none d-xl-block">
-                                <div class="nk-news-list">
-                                    <a class="nk-news-item" href="#">
-                                        <div class="nk-news-icon">
-                                            <em class="icon ni ni-card-view"></em>
-                                        </div>
-                                        <div class="nk-news-text">
-                                            <p><?php echo $__env->yieldContent('page-title', 'Admin Panel'); ?> <span> <?php echo $__env->yieldContent('page-description', 'Manage your platform'); ?></span></p>
-                                            <em class="icon ni ni-external"></em>
-                                        </div>
-                                    </a>
-                                </div>
+                                
                             </div><!-- .nk-header-news -->
                             <div class="nk-header-tools">
                                 <ul class="nk-quick-nav">

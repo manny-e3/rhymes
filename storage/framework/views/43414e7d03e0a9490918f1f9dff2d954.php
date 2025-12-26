@@ -22,7 +22,7 @@
                                     </div>
                                     <div class="nk-block-head-content">
                                         <a href="<?php echo e(route('author.books.create')); ?>"  class="btn btn-primary d-none d-sm-inline-flex"><em class="icon ni ni-plus"></em><span>Create New</span></a>
-                                        <a href="#" class="btn btn-icon btn-primary d-inline-flex d-sm-none"><em class="icon ni ni-plus"></em></a>
+                                        <a href="<?php echo e(route('author.books.create')); ?>" class="btn btn-icon btn-primary d-inline-flex d-sm-none"><em class="icon ni ni-plus"></em></a>
                                     </div>
                                 </div>
                             </div><!-- .nk-block-head -->
