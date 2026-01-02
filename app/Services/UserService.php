@@ -23,10 +23,9 @@ class UserService
         'name' => $data['name'],
         'email' => $data['email'],
         'phone' => $data['phone'] ?? null,
-        'website' => $data['website'] ?? null,
-        'bio' => $data['bio'] ?? null,
-        'email_verified_at' => isset($data['email_verified']) && $data['email_verified']
-            ? ($user->email_verified_at ?? now())
+        
+        'email_verified_at' => array_key_exists('email_verified', $data)
+            ? ($data['email_verified'] ? now() : null)
             : $user->email_verified_at,
     ];
 

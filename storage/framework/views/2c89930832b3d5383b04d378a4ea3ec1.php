@@ -171,18 +171,11 @@
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 
-                                <li class="nk-menu-heading">
-                                    <h6 class="overline-title text-primary-alt">ERPREV Integration</h6>
-                                </li>
                                 
                                 
                                 
-                                <li class="nk-menu-item">
-                                    <a href="<?php echo e(route('admin.users.activity')); ?>" class="nk-menu-link">
-                                        <span class="nk-menu-icon"><em class="icon ni ni-activity-alt"></em></span>
-                                        <span class="nk-menu-text">User Activities</span>
-                                    </a>
-                                </li>
+                                
+                                
                                 
                                 <li class="nk-menu-heading">
                                     <h6 class="overline-title text-primary-alt">System</h6>
@@ -359,7 +352,8 @@
     <script src="<?php echo e(asset('assets/js/bundle.js?ver=3.2.3')); ?>"></script>
     <script src="<?php echo e(asset('assets/js/scripts.js?ver=3.2.3')); ?>"></script>
     <script src="<?php echo e(asset('assets/js/charts/chart-ecommerce.js?ver=3.2.3')); ?>"></script>
-    <script src="<?php echo e(asset('js/notifications.js')); ?>"></script>
+    <!-- Notifications Script -->
+    <script src="<?php echo e(asset('js/notifications.js?ver=1.1')); ?>"></script>
     <script src="<?php echo e(asset('js/admin.js')); ?>"></script>
     <script src="<?php echo e(asset('/assets/js/libs/datatable-btns.js')); ?>"></script>
 

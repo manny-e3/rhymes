@@ -185,7 +185,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Notifications Script -->
-    <script src="<?php echo e(asset('js/notifications.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/notifications.js?ver=1.1')); ?>"></script>
     
     <!-- SweetAlert2 Initialization -->
     <script>

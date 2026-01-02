@@ -28,6 +28,7 @@ class NotificationManager {
         this.unreadCount = 0;
         this.darkMode = localStorage.getItem('darkMode') === 'true';
         this.pusherChannel = null;
+        this.notifications = new Map(); // Store notification data
         this.init();
     }
 
@@ -98,10 +99,17 @@ class NotificationManager {
             data = this.formatNotificationData(notification);
         }
 
+        // Store in map
+        this.notifications.set(notification.id, { ...data, action_url: notification.data?.action_url || '#' });
+
         // Create the notification element
         const notificationElement = document.createElement('div');
         notificationElement.className = 'nk-notification-item dropdown-inner notification-item';
         notificationElement.dataset.notificationId = notification.id;
+
+        // Add cursor pointer style
+        notificationElement.style.cursor = 'pointer';
+
         notificationElement.innerHTML = `
             <div class="nk-notification-icon">
                 <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
@@ -118,6 +126,12 @@ class NotificationManager {
             container.insertBefore(notificationElement, container.firstChild);
         } else {
             container.appendChild(notificationElement);
+        }
+
+        // Remove empty message if present
+        const emptyMsg = container.querySelector('.text-muted');
+        if (emptyMsg && emptyMsg.textContent === 'No new notifications') {
+            emptyMsg.closest('.nk-notification-item').remove();
         }
     }
 
@@ -166,10 +180,21 @@ class NotificationManager {
 
         // Individual notification clicks
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.notification-item')) {
-                const notificationId = e.target.closest('.notification-item').dataset.notificationId;
+            const item = e.target.closest('.notification-item');
+            if (item) {
+                // Prevent default dropdown closing behavior if needed
+                e.preventDefault();
+                e.stopPropagation();
+
+                const notificationId = item.dataset.notificationId;
                 if (notificationId) {
-                    this.markAsRead(notificationId);
+                    const data = this.notifications.get(notificationId);
+                    if (data) {
+                        this.showNotificationModal(data, notificationId);
+                    } else {
+                        // Fallback if data not found in map (shouldn't happen if initialized correctly)
+                        this.markAsRead(notificationId);
+                    }
                 }
             }
         });
@@ -246,6 +271,9 @@ class NotificationManager {
             return;
         }
 
+        // Clear existing map
+        this.notifications.clear();
+
         container.innerHTML = notifications.map(notification => {
             // Try both approaches for getting notification data
             let data;
@@ -255,11 +283,16 @@ class NotificationManager {
                 data = this.formatNotificationData(notification);
             }
 
+            // Store in map with action_url
+            // Note: API response might have data.action_url inside the 'data' property of the notification object
+            const actionUrl = notification.data?.action_url || notification.action_url || '#';
+            this.notifications.set(notification.id, { ...data, action_url: actionUrl });
+
             // Debug: Log individual notification data
             console.log('Notification data:', notification, 'Formatted data:', data);
 
             return `
-                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}">
+                <div class="nk-notification-item dropdown-inner notification-item" data-notification-id="${notification.id}" style="cursor: pointer;">
                     <div class="nk-notification-icon">
                         <em class="icon icon-circle bg-${data.type}-dim ${data.icon}"></em>
                     </div>
@@ -342,10 +375,95 @@ class NotificationManager {
             });
 
             if (response.ok) {
+                // We reload notifications to update the list and badges
                 this.loadUnreadNotifications();
             }
         } catch (error) {
             console.error('Error marking as read:', error);
+        }
+    }
+
+    showNotificationModal(data, notificationId) {
+        // Mark as read in background
+        this.markAsRead(notificationId);
+
+        const modalHtml = `
+            <div class="modal fade" id="notificationDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Notification Details</h5>
+                            <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true" class="d-none d-sm-block">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center pt-4">
+                            <div class="mb-3">
+                                <em class="icon ni ni-bell-fill fs-1 text-${data.type === 'success' ? 'success' : (data.type === 'warning' ? 'warning' : 'primary')}"></em>
+                            </div>
+                            <h6 class="mb-2">${data.title}</h6>
+                            <p class="text-muted mb-4">${data.message}</p>
+                            <p class="text-xs text-soft">${data.time}</p>
+                        </div>
+                        <div class="modal-footer">
+                            ${data.action_url && data.action_url !== '#' ? `<a href="${data.action_url}" class="btn btn-primary">View details</a>` : ''}
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById('notificationDetailModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modalElement = document.getElementById('notificationDetailModal');
+
+        try {
+            // Check for Bootstrap 5 (native)
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+            // Check for jQuery / Bootstrap 4
+            else if (typeof jQuery !== 'undefined' && jQuery.fn.modal) {
+                jQuery(modalElement).modal('show');
+            }
+            // Fallback
+            else {
+                console.warn('Bootstrap modal not detected, using fallback');
+                modalElement.classList.add('show');
+                modalElement.style.display = 'block';
+                modalElement.style.backgroundColor = 'rgba(0,0,0,0.5)';
+
+                // Manual close handlers
+                const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"], .close');
+                closeButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        modalElement.classList.remove('show');
+                        modalElement.style.display = 'none';
+                    });
+                });
+            }
+        } catch (e) {
+            console.error('Error showing modal:', e);
+            // Fallback
+            modalElement.classList.add('show');
+            modalElement.style.display = 'block';
+            modalElement.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"], .close');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modalElement.classList.remove('show');
+                    modalElement.style.display = 'none';
+                });
+            });
         }
     }
 
@@ -457,8 +575,12 @@ class NotificationManager {
         document.body.insertAdjacentHTML('beforeend', modalHtml);
 
         // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('loginActivityModal'));
-        modal.show();
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(document.getElementById('loginActivityModal'));
+            modal.show();
+        } else if (typeof jQuery !== 'undefined') {
+            jQuery('#loginActivityModal').modal('show');
+        }
     }
 }
 

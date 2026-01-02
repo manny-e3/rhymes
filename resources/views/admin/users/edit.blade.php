@@ -75,7 +75,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
+        {{-- <div class="col-lg-6">
             <div class="form-group">
                 <label class="form-label" for="website">Website URL</label>
                 <div class="form-control-wrap">
@@ -85,7 +85,7 @@
                     @enderror
                 </div>
             </div>
-        </div>
+        </div> --}}
       
         
         <!-- Role Management -->
@@ -116,7 +116,7 @@
                 <label class="form-label">Email Verification</label>
                 <div class="form-control-wrap">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="email_verified" name="email_verified" 
+                        <input type="checkbox" class="custom-control-input" id="email_verified" name="email_verified" value="1" 
                             {{ $user->email_verified_at ? 'checked' : '' }}>
                         <label class="custom-control-label" for="email_verified">Email Verified</label>
                     </div>
@@ -129,7 +129,7 @@
                 <label class="form-label">Account Status</label>
                 <div class="form-control-wrap">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" 
+                        <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" value="1" 
                             {{ $user->isActive() ? 'checked' : '' }} disabled>
                         <label class="custom-control-label" for="account_active">
                             @if($user->isActive())

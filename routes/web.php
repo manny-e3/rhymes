@@ -516,6 +516,37 @@ Route::get('/test-update', function () {
     return response()->json(['success' => false, 'error' => 'No user found']);
 });
 
+// Test route for user update with form data simulation
+Route::post('/test-user-update', function (Request $request) {
+    $user = \App\Models\User::first();
+    if (!$user) {
+        return response()->json(['success' => false, 'error' => 'No user found']);
+    }
+    
+    // Simulate form data that would be sent
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'phone' => 'nullable|string|max:20',
+        'roles' => 'sometimes|array',
+        'email_verified' => 'boolean'
+    ]);
+    
+    try {
+        $userService = new \App\Services\UserService();
+        $updatedUser = $userService->updateUser($user, $validated);
+        
+        return response()->json([
+            'success' => true, 
+            'user' => $updatedUser,
+            'original_data' => $request->all(),
+            'validated_data' => $validated
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+    }
+});
+
 // Test route for user creation
 Route::get('/test-create', function () {
     try {

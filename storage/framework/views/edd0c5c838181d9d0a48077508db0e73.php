@@ -115,31 +115,7 @@ unset($__errorArgs, $__bag); ?>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="form-group">
-                <label class="form-label" for="website">Website URL</label>
-                <div class="form-control-wrap">
-                    <input type="url" class="form-control <?php $__errorArgs = ['website'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" id="website" name="website" value="<?php echo e(old('website', $user->website)); ?>" placeholder="https://example.com">
-                    <?php $__errorArgs = ['website'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <span class="form-note-error"><?php echo e($message); ?></span>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                </div>
-            </div>
-        </div>
+        
       
         
         <!-- Role Management -->
@@ -178,9 +154,28 @@ unset($__errorArgs, $__bag); ?>
                 <label class="form-label">Email Verification</label>
                 <div class="form-control-wrap">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="email_verified" name="email_verified" 
+                        <input type="checkbox" class="custom-control-input" id="email_verified" name="email_verified" value="1" 
                             <?php echo e($user->email_verified_at ? 'checked' : ''); ?>>
                         <label class="custom-control-label" for="email_verified">Email Verified</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label class="form-label">Account Status</label>
+                <div class="form-control-wrap">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" value="1" 
+                            <?php echo e($user->isActive() ? 'checked' : ''); ?> disabled>
+                        <label class="custom-control-label" for="account_active">
+                            <?php if($user->isActive()): ?>
+                                <span class="badge badge-sm badge-dim bg-outline-success">Active</span>
+                            <?php else: ?>
+                                <span class="badge badge-sm badge-dim bg-outline-danger">Deactivated</span>
+                            <?php endif; ?>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -331,15 +326,8 @@ unset($__errorArgs, $__bag); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const passwordResetForm = document.getElementById('passwordResetForm');
-    
-    if (passwordResetForm) {
-        passwordResetForm.addEventListener('submit', function(e) {
-            console.log('Password reset form submitted');
-            // The confirmation dialog is handled by our admin.js script
-            // which looks for elements with data-confirm-reset attribute
-        });
-    }
+    // The confirmation dialogs are handled by our admin.js script
+    // which looks for elements with data-confirm attributes
 });
 </script>
 <?php $__env->stopPush(); ?>

@@ -187,9 +187,9 @@
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 
-                                <li class="nk-menu-heading">
+                                {{-- <li class="nk-menu-heading">
                                     <h6 class="overline-title text-primary-alt">ERPREV Integration</h6>
-                                </li>
+                                </li> --}}
                                 
                                 {{-- <li class="nk-menu-item">
                                     <a href="{{ route('admin.reports.sales-dashboard') }}" class="nk-menu-link">
@@ -212,12 +212,12 @@
                                     </a>
                                 </li> --}}
                                 
-                                <li class="nk-menu-item">
+                                {{-- <li class="nk-menu-item">
                                     <a href="{{ route('admin.users.activity') }}" class="nk-menu-link">
                                         <span class="nk-menu-icon"><em class="icon ni ni-activity-alt"></em></span>
                                         <span class="nk-menu-text">User Activities</span>
                                     </a>
-                                </li>
+                                </li> --}}
                                 
                                 <li class="nk-menu-heading">
                                     <h6 class="overline-title text-primary-alt">System</h6>
@@ -415,7 +415,8 @@
     <script src="{{ asset('assets/js/bundle.js?ver=3.2.3') }}"></script>
     <script src="{{ asset('assets/js/scripts.js?ver=3.2.3') }}"></script>
     <script src="{{ asset('assets/js/charts/chart-ecommerce.js?ver=3.2.3') }}"></script>
-    <script src="{{ asset('js/notifications.js') }}"></script>
+    <!-- Notifications Script -->
+    <script src="{{ asset('js/notifications.js?ver=1.1') }}"></script>
     <script src="{{ asset('js/admin.js') }}"></script>
     <script src="{{asset('/assets/js/libs/datatable-btns.js')}}"></script>
 

@@ -173,18 +173,18 @@
                                                         <em class="icon ni ni-eye-fill"></em>
                                                     </a>
                                                 </li>
-                                                {{-- <li class="nk-tb-action-hidden">
+                                                <li class="nk-tb-action-hidden">
                                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-trigger btn-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                                                         <em class="icon ni ni-edit-fill"></em>
                                                     </a>
-                                                </li> --}}
+                                                </li>
                                                 <li>
                                                     <div class="drodown">
                                                         <a href="#" class="dropdown-toggle btn btn-icon btn-trigger" data-bs-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="{{ route('admin.users.show', $user) }}"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
-                                                                {{-- <li><a href="{{ route('admin.users.edit', $user) }}"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li> --}}
+                                                                <li><a href="{{ route('admin.users.edit', $user) }}"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li> 
                                                                 @if(!$user->hasRole('author'))
                                                                     <li>
                                                                         <form method="POST" action="{{ route('admin.users.promote-author', $user) }}">
