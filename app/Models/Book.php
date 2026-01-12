@@ -22,6 +22,7 @@ class Book extends Model
         'admin_notes',
         'rev_book_id',
         'quantity', // Added quantity field
+        'original_data',
     ];
 
     protected function casts(): array

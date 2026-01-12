@@ -66,7 +66,7 @@ class BookReviewService
             
             $oldStatus = $book->status;
             
-            // Update book status
+            // Normal book status update
             $updated = $book->update($data);
             
             Log::info('BookReviewService: book database update result', [
@@ -74,7 +74,7 @@ class BookReviewService
                 'book_title' => $book->title,
                 'updated' => $updated,
                 'old_status' => $oldStatus,
-                'new_status' => $data['status'] ?? null,
+                'new_status' => $book->status,
                 'admin_notes_provided' => $data['admin_notes'] ?? 'NOT_PROVIDED',
                 'admin_notes_in_db_before_refresh' => $book->admin_notes ?? 'NULL_IN_DB',
                 'admin_id' => $admin->id,
@@ -83,7 +83,7 @@ class BookReviewService
             
             if ($updated) {
                 // Save quantity if provided and status is stocked
-                if ($data['status'] === 'stocked' && isset($data['quantity'])) {
+                if ($book->status === 'stocked' && isset($data['quantity'])) {
                     $book->update(['quantity' => $data['quantity']]);
                     Log::info('BookReviewService: Quantity saved', [
                         'book_id' => $book->id,
@@ -93,7 +93,7 @@ class BookReviewService
                 }
                 
                 // If book is stocked, register it as a product in ERPREV (without quantity)
-                if ($data['status'] === 'stocked') {
+                if ($book->status === 'stocked') {
                     Log::info('BookReviewService: Registering book in ERPREV', [
                         'book_id' => $book->id,
                         'book_title' => $book->title,
@@ -142,7 +142,7 @@ class BookReviewService
                 }
                 
                 // Handle author promotion if first book is approved for delivery and user is not already an author
-                if ($data['status'] === 'approved_awaiting_delivery' && !$book->user->hasRole('author') && !$book->user->hasRole('admin')) {
+                if ($book->status === 'approved_awaiting_delivery' && !$book->user->hasRole('author') && !$book->user->hasRole('admin')) {
                     Log::info('BookReviewService: Promoting user to author', [
                         'user_id' => $book->user->id,
                         'user_name' => $book->user->name,
@@ -169,18 +169,18 @@ class BookReviewService
                     'book_id' => $book->id,
                     'book_title' => $book->title,
                     'old_status' => $oldStatus,
-                    'new_status' => $data['status'],
+                    'new_status' => $book->status,
                     'admin_notes' => $data['admin_notes'] ?? null,
                     'admin_notes_from_db' => $book->admin_notes ?? null,
                     'admin_id' => $admin->id,
                 ]);
-                $book->user->notify(new BookStatusChanged($book, $oldStatus, $data['status'], $data['admin_notes'] ?? null));
+                $book->user->notify(new BookStatusChanged($book, $oldStatus, $book->status, $data['admin_notes'] ?? null));
                 
                 Log::info('BookReviewService: reviewBook process completed successfully', [
                     'book_id' => $book->id,
                     'book_title' => $book->title,
                     'old_status' => $oldStatus,
-                    'new_status' => $data['status'],
+                    'new_status' => $book->status,
                     'admin_id' => $admin->id,
                     'admin_name' => $admin->name,
                     'timestamp' => now()->toISOString(),
@@ -280,6 +280,7 @@ class BookReviewService
             'rejected_books' => Book::where('status', 'rejected')->count(),
             'approved_awaiting_delivery_books' => Book::where('status', 'approved_awaiting_delivery')->count(),
             'stocked_books' => Book::where('status', 'stocked')->count(),
+
         ];
         
         Log::info('BookReviewService: getBookStatistics completed', $statistics);

@@ -98,7 +98,64 @@ class BookService
      */
     public function updateBook(Book $book, array $data): bool
     {
+        // If the book is currently stocked and an author is updating it, 
+        // notify admin but keep the status as 'stocked'
+        if ($book->status === 'stocked') {
+            // Store original data for comparison
+            $originalData = [
+                'title' => $book->title,
+                'isbn' => $book->isbn,
+                'genre' => $book->genre,
+                'price' => $book->price,
+                'book_type' => $book->book_type,
+                'description' => $book->description,
+            ];
+            
+            $data['original_data'] = $originalData;
+            
+            // Notify admins about the edit
+            $this->notifyAdminsAboutBookEdit($book);
+        }
+        
         return $book->update($data);
+    }
+    
+    /**
+     * Notify all admins about a book edit that requires approval
+     */
+    private function notifyAdminsAboutBookEdit(Book $book): void
+    {
+        try {
+            // Get all admins
+            $admins = User::whereHas('roles', function ($query) {
+                $query->where('name', 'admin');
+            })->get();
+            
+            
+            // Notify each admin
+            foreach ($admins as $admin) {
+                try {
+                    $admin->notify(new \App\Notifications\BookEditedForApproval($book));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send book edit notification to admin', [
+                        'admin_id' => $admin->id,
+                        'admin_name' => $admin->name,
+                        'admin_email' => $admin->email,
+                        'book_id' => $book->id,
+                        'book_title' => $book->title,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to notify admins about book edit', [
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+                'author_id' => $book->user_id,
+                'author_name' => $book->user->name ?? 'Unknown',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**

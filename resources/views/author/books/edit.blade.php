@@ -166,6 +166,9 @@
                                                     @case('stocked')
                                                         <span class="badge badge-info">In Stock</span>
                                                         @break
+                                                    @case('edited_pending_approval')
+                                                        <span class="badge badge-warning">Edited - Awaiting Approval</span>
+                                                        @break
                                                     @case('rejected')
                                                         <span class="badge badge-danger">Rejected</span>
                                                         @break

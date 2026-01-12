@@ -37,9 +37,9 @@ class BookPolicy
      */
     public function update(User $user, Book $book): bool
     {
-        // Only book owner can edit, and only if pending or rejected
+        // Only book owner can edit, and only if pending, rejected, or stocked
         return $user->id === $book->user_id && 
-               in_array($book->status, ['pending', 'rejected']);
+               in_array($book->status, ['pending', 'rejected', 'stocked', 'edited_pending_approval']);
     }
 
     /**

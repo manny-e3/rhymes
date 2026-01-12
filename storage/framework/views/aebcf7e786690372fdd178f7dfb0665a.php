@@ -201,26 +201,49 @@
                     <?php endif; ?>
                 </div>
             <?php elseif(trim($newStatus) === 'stocked'): ?>
-                <p>Your book "<strong><?php echo e($book->title); ?></strong>" has been approved. 🚀 Great News!</p>
-                
-                <div class="status-box stocked-info">
-                    <h3 class="status-title"><i>📚</i> Your Book is Now Available!</h3>
-                    <p>Your book is now available in our inventory.</p>
-                    <p>Sales tracking is now active and you can monitor your earnings.</p>
+                <?php if($book->getOriginal('status') === 'edited_pending_approval'): ?>
+                    <p>Your book "<strong><?php echo e($book->title); ?></strong>" edit has been approved! 🚀 Great News!</p>
                     
-                    <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
-                        <div class="admin-notes">
-                            <strong>Admin notes:</strong> 
-                            <?php if(isset($adminNotes) && $adminNotes): ?>
-                                <?php echo e($adminNotes); ?>
+                    <div class="status-box stocked-info">
+                        <h3 class="status-title"><i>📚</i> Your Book Edit Has Been Approved!</h3>
+                        <p>Your book changes have been approved and are now reflected in our inventory.</p>
+                        <p>Sales tracking continues to be active and you can monitor your earnings.</p>
+                        
+                        <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
+                            <div class="admin-notes">
+                                <strong>Admin notes:</strong> 
+                                <?php if(isset($adminNotes) && $adminNotes): ?>
+                                    <?php echo e($adminNotes); ?>
 
-                            <?php elseif($book->admin_notes): ?>
-                                <?php echo e($book->admin_notes); ?>
+                                <?php elseif($book->admin_notes): ?>
+                                    <?php echo e($book->admin_notes); ?>
 
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <p>Your book "<strong><?php echo e($book->title); ?></strong>" has been approved. 🚀 Great News!</p>
+                    
+                    <div class="status-box stocked-info">
+                        <h3 class="status-title"><i>📚</i> Your Book is Now Available!</h3>
+                        <p>Your book is now available in our inventory.</p>
+                        <p>Sales tracking is now active and you can monitor your earnings.</p>
+                        
+                        <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
+                            <div class="admin-notes">
+                                <strong>Admin notes:</strong> 
+                                <?php if(isset($adminNotes) && $adminNotes): ?>
+                                    <?php echo e($adminNotes); ?>
+
+                                <?php elseif($book->admin_notes): ?>
+                                    <?php echo e($book->admin_notes); ?>
+
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
                 
                 <div class="cta-button-container">
                     <a href="<?php echo e(route('author.wallet.index')); ?>" class="cta-button">
@@ -230,7 +253,9 @@
             <?php elseif(trim($newStatus) === 'pending_review'): ?>
                 <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong><?php echo e(ucfirst(str_replace('_', ' ', $newStatus))); ?></strong>.</p>
                 
-                <div class="status-box review-info">
+               
+                     <div class="status-box delivery-info">
+                    
                     <h3 class="status-title"><i>📋</i> Book Submitted for Review</h3>
                     <p>Your book has been successfully submitted and is now pending review by our team.</p>
                     <p>We'll review your submission and get back to you soon.</p>
@@ -242,24 +267,29 @@
                     </a>
                 </div>
             <?php elseif(trim($newStatus) === 'send_review_copy'): ?>
-                <p>Thank you for submitting your book details to us. We appreciate your interest in partnering with Rovingheights. As the next step in our review process, we require a copy of your book for evaluation: <strong><?php echo e($book->title); ?></strong>.</p>
 
-                <div class="status-box review-process">
-                    <h3 class="status-title"><i>📖</i> Review Copy Required</h3>
-                    <p>If you are in Lagos, please submit a copy to:</p>
+             <div class="status-box delivery-info">
+                    
+                    <p>Thank you for submitting your book details to us. We appreciate your interest in partnering with Rovingheights. As the next step in our review process, we require a copy of your book for evaluation: <strong><?php echo e($book->title); ?></strong>.</p>
+                    
+                     <p>If you are in Lagos, please submit a copy to:</p>
+                    
                     <div class="address">
-                        <strong>Rovingheights Bookstore</strong>
-                        <p>28, Ogunlana Drive, Surulere.</p>
-                        <p>Contact: 0810 979 5365</p>
+                        <strong>Lagos Drop-off Location:</strong>
+                        <p>Digital Bridge Institute</p>
+                        <p>1, Nitel Road, Cappa Oshodi, Lagos</p>
+                        <p>Contact: Bidemi – 0810 411 3185</p>
                     </div>
+                    
 
-                    <p>If you are in Abuja, please submit a copy to:</p>
+                     <p>If you are in Abuja, please submit a copy to:</p>
                     <div class="address">
-                        <strong>Rovingheights Bookstore</strong>
-                        <p>Shop S01, 2nd floor, City Centre Mall, Gimbiya Street, Area 11, Garki.</p>
-                        <p>Contact: 0802 828 7089</p>
+                        <strong>Abuja Drop-off Location:</strong>
+                        <p>CVS Plaza, Shop 4.1, Block B</p>
+                        <p>145, Ademola Adetokunbo Crescent, opposite Oti Carpets, Wuse 2, Abuja</p>
+                        <p>Contact: 0902 666 6195</p>
                     </div>
-
+                    
                     <p>The review process typically takes 1–2 weeks. Once it is completed, we will communicate our final stocking decision. If we are unable to proceed with stocking your book, we will notify you. Please note that submitted copies are not returned.</p>
 
                     <p>As part of our evaluation, we will assess the content of the book, as well as the printing and production quality. Additionally, your book should have a valid ISBN and a scannable barcode.</p>
@@ -275,6 +305,8 @@
                     <p>Regards,</p>
                     <p>Team Rovingheights</p>
                     
+                
+                    
                     <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
                         <div class="admin-notes">
                             <strong>Admin notes:</strong> 
@@ -287,6 +319,37 @@
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
+                </div>
+
+
+               
+
+            <?php elseif(trim($newStatus) === 'edited_pending_approval'): ?>
+                <p>Your book "<strong><?php echo e($book->title); ?></strong>" has been edited and is awaiting admin approval.</p>
+                
+                <div class="status-box review-info">
+                    <h3 class="status-title"><i>📋</i> Book Edit Submitted for Approval</h3>
+                    <p>Your book has been successfully edited and submitted for admin approval.</p>
+                    <p>We'll review your changes and get back to you soon.</p>
+                    
+                    <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
+                        <div class="admin-notes">
+                            <strong>Admin notes:</strong> 
+                            <?php if(isset($adminNotes) && $adminNotes): ?>
+                                <?php echo e($adminNotes); ?>
+
+                            <?php elseif($book->admin_notes): ?>
+                                <?php echo e($book->admin_notes); ?>
+
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="cta-button-container">
+                    <a href="<?php echo e(route('dashboard')); ?>" class="cta-button">
+                        View Dashboard
+                    </a>
                 </div>
             <?php elseif(trim($newStatus) === 'rejected'): ?>
                 <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong><?php echo e(ucfirst(str_replace('_', ' ', $newStatus))); ?></strong>.</p>

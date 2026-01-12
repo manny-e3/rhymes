@@ -52,9 +52,10 @@
                                                     <option value="">All Status</option>
                                                     <option value="pending_review" <?php echo e(request('status') === 'pending_review' ? 'selected' : ''); ?>>Pending Review</option>
                                                     <option value="send_review_copy" <?php echo e(request('status') === 'send_review_copy' ? 'selected' : ''); ?>>Send Review Copy</option>
-                                                    <option value="approved_awaiting_delivery" <?php echo e(request('status') === 'approved_awaiting_delivery' ? 'selected' : ''); ?>>Approved - Awaiting Delivery</option>
+                                                    <option value="approved_awaiting_delivery" <?php echo e(request('status') === 'approved_awaiting_delivery' ? 'selected' : ''); ?>>Approved - AWaiting Delivery</option>
                                                     <option value="rejected" <?php echo e(request('status') === 'rejected' ? 'selected' : ''); ?>>Rejected</option>
                                                     <option value="stocked" <?php echo e(request('status') === 'stocked' ? 'selected' : ''); ?>>Stocked</option>
+                                                    <option value="edited_pending_approval" <?php echo e(request('status') === 'edited_pending_approval' ? 'selected' : ''); ?>>Edited - Awaiting Approval</option>
                                                 </select>
                                             </div>
                                             <div class="form-wrap w-150px">
@@ -127,6 +128,8 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
                                             <?php elseif($book->status === 'stocked'): ?>
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
+                                            <?php elseif($book->status === 'edited_pending_approval'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
                                             <?php endif; ?>
                                             <?php if($book->trashed()): ?>
                                                 <span class="badge badge-sm badge-dim bg-outline-secondary">Deleted</span>
@@ -200,6 +203,10 @@
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
                                                                     <?php elseif($book->status === 'stocked'): ?>
+                                                                        <li>
+                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
+                                                                        </li>
+                                                                    <?php elseif($book->status === 'edited_pending_approval'): ?>
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
@@ -288,11 +295,13 @@
                                 <?php elseif($book->status === 'send_review_copy'): ?>
                                     <span class="badge badge-sm badge-dim bg-outline-info">Send Review Copy</span>
                                 <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
-                                    <span class="badge badge-sm badge-dim bg-outline-success">Approved - Awaiting Delivery</span>
+                                    <span class="badge badge-sm badge-dim bg-outline-success">Approved - AWaiting Delivery</span>
                                 <?php elseif($book->status === 'rejected'): ?>
                                     <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
                                 <?php elseif($book->status === 'stocked'): ?>
                                     <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
+                                <?php elseif($book->status === 'edited_pending_approval'): ?>
+                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - AWaiting Approval</span>
                                 <?php endif; ?>
                             </p>
                             <?php if($book->status === 'stocked' && $book->quantity): ?>
@@ -303,6 +312,101 @@
                             <p><strong>Submitted:</strong> <?php echo e($book->created_at->format('M d, Y')); ?></p>
                         </div>
                     </div>
+                                    
+                    <!-- Original vs New Data Comparison for edited books -->
+                    <?php if($book->status === 'edited_pending_approval' && $book->original_data): ?>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Changes Comparison:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Original Value</th>
+                                            <th>New Value</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Title</strong></td>
+                                            <td><?php echo e($book->original_data['title'] ?? 'N/A'); ?></td>
+                                            <td><?php echo e($book->title); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['title'] ?? '') !== $book->title): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>ISBN</strong></td>
+                                            <td><?php echo e($book->original_data['isbn'] ?? 'N/A'); ?></td>
+                                            <td><?php echo e($book->isbn); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['isbn'] ?? '') !== $book->isbn): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Genre</strong></td>
+                                            <td><?php echo e($book->original_data['genre'] ?? 'N/A'); ?></td>
+                                            <td><?php echo e($book->genre); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['genre'] ?? '') !== $book->genre): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Price</strong></td>
+                                            <td>₦<?php echo e(number_format($book->original_data['price'] ?? 0, 2)); ?></td>
+                                            <td>₦<?php echo e(number_format($book->price, 2)); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['price'] ?? 0) !== $book->price): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Type</strong></td>
+                                            <td><?php echo e($book->original_data['book_type'] ?? 'N/A'); ?></td>
+                                            <td><?php echo e($book->book_type); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['book_type'] ?? '') !== $book->book_type): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Description</strong></td>
+                                            <td><?php echo e(Str::limit($book->original_data['description'] ?? '', 50)); ?></td>
+                                            <td><?php echo e(Str::limit($book->description, 50)); ?></td>
+                                            <td>
+                                                <?php if(($book->original_data['description'] ?? '') !== $book->description): ?>
+                                                    <span class="badge bg-warning">Changed</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     
                     <?php if($book->description): ?>
                     <div class="form-group mb-3">
@@ -340,6 +444,11 @@
                                 <input class="form-check-input" type="radio" name="status" id="stock-<?php echo e($book->id); ?>" value="stocked" 
                                        <?php echo e($book->status === 'stocked' ? 'checked' : ''); ?>>
                                 <label class="form-check-label" for="stock-<?php echo e($book->id); ?>">Stock</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="edited-pending-approval-<?php echo e($book->id); ?>" value="edited_pending_approval" 
+                                       <?php echo e($book->status === 'edited_pending_approval' ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="edited-pending-approval-<?php echo e($book->id); ?>">Edited - Awaiting Approval</label>
                             </div>
                         </div>
                     </div>
@@ -426,6 +535,8 @@
                                         <span class="badge badge-sm bg-danger">Rejected</span>
                                     <?php elseif($book->status === 'stocked'): ?>
                                         <span class="badge badge-sm bg-info">Stocked</span>
+                                    <?php elseif($book->status === 'edited_pending_approval'): ?>
+                                        <span class="badge badge-sm bg-warning">Edited - Awaiting Approval</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -538,6 +649,9 @@
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-<?php echo e($book->id); ?>">Send Review Copy</button>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-<?php echo e($book->id); ?>">Approve for Delivery</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-<?php echo e($book->id); ?>">Set Pending Review</button>
+                <?php elseif($book->status === 'edited_pending_approval'): ?>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-<?php echo e($book->id); ?>">Approve Changes</button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-<?php echo e($book->id); ?>">Reject Changes</button>
                 <?php else: ?>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>" data-bs-dismiss="modal">Edit Status</button>
                 <?php endif; ?>
@@ -765,6 +879,9 @@ function toggleRevBookIdField(bookId) {
             if (this.value === 'stocked') {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'block';
                 if (quantityGroup) quantityGroup.style.display = 'block'; // Show quantity field
+            } else if (this.value === 'edited_pending_approval') {
+                if (revBookIdGroup) revBookIdGroup.style.display = 'none';
+                if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field
             } else {
                 if (revBookIdGroup) revBookIdGroup.style.display = 'none';
                 if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field

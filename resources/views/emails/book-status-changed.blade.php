@@ -199,24 +199,45 @@
                     @endif
                 </div>
             @elseif(trim($newStatus) === 'stocked')
-                <p>Your book "<strong>{{ $book->title }}</strong>" has been approved. 🚀 Great News!</p>
-                
-                <div class="status-box stocked-info">
-                    <h3 class="status-title"><i>📚</i> Your Book is Now Available!</h3>
-                    <p>Your book is now available in our inventory.</p>
-                    <p>Sales tracking is now active and you can monitor your earnings.</p>
+                @if($book->getOriginal('status') === 'edited_pending_approval')
+                    <p>Your book "<strong>{{ $book->title }}</strong>" edit has been approved! 🚀 Great News!</p>
                     
-                    @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
-                        <div class="admin-notes">
-                            <strong>Admin notes:</strong> 
-                            @if(isset($adminNotes) && $adminNotes)
-                                {{ $adminNotes }}
-                            @elseif($book->admin_notes)
-                                {{ $book->admin_notes }}
-                            @endif
-                        </div>
-                    @endif
-                </div>
+                    <div class="status-box stocked-info">
+                        <h3 class="status-title"><i>📚</i> Your Book Edit Has Been Approved!</h3>
+                        <p>Your book changes have been approved and are now reflected in our inventory.</p>
+                        <p>Sales tracking continues to be active and you can monitor your earnings.</p>
+                        
+                        @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
+                            <div class="admin-notes">
+                                <strong>Admin notes:</strong> 
+                                @if(isset($adminNotes) && $adminNotes)
+                                    {{ $adminNotes }}
+                                @elseif($book->admin_notes)
+                                    {{ $book->admin_notes }}
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <p>Your book "<strong>{{ $book->title }}</strong>" has been approved. 🚀 Great News!</p>
+                    
+                    <div class="status-box stocked-info">
+                        <h3 class="status-title"><i>📚</i> Your Book is Now Available!</h3>
+                        <p>Your book is now available in our inventory.</p>
+                        <p>Sales tracking is now active and you can monitor your earnings.</p>
+                        
+                        @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
+                            <div class="admin-notes">
+                                <strong>Admin notes:</strong> 
+                                @if(isset($adminNotes) && $adminNotes)
+                                    {{ $adminNotes }}
+                                @elseif($book->admin_notes)
+                                    {{ $book->admin_notes }}
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @endif
                 
                 <div class="cta-button-container">
                     <a href="{{ route('author.wallet.index') }}" class="cta-button">
@@ -295,6 +316,31 @@
 
                
 
+            @elseif(trim($newStatus) === 'edited_pending_approval')
+                <p>Your book "<strong>{{ $book->title }}</strong>" has been edited and remains stocked.</p>
+                
+                <div class="status-box review-info">
+                    <h3 class="status-title"><i>📋</i> Book Successfully Updated</h3>
+                    <p>Your book has been successfully updated and remains in the stocked status.</p>
+                    <p>An admin has been notified of your changes.</p>
+                    
+                    @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
+                        <div class="admin-notes">
+                            <strong>Admin notes:</strong> 
+                            @if(isset($adminNotes) && $adminNotes)
+                                {{ $adminNotes }}
+                            @elseif($book->admin_notes)
+                                {{ $book->admin_notes }}
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                
+                <div class="cta-button-container">
+                    <a href="{{ route('dashboard') }}" class="cta-button">
+                        View Dashboard
+                    </a>
+                </div>
             @elseif(trim($newStatus) === 'rejected')
                 <p>Your book "<strong>{{ $book->title }}</strong>" status has been updated to <strong>{{ ucfirst(str_replace('_', ' ', $newStatus)) }}</strong>.</p>
                 

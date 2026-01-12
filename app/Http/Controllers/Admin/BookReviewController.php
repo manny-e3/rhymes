@@ -285,6 +285,7 @@ class BookReviewController extends Controller
                 'reject' => 'rejected',
                 'approve_delivery' => 'approved_awaiting_delivery',
                 'stock' => 'stocked',
+                'edited_pending_approval' => 'edited_pending_approval',
                 'delete' => null,
                 'restore' => null,
                 'forceDelete' => null,

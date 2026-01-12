@@ -87,6 +87,8 @@
                                                                         <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
                                                                     @elseif($book->status === 'stocked')
                                                                         <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
+                                                                    @elseif($book->status === 'edited_pending_approval')
+                                                                        <span class="badge badge-sm badge-dim bg-outline-info">Edited - Notified</span>
                                                                     @endif
                                                                                                     @if($book->trashed())
                                                                     <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
@@ -121,6 +123,15 @@
                                                                                         <span>View Details</span>
                                                                                     </a>
                                                                                 </li>
+
+                                                                                 @if($book->status === 'stocked' || $book->status === 'edited_pending_approval')
+                                                                                 <li>
+                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-{{ $book->id }}">
+                                                                                                <em class="icon ni ni-repeat"></em>
+                                                                                                <span>Edit</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        @endif
 
                                                                                 @if($book->trashed())
                                                                                     <li>
@@ -372,7 +383,7 @@
                             <!-- Price -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label" for="edit_price_{{$book->id}}">Price ($)</label>
+                                    <label class="form-label" for="edit_price_{{$book->id}}">Price (₦)</label>
                                     <div class="form-control-wrap">
                                         <input type="number" class="form-control" id="edit_price_{{$book->id}}" name="price" value="{{$book->price}}" step="0.01" min="0" required>
                                         @error('price')
@@ -505,6 +516,7 @@
                                                             @case('send_review_copy') badge-info @break
                                                             @case('approved_awaiting_delivery') badge-success @break
                                                             @case('stocked') badge-info @break
+                                                            @case('edited_pending_approval') badge-warning @break
                                                             @case('rejected') badge-danger @break
                                                         @endswitch
                                                     ">{{ucfirst(str_replace('_', ' ', $book->status))}}</span>
@@ -563,7 +575,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    @if($book->status === 'pending_review' || $book->status === 'rejected')
+                    @if($book->status === 'pending_review' || $book->status === 'rejected' || $book->status === 'edited_pending_approval')
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#editBook-{{$book->id}}">Edit Book</button>
                     @endif
                 </div>

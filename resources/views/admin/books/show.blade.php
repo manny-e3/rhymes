@@ -23,8 +23,8 @@
                             <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
-                                    @if($book->status === 'pending')
-                                        <li><a href="javascript:void(0)" class="btn btn-success" onclick="reviewBook({{ $book->id }}, 'accepted'); return false;"><em class="icon ni ni-check"></em><span>Approve</span></a></li>
+                                    @if($book->status === 'pending_review')
+                                        <li><a href="javascript:void(0)" class="btn btn-success" onclick="reviewBook({{ $book->id }}, 'approved_awaiting_delivery'); return false;"><em class="icon ni ni-check"></em><span>Approve</span></a></li>
                                         <li><a href="javascript:void(0)" class="btn btn-danger" onclick="reviewBook({{ $book->id }}, 'rejected'); return false;"><em class="icon ni ni-cross"></em><span>Reject</span></a></li>
                                     @endif
                                     <li><a href="{{ route('admin.books.index') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-arrow-left"></em><span>Back to Books</span></a></li>
@@ -46,14 +46,16 @@
                                         <h6 class="title">Book Information</h6>
                                     </div>
                                     <div class="card-tools">
-                                        @if($book->status === 'pending')
+                                        @if($book->status === 'pending_review')
                                             <span class="badge badge-warning">Pending Review</span>
-                                        @elseif($book->status === 'accepted')
-                                            <span class="badge badge-success">Published</span>
+                                        @elseif($book->status === 'approved_awaiting_delivery')
+                                            <span class="badge badge-success">Approved - Awaiting Delivery</span>
                                         @elseif($book->status === 'rejected')
                                             <span class="badge badge-danger">Rejected</span>
                                         @elseif($book->status === 'stocked')
                                             <span class="badge badge-info">Stocked</span>
+                                        @elseif($book->status === 'edited_pending_approval')
+                                            <span class="badge badge-warning">Edited - Awaiting Approval</span>
                                         @endif
                                     </div>
                                 </div>
@@ -113,12 +115,107 @@
                                             </div>
                                         </div>
                                     @endif
+                                    
+                                    <!-- Original vs New Data Comparison for edited books -->
+                                    @if($book->status === 'edited_pending_approval' && $book->original_data)
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Changes Comparison</label>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Field</th>
+                                                                <th>Original Value</th>
+                                                                <th>New Value</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><strong>Title</strong></td>
+                                                                <td>{{ $book->original_data['title'] ?? 'N/A' }}</td>
+                                                                <td>{{ $book->title }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['title'] ?? '') !== $book->title)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>ISBN</strong></td>
+                                                                <td>{{ $book->original_data['isbn'] ?? 'N/A' }}</td>
+                                                                <td>{{ $book->isbn }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['isbn'] ?? '') !== $book->isbn)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Genre</strong></td>
+                                                                <td>{{ $book->original_data['genre'] ?? 'N/A' }}</td>
+                                                                <td>{{ $book->genre }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['genre'] ?? '') !== $book->genre)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Price</strong></td>
+                                                                <td>₦{{ number_format($book->original_data['price'] ?? 0, 2) }}</td>
+                                                                <td>₦{{ number_format($book->price, 2) }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['price'] ?? 0) !== $book->price)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Type</strong></td>
+                                                                <td>{{ $book->original_data['book_type'] ?? 'N/A' }}</td>
+                                                                <td>{{ $book->book_type }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['book_type'] ?? '') !== $book->book_type)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Description</strong></td>
+                                                                <td>{{ Str::limit($book->original_data['description'] ?? '', 50) }}</td>
+                                                                <td>{{ Str::limit($book->description, 50) }}</td>
+                                                                <td>
+                                                                    @if(($book->original_data['description'] ?? '') !== $book->description)
+                                                                        <span class="badge bg-warning">Changed</span>
+                                                                    @else
+                                                                        <span class="badge bg-success">Unchanged</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <!-- Sales Performance -->
-                        @if($book->status === 'accepted' && $stats['total_sales'] > 0)
+                        @if($book->status === 'stocked' && $stats['total_sales'] > 0)
                             <div class="card card-bordered card-full">
                                 <div class="card-inner">
                                     <div class="card-title-group align-start mb-3">
@@ -223,7 +320,7 @@
                         </div>
 
                         <!-- Review Actions -->
-                        @if($book->status === 'pending')
+                        @if($book->status === 'pending_review')
                             <div class="card card-bordered card-full">
                                 <div class="card-inner">
                                     <div class="card-title-group align-start mb-3">
@@ -241,13 +338,38 @@
                                     
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <button class="btn btn-success btn-block" onclick="reviewBook({{ $book->id }}, 'accepted')">
+                                            <button class="btn btn-success btn-block" onclick="reviewBook({{ $book->id }}, 'approved_awaiting_delivery')">
                                                 <em class="icon ni ni-check"></em><span>Approve</span>
                                             </button>
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-danger btn-block" onclick="reviewBook({{ $book->id }}, 'rejected')">
                                                 <em class="icon ni ni-cross"></em><span>Reject</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($book->status === 'edited_pending_approval')
+                            <div class="card card-bordered card-full">
+                                <div class="card-inner">
+                                    <div class="card-title-group align-start mb-3">
+                                        <div class="card-title">
+                                            <h6 class="title">Book Status</h6>
+                                        </div>
+                                    </div>
+                                                            
+                                    <div class="alert alert-info">
+                                        <div class="alert-cta">
+                                            <h6>Edited - Notified</h6>
+                                            <p>This book has been edited by the author. An admin has been notified of the changes.</p>
+                                        </div>
+                                    </div>
+                                                            
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <button class="btn btn-primary btn-block" onclick="reviewBook({{ $book->id }}, 'stocked')">
+                                                <em class="icon ni ni-edit"></em><span>Edit Status</span>
                                             </button>
                                         </div>
                                     </div>
@@ -287,13 +409,13 @@
                                         </li>
                                     @endif
                                     
-                                    @if($book->status !== 'pending')
+                                    @if($book->status !== 'pending_review')
                                         <li class="nk-activity-item">
-                                            <div class="nk-activity-media user-avatar {{ $book->status === 'accepted' ? 'bg-success' : 'bg-danger' }}">
-                                                <em class="icon ni ni-{{ $book->status === 'accepted' ? 'check' : 'cross' }}"></em>
+                                            <div class="nk-activity-media user-avatar {{ in_array($book->status, ['approved_awaiting_delivery', 'stocked', 'edited_pending_approval']) ? 'bg-success' : 'bg-danger' }}">
+                                                <em class="icon ni ni-{{ in_array($book->status, ['approved_awaiting_delivery', 'stocked', 'edited_pending_approval']) ? 'check' : 'cross' }}"></em>
                                             </div>
                                             <div class="nk-activity-data">
-                                                <div class="label">Book {{ $book->status === 'accepted' ? 'approved' : 'rejected' }}</div>
+                                                <div class="label">Book {{ in_array($book->status, ['approved_awaiting_delivery', 'stocked', 'edited_pending_approval']) ? 'status updated' : 'rejected' }}</div>
                                                 <span class="time">{{ $book->updated_at->format('M d, Y \a\t g:i A') }}</span>
                                             </div>
                                         </li>
@@ -356,9 +478,9 @@ function reviewBook(bookId, status) {
     document.getElementById('bookId').value = bookId;
     document.getElementById('reviewStatus').value = status;
     
-    // Show REV Book ID field only for accepted status
+    // Show REV Book ID field only for stocked status
     const revBookIdGroup = document.getElementById('revBookIdGroup');
-    if (status === 'accepted') {
+    if (status === 'stocked') {
         revBookIdGroup.style.display = 'block';
     } else {
         revBookIdGroup.style.display = 'none';

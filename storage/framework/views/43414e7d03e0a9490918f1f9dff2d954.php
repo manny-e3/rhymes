@@ -86,6 +86,8 @@
                                                                         <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
                                                                     <?php elseif($book->status === 'stocked'): ?>
                                                                         <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
+                                                                    <?php elseif($book->status === 'edited_pending_approval'): ?>
+                                                                        <span class="badge badge-sm badge-dim bg-outline-info">Edited - Notified</span>
                                                                     <?php endif; ?>
                                                                                                     <?php if($book->trashed()): ?>
                                                                     <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
@@ -120,6 +122,15 @@
                                                                                         <span>View Details</span>
                                                                                     </a>
                                                                                 </li>
+
+                                                                                 <?php if($book->status === 'stocked' || $book->status === 'edited_pending_approval'): ?>
+                                                                                 <li>
+                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">
+                                                                                                <em class="icon ni ni-repeat"></em>
+                                                                                                <span>Edit</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        <?php endif; ?>
 
                                                                                 <?php if($book->trashed()): ?>
                                                                                     <li>
@@ -434,7 +445,7 @@ unset($__errorArgs, $__bag); ?>
                             <!-- Price -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label" for="edit_price_<?php echo e($book->id); ?>">Price ($)</label>
+                                    <label class="form-label" for="edit_price_<?php echo e($book->id); ?>">Price (₦)</label>
                                     <div class="form-control-wrap">
                                         <input type="number" class="form-control" id="edit_price_<?php echo e($book->id); ?>" name="price" value="<?php echo e($book->price); ?>" step="0.01" min="0" required>
                                         <?php $__errorArgs = ['price'];
@@ -588,6 +599,7 @@ unset($__errorArgs, $__bag); ?>
                                                             <?php case ('send_review_copy'): ?> badge-info <?php break; ?>
                                                             <?php case ('approved_awaiting_delivery'): ?> badge-success <?php break; ?>
                                                             <?php case ('stocked'): ?> badge-info <?php break; ?>
+                                                            <?php case ('edited_pending_approval'): ?> badge-warning <?php break; ?>
                                                             <?php case ('rejected'): ?> badge-danger <?php break; ?>
                                                         <?php endswitch; ?>
                                                     "><?php echo e(ucfirst(str_replace('_', ' ', $book->status))); ?></span>
@@ -646,7 +658,7 @@ unset($__errorArgs, $__bag); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <?php if($book->status === 'pending_review' || $book->status === 'rejected'): ?>
+                    <?php if($book->status === 'pending_review' || $book->status === 'rejected' || $book->status === 'edited_pending_approval'): ?>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">Edit Book</button>
                     <?php endif; ?>
                 </div>
