@@ -299,7 +299,7 @@ class BookService
      */
     public function updateBookStatus(Book $book, string $status, ?string $adminNotes = null): bool
     {
-        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked'];
+        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked', 'recall_requested', 'recalled'];
         
         if (!in_array($status, $validStatuses)) {
             throw new \InvalidArgumentException('Invalid book status');
@@ -313,7 +313,44 @@ class BookService
 
         return $this->updateBook($book, $data);
     }
-
+    
+    /**
+     * Notify admins about book recall request
+     */
+    public function notifyAdminsAboutBookRecall(Book $book, ?string $recallReason = null): void
+    {
+        try {
+            // Get all admins
+            $admins = \App\Models\User::whereHas('roles', function ($query) {
+                $query->where('name', 'admin');
+            })->get();
+            
+            // Notify each admin
+            foreach ($admins as $admin) {
+                try {
+                    $admin->notify(new \App\Notifications\BookRecallNotification($book, $recallReason));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send book recall notification to admin', [
+                        'admin_id' => $admin->id,
+                        'admin_name' => $admin->name,
+                        'admin_email' => $admin->email,
+                        'book_id' => $book->id,
+                        'book_title' => $book->title,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to notify admins about book recall', [
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+                'author_id' => $book->user_id,
+                'author_name' => $book->user->name ?? 'Unknown',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
     /**
      * Get author books count
      */

@@ -89,6 +89,10 @@
                                                                         <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                                                     @elseif($book->status === 'edited_pending_approval')
                                                                         <span class="badge badge-sm badge-dim bg-outline-info">Edited - Notified</span>
+                                                                    @elseif($book->status === 'recall_requested')
+                                                                        <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
+                                                                    @elseif($book->status === 'recalled')
+                                                                        <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
                                                                     @endif
                                                                                                     @if($book->trashed())
                                                                     <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
@@ -124,11 +128,20 @@
                                                                                     </a>
                                                                                 </li>
 
-                                                                                 @if($book->status === 'stocked' || $book->status === 'edited_pending_approval')
+                                                                                 @if($book->status === 'stocked' || $book->status === 'edited_pending_approval' || $book->status === 'recall_requested')
                                                                                  <li>
                                                                                             <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-{{ $book->id }}">
                                                                                                 <em class="icon ni ni-repeat"></em>
                                                                                                 <span>Edit</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        @endif
+                                                                                        @if($book->status !== 'recall_requested' && $book->status !== 'recalled')
+                                                                                        <li class="divider"></li>
+                                                                                        <li>
+                                                                                            <a href="#" onclick="requestBookRecall({{ $book->id }}); return false;">
+                                                                                                <em class="icon ni ni-exclamation-circle"></em>
+                                                                                                <span>Request Recall</span>
                                                                                             </a>
                                                                                         </li>
                                                                                         @endif
@@ -517,6 +530,8 @@
                                                             @case('approved_awaiting_delivery') badge-success @break
                                                             @case('stocked') badge-info @break
                                                             @case('edited_pending_approval') badge-warning @break
+                                                            @case('recall_requested') badge-warning @break
+                                                            @case('recalled') badge-danger @break
                                                             @case('rejected') badge-danger @break
                                                         @endswitch
                                                     ">{{ucfirst(str_replace('_', ' ', $book->status))}}</span>
@@ -639,6 +654,73 @@
             form.appendChild(methodField);
             document.body.appendChild(form);
             form.submit();
+        });
+    }
+    
+    function requestBookRecall(bookId) {
+        // Show a prompt for the recall reason
+        Swal.fire({
+            title: 'Request Book Recall',
+            text: 'Do you want to recall this book? This will notify the admin.',
+            input: 'textarea',
+            inputPlaceholder: 'Optional: Provide a reason for the recall request...',
+            inputAttributes: {
+                'aria-label': 'Provide a reason for the recall request'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Request Recall',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            reverseButtons: true,
+            inputValidator: (value) => {
+                if (value && value.length > 1000) {
+                    return 'Recall reason cannot exceed 1000 characters.';
+                }
+                return null;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send the recall request
+                fetch(`{{ route('author.books.recall', ['book' => '__BOOK_ID__']) }}`.replace('__BOOK_ID__', bookId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        recall_reason: result.value || null
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'An error occurred while requesting the recall.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Recall request error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while sending the recall request.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                    });
+                });
+            }
         });
     }
 </script>

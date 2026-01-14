@@ -58,6 +58,7 @@
                                                     <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
                                                     <option value="stocked" {{ request('status') === 'stocked' ? 'selected' : '' }}>Stocked</option>
                                                     <option value="edited_pending_approval" {{ request('status') === 'edited_pending_approval' ? 'selected' : '' }}>Edited - Awaiting Approval</option>
+
                                                 </select>
                                             </div>
                                             <div class="form-wrap w-150px">
@@ -172,7 +173,12 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                             @elseif($book->status === 'edited_pending_approval')
                                                 <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
+                                            @elseif($book->status === 'recall_requested')
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
+                                            @elseif($book->status === 'recalled')
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
                                             @endif
+                                           
                                             @if($book->trashed())
                                                 <span class="badge badge-sm badge-dim bg-outline-secondary">Deleted</span>
                                             @endif
@@ -204,6 +210,17 @@
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="#" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-{{$book->id}}"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
+                                                                 @if($book->status == 'recall_requested')
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                        </li>
+                                                                        @endif
+                                                                       
+
                                                                 @if($book->trashed())
                                                                     <li>
                                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;">
@@ -226,9 +243,7 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}"><em class="icon ni ni-mail"></em><span>Send Review Copy</span></button>
                                                                         </li>
-                                                                        {{-- <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}"><em class="icon ni ni-check"></em><span>Approve for Delivery</span></button>
-                                                                        </li> --}}
+                                                                       
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}"><em class="icon ni ni-cross"></em><span>Reject</span></button>
                                                                         </li>
@@ -250,12 +265,21 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
+                                                                       
                                                                     @elseif($book->status === 'edited_pending_approval')
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
+                                                                        @if($book->recall_requested)
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                        </li>
+                                                                        @endif
                                                                     @else
-                                                                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></a></li>
                                                                     @endif
                                                                     <li class="divider"></li>
                                                                     <li>
@@ -344,7 +368,7 @@
                                 @elseif($book->status === 'stocked')
                                     <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                 @elseif($book->status === 'edited_pending_approval')
-                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - AWaiting Approval</span>
+                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
                                 @endif
                             </p>
                             @if($book->status === 'stocked' && $book->quantity)
@@ -488,11 +512,7 @@
                                        {{ $book->status === 'stocked' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="stock-{{$book->id}}">Stock</label>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="edited-pending-approval-{{$book->id}}" value="edited_pending_approval" 
-                                       {{ $book->status === 'edited_pending_approval' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="edited-pending-approval-{{$book->id}}">Edited - Awaiting Approval</label>
-                            </div>
+                            
                         </div>
                     </div>
                     
@@ -578,8 +598,8 @@
                                         <span class="badge badge-sm bg-danger">Rejected</span>
                                     @elseif($book->status === 'stocked')
                                         <span class="badge badge-sm bg-info">Stocked</span>
-                                    @elseif($book->status === 'edited_pending_approval')
-                                        <span class="badge badge-sm bg-warning">Edited - Awaiting Approval</span>
+                                    @elseif($book->status === 'recalled')
+                                        <span class="badge badge-sm bg-warning">recalled</span>
                                     @endif
                                 </td>
                             </tr>
@@ -902,6 +922,70 @@
 </div>
 @endforeach
 
+<!-- Deny Recall Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="denyRecallModal-{{$book->id}}" aria-labelledby="denyRecallModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="denyRecallModalLabel-{{$book->id}}">Deny Recall Request - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.recall-action', $book) }}">
+                @csrf
+                <input type="hidden" name="action" value="deny">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <p>Are you sure you want to deny this recall request? This will cancel the recall and maintain the book's current status.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about why the recall was denied..."></textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Deny Recall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Approve Recall Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="approveRecallModal-{{$book->id}}" aria-labelledby="approveRecallModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveRecallModalLabel-{{$book->id}}">Approve Recall Request - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.recall-action', $book) }}">
+                @csrf
+                <input type="hidden" name="action" value="approve">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <p>Are you sure you want to approve this recall request? This will update the book status to "Recalled".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about the recall approval..."></textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Approve Recall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -1076,6 +1160,74 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', convertConfirmToSweetAlert);
 } else {
     convertConfirmToSweetAlert();
+}
+
+// Function to handle recall requests
+function handleRecallRequest(bookId, action) {
+    let title, text, confirmText;
+    
+    if (action === 'approve') {
+        title = 'Approve Recall Request';
+        text = 'Are you sure you want to approve this recall request?';
+        confirmText = 'Approve';
+    } else {
+        title = 'Deny Recall Request';
+        text = 'Are you sure you want to deny this recall request?';
+        confirmText = 'Deny';
+    }
+    
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: confirmText,
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Make AJAX request to handle the recall action
+            fetch(`/admin/books/${bookId}/recall-action`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Success!',
+                        data.message,
+                        'success'
+                    ).then(() => {
+                        // Reload the page to reflect changes
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'An error occurred while processing the recall request.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Recall action error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while processing the recall request.',
+                    'error'
+                );
+            });
+        }
+    });
 }
 </script>
 @endsection

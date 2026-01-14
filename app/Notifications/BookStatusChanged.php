@@ -116,6 +116,8 @@ class BookStatusChanged extends Notification implements ShouldQueue
                 return 'Your book "' . $this->book->title . '" approved. Great News! Your book is now available in our inventory. Sales tracking is now active and you can monitor your earnings.';
             case 'edited_pending_approval':
                 return 'Your book "' . $this->book->title . '" has been edited and is still stocked. An admin has been notified of your changes.';
+            case 'recalled':
+                return 'Your book "' . $this->book->title . '" status has been updated to Recalled.';
             default:
                 return 'Your book "' . $this->book->title . '" status changed to ' . str_replace('_', ' ', $this->newStatus);
         }
@@ -129,6 +131,7 @@ class BookStatusChanged extends Notification implements ShouldQueue
             case 'approved_awaiting_delivery':
             case 'stocked':
             case 'edited_pending_approval':
+            case 'recalled':
                 return route('dashboard');
             case 'rejected':
                 return route('author.books.edit', $this->book);

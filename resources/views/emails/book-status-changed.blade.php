@@ -369,9 +369,37 @@
                         Edit Book
                     </a>
                 </div>
+            @elseif(trim($newStatus) === 'recalled')
+                <p>Your book "<strong>{{ $book->title }}</strong>" status has been updated to <strong>{{ ucfirst(str_replace('_', ' ', $newStatus)) }}</strong>.</p>
+                
+                <div class="status-box rejected-info">
+                    <h3 class="status-title"><i>⚠️</i> Book Recalled</h3>
+                    <p>Your book has been recalled from our inventory.</p>
+                    
+                    @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
+                        <div class="admin-notes">
+                            <strong>Admin notes:</strong> 
+                            @if(isset($adminNotes) && $adminNotes)
+                                {{ $adminNotes }}
+                            @elseif($book->admin_notes)
+                                {{ $book->admin_notes }}
+                            @endif
+                        </div>
+                    @else
+                        <p>No additional notes provided.</p>
+                    @endif
+                    
+                    <p>If you have questions about this recall, please contact us.</p>
+                </div>
+                
+                <div class="cta-button-container">
+                    <a href="{{ route('dashboard') }}" class="cta-button">
+                        View Dashboard
+                    </a>
+                </div>
             @else
                 <p>Your book "<strong>{{ $book->title }}</strong>" status has been updated to <strong>{{ ucfirst(str_replace('_', ' ', $newStatus)) }}</strong>.</p>
-                <p class="debug-message">DEBUG: Unexpected status "{{ $newStatus }}" - using fallback message</p>
+                <p>We appreciate your participation in the Rhymes platform!</p>
             @endif
             
             <p>Thank you for being part of the Rhymes platform!</p>

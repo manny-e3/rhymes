@@ -588,6 +588,7 @@ Route::middleware('role:author')->group(function () {
         
         Route::resource('books', BookController::class);
         Route::post('books/{id}/restore', [BookController::class, 'restore'])->name('books.restore');
+        Route::post('books/{book}/recall', [BookController::class, 'requestRecall'])->name('books.recall');
         Route::get('wallet', [WalletController::class, 'index'])->name('wallet.index');
         Route::get('wallet/export', [WalletController::class, 'export'])->name('wallet.export');
         Route::get('payouts', [PayoutController::class, 'index'])->name('payouts.index');
@@ -646,6 +647,7 @@ Route::middleware('role:admin')->group(function () {
         Route::get('books/published', function() { return app(BookReviewController::class)->index(request()->merge(['status' => 'accepted'])); })->name('books.published');
         Route::get('books/{book}', [BookReviewController::class, 'show'])->name('books.show');
         Route::patch('books/{book}/review', [BookReviewController::class, 'review'])->name('books.review');
+        Route::post('books/{book}/recall-action', [BookReviewController::class, 'handleRecallAction'])->name('books.recall-action');
         Route::post('books/bulk-action', [BookReviewController::class, 'bulkAction'])->name('books.bulk-action');
         Route::get('books/logs', [BookReviewController::class, 'reviewLogs'])->name('books.logs');
         Route::get('books/export/csv', [BookReviewController::class, 'exportCsv'])->name('books.export.csv');

@@ -472,4 +472,83 @@ class BookReviewController extends Controller
         
         return $pdf->download($filename);
     }
+    
+    /**
+     * Handle recall action (approve/deny) for a book
+     */
+    public function handleRecallAction(Request $request, Book $book)
+    {
+        try {
+            $validated = $request->validate([
+                'action' => 'required|in:approve,deny',
+                'admin_notes' => 'nullable|string',
+            ]);
+            
+            $action = $validated['action'];
+            $adminNotes = $validated['admin_notes'] ?? null;
+            
+            if ($action === 'approve') {
+                // Approve the recall - update book status to 'recalled'
+                $oldStatus = $book->status;
+                $book->update([
+                    'recall_requested' => false,
+                    'recall_reason' => null,
+                    'recall_requested_at' => null,
+                    'status' => 'recalled',
+                    'admin_notes' => $adminNotes, // Store admin notes
+                ]);
+                
+                // Notify the author about the recall approval
+                $book->user->notify(new \App\Notifications\BookStatusChanged(
+                    $book, 
+                    $oldStatus, 
+                    'recalled', 
+                    $adminNotes
+                ));
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Recall request approved successfully. Book status updated to Recalled. Author has been notified.',
+                    ]);
+                }
+                
+                return redirect()->back()->with('success', 'Recall request approved successfully. Book status updated to Recalled. Author has been notified.');
+            } else {
+                // Deny the recall - clear the recall request and reset status if needed
+                $book->update([
+                    'recall_requested' => false,
+                    'recall_reason' => null,
+                    'recall_requested_at' => null,
+                    // Keep the original status or set to appropriate status
+                ]);
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Recall request denied successfully.',
+                    ]);
+                }
+                
+                return redirect()->back()->with('success', 'Recall request denied successfully.');
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to handle book recall action', [
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+                'action' => $request->action ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while processing the recall action. Please try again.',
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', 'An error occurred while processing the recall action. Please try again.');
+        }
+    }
 }

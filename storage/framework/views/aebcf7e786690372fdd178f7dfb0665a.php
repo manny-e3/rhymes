@@ -325,12 +325,12 @@
                
 
             <?php elseif(trim($newStatus) === 'edited_pending_approval'): ?>
-                <p>Your book "<strong><?php echo e($book->title); ?></strong>" has been edited and is awaiting admin approval.</p>
+                <p>Your book "<strong><?php echo e($book->title); ?></strong>" has been edited and remains stocked.</p>
                 
                 <div class="status-box review-info">
-                    <h3 class="status-title"><i>📋</i> Book Edit Submitted for Approval</h3>
-                    <p>Your book has been successfully edited and submitted for admin approval.</p>
-                    <p>We'll review your changes and get back to you soon.</p>
+                    <h3 class="status-title"><i>📋</i> Book Successfully Updated</h3>
+                    <p>Your book has been successfully updated and remains in the stocked status.</p>
+                    <p>An admin has been notified of your changes.</p>
                     
                     <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
                         <div class="admin-notes">
@@ -381,9 +381,39 @@
                         Edit Book
                     </a>
                 </div>
+            <?php elseif(trim($newStatus) === 'recalled'): ?>
+                <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong><?php echo e(ucfirst(str_replace('_', ' ', $newStatus))); ?></strong>.</p>
+                
+                <div class="status-box rejected-info">
+                    <h3 class="status-title"><i>⚠️</i> Book Recalled</h3>
+                    <p>Your book has been recalled from our inventory.</p>
+                    
+                    <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
+                        <div class="admin-notes">
+                            <strong>Admin notes:</strong> 
+                            <?php if(isset($adminNotes) && $adminNotes): ?>
+                                <?php echo e($adminNotes); ?>
+
+                            <?php elseif($book->admin_notes): ?>
+                                <?php echo e($book->admin_notes); ?>
+
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <p>No additional notes provided.</p>
+                    <?php endif; ?>
+                    
+                    <p>If you have questions about this recall, please contact us.</p>
+                </div>
+                
+                <div class="cta-button-container">
+                    <a href="<?php echo e(route('dashboard')); ?>" class="cta-button">
+                        View Dashboard
+                    </a>
+                </div>
             <?php else: ?>
                 <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong><?php echo e(ucfirst(str_replace('_', ' ', $newStatus))); ?></strong>.</p>
-                <p class="debug-message">DEBUG: Unexpected status "<?php echo e($newStatus); ?>" - using fallback message</p>
+                <p>We appreciate your participation in the Rhymes platform!</p>
             <?php endif; ?>
             
             <p>Thank you for being part of the Rhymes platform!</p>

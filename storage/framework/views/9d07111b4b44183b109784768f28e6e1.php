@@ -56,6 +56,7 @@
                                                     <option value="rejected" <?php echo e(request('status') === 'rejected' ? 'selected' : ''); ?>>Rejected</option>
                                                     <option value="stocked" <?php echo e(request('status') === 'stocked' ? 'selected' : ''); ?>>Stocked</option>
                                                     <option value="edited_pending_approval" <?php echo e(request('status') === 'edited_pending_approval' ? 'selected' : ''); ?>>Edited - Awaiting Approval</option>
+
                                                 </select>
                                             </div>
                                             <div class="form-wrap w-150px">
@@ -130,7 +131,12 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                             <?php elseif($book->status === 'edited_pending_approval'): ?>
                                                 <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
+                                            <?php elseif($book->status === 'recall_requested'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
+                                            <?php elseif($book->status === 'recalled'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
                                             <?php endif; ?>
+                                           
                                             <?php if($book->trashed()): ?>
                                                 <span class="badge badge-sm badge-dim bg-outline-secondary">Deleted</span>
                                             <?php endif; ?>
@@ -162,6 +168,17 @@
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="#" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-<?php echo e($book->id); ?>"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
+                                                                 <?php if($book->status == 'recall_requested'): ?>
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-<?php echo e($book->id); ?>"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-<?php echo e($book->id); ?>"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                        </li>
+                                                                        <?php endif; ?>
+                                                                       
+
                                                                 <?php if($book->trashed()): ?>
                                                                     <li>
                                                                         <form method="POST" action="<?php echo e(route('admin.books.bulk-action')); ?>" style="display:inline;">
@@ -184,7 +201,7 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-<?php echo e($book->id); ?>"><em class="icon ni ni-mail"></em><span>Send Review Copy</span></button>
                                                                         </li>
-                                                                        
+                                                                       
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-<?php echo e($book->id); ?>"><em class="icon ni ni-cross"></em><span>Reject</span></button>
                                                                         </li>
@@ -206,12 +223,21 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
+                                                                       
                                                                     <?php elseif($book->status === 'edited_pending_approval'): ?>
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
+                                                                        <?php if($book->recall_requested): ?>
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-<?php echo e($book->id); ?>"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-<?php echo e($book->id); ?>"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                        </li>
+                                                                        <?php endif; ?>
                                                                     <?php else: ?>
-                                                                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>"><em class="icon ni ni-edit"></em><span>Edit Status</span></a></li>
                                                                     <?php endif; ?>
                                                                     <li class="divider"></li>
                                                                     <li>
@@ -301,7 +327,7 @@
                                 <?php elseif($book->status === 'stocked'): ?>
                                     <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                 <?php elseif($book->status === 'edited_pending_approval'): ?>
-                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - AWaiting Approval</span>
+                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
                                 <?php endif; ?>
                             </p>
                             <?php if($book->status === 'stocked' && $book->quantity): ?>
@@ -445,11 +471,7 @@
                                        <?php echo e($book->status === 'stocked' ? 'checked' : ''); ?>>
                                 <label class="form-check-label" for="stock-<?php echo e($book->id); ?>">Stock</label>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="edited-pending-approval-<?php echo e($book->id); ?>" value="edited_pending_approval" 
-                                       <?php echo e($book->status === 'edited_pending_approval' ? 'checked' : ''); ?>>
-                                <label class="form-check-label" for="edited-pending-approval-<?php echo e($book->id); ?>">Edited - Awaiting Approval</label>
-                            </div>
+                            
                         </div>
                     </div>
                     
@@ -535,8 +557,8 @@
                                         <span class="badge badge-sm bg-danger">Rejected</span>
                                     <?php elseif($book->status === 'stocked'): ?>
                                         <span class="badge badge-sm bg-info">Stocked</span>
-                                    <?php elseif($book->status === 'edited_pending_approval'): ?>
-                                        <span class="badge badge-sm bg-warning">Edited - Awaiting Approval</span>
+                                    <?php elseif($book->status === 'recalled'): ?>
+                                        <span class="badge badge-sm bg-warning">recalled</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -650,8 +672,7 @@
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-<?php echo e($book->id); ?>">Approve for Delivery</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-<?php echo e($book->id); ?>">Set Pending Review</button>
                 <?php elseif($book->status === 'edited_pending_approval'): ?>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-<?php echo e($book->id); ?>">Approve Changes</button>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-<?php echo e($book->id); ?>">Reject Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-<?php echo e($book->id); ?>">View Details</button>
                 <?php else: ?>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>" data-bs-dismiss="modal">Edit Status</button>
                 <?php endif; ?>
@@ -860,6 +881,70 @@
 </div>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
+<!-- Deny Recall Modal for each book -->
+<?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" tabindex="-1" id="denyRecallModal-<?php echo e($book->id); ?>" aria-labelledby="denyRecallModalLabel-<?php echo e($book->id); ?>" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="denyRecallModalLabel-<?php echo e($book->id); ?>">Deny Recall Request - <?php echo e($book->title); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?php echo e(route('admin.books.recall-action', $book)); ?>">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="action" value="deny">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <p>Are you sure you want to deny this recall request? This will cancel the recall and maintain the book's current status.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about why the recall was denied..."></textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Deny Recall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+<!-- Approve Recall Modal for each book -->
+<?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" tabindex="-1" id="approveRecallModal-<?php echo e($book->id); ?>" aria-labelledby="approveRecallModalLabel-<?php echo e($book->id); ?>" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveRecallModalLabel-<?php echo e($book->id); ?>">Approve Recall Request - <?php echo e($book->title); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?php echo e(route('admin.books.recall-action', $book)); ?>">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="action" value="approve">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <p>Are you sure you want to approve this recall request? This will update the book status to "Recalled".</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about the recall approval..."></textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Approve Recall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -1034,6 +1119,74 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', convertConfirmToSweetAlert);
 } else {
     convertConfirmToSweetAlert();
+}
+
+// Function to handle recall requests
+function handleRecallRequest(bookId, action) {
+    let title, text, confirmText;
+    
+    if (action === 'approve') {
+        title = 'Approve Recall Request';
+        text = 'Are you sure you want to approve this recall request?';
+        confirmText = 'Approve';
+    } else {
+        title = 'Deny Recall Request';
+        text = 'Are you sure you want to deny this recall request?';
+        confirmText = 'Deny';
+    }
+    
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: confirmText,
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Make AJAX request to handle the recall action
+            fetch(`/admin/books/${bookId}/recall-action`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Success!',
+                        data.message,
+                        'success'
+                    ).then(() => {
+                        // Reload the page to reflect changes
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'An error occurred while processing the recall request.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Recall action error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while processing the recall request.',
+                    'error'
+                );
+            });
+        }
+    });
 }
 </script>
 <?php $__env->stopSection(); ?>

@@ -29,10 +29,14 @@ class NotificationController extends Controller
             ->limit(10)
             ->get();
             
-        return response()->json([
+            
+       return  response()->json([
             'notifications' => $notifications,
             'unread_count' => $notifications->count()
         ]);
+
+// return redirect()->route('dashboard');
+
     }
 
     public function markAllAsRead()

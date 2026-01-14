@@ -41,6 +41,12 @@ class BookPolicy
         return $user->id === $book->user_id && 
                in_array($book->status, ['pending', 'rejected', 'stocked', 'edited_pending_approval']);
     }
+    
+    public function recall(User $user, Book $book): bool
+    {
+        // Only book owner can recall their book
+        return $user->id === $book->user_id;
+    }
 
     /**
      * Determine whether the user can delete the model.

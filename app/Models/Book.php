@@ -23,6 +23,9 @@ class Book extends Model
         'rev_book_id',
         'quantity', // Added quantity field
         'original_data',
+        'recall_requested',
+        'recall_reason',
+        'recall_requested_at',
     ];
 
     protected function casts(): array

@@ -304,4 +304,45 @@ class BookController extends Controller
                 ->with('error', 'An error occurred while restoring your book. Please try again.');
         }
     }
+    
+    /**
+     * Request to recall a book
+     */
+    public function requestRecall(Request $request, Book $book)
+    {
+        $this->authorize('recall', $book);
+        
+        try {
+            $validated = $request->validate([
+                'recall_reason' => 'nullable|string|max:1000',
+            ]);
+            
+            // Update the book with recall request information and change status to recall_requested
+            $book->update([
+                'recall_requested' => true,
+                'recall_reason' => $validated['recall_reason'] ?? null,
+                'recall_requested_at' => now(),
+                'status' => 'recall_requested',
+            ]);
+            
+            // Notify admins about the recall request
+            $this->bookService->notifyAdminsAboutBookRecall($book, $validated['recall_reason'] ?? null);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Recall request sent successfully. Admins have been notified.',
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Book recall request error: ' . $e->getMessage(), [
+                'book_id' => $book->id,
+                'request_data' => $request->all(),
+                'exception' => $e
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while sending the recall request. Please try again.',
+            ], 500);
+        }
+    }
 }

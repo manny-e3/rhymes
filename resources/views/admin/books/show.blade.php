@@ -56,6 +56,10 @@
                                             <span class="badge badge-info">Stocked</span>
                                         @elseif($book->status === 'edited_pending_approval')
                                             <span class="badge badge-warning">Edited - Awaiting Approval</span>
+                                        @elseif($book->status === 'recall_requested')
+                                            <span class="badge badge-warning">Recall Requested</span>
+                                        @elseif($book->status === 'recalled')
+                                            <span class="badge badge-danger">Recalled</span>
                                         @endif
                                     </div>
                                 </div>
@@ -112,6 +116,26 @@
                                             <div class="form-group">
                                                 <label class="form-label">Admin Notes</label>
                                                 <div class="alert alert-info">{{ $book->admin_notes }}</div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    
+                                    <!-- Recall Request Information -->
+                                    @if($book->recall_requested)
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Recall Request</label>
+                                                <div class="alert alert-warning">
+                                                    <div class="alert-body">
+                                                        <h6>Recall Requested</h6>
+                                                        <p><strong>Requested at:</strong> {{ $book->recall_requested_at->format('M d, Y \a\t h:i A') }}</p>
+                                                        @if($book->recall_reason)
+                                                            <p><strong>Reason:</strong> {{ $book->recall_reason }}</p>
+                                                        @else
+                                                            <p><strong>Reason:</strong> No reason provided</p>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     @endif
