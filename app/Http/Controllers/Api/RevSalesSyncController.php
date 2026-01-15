@@ -220,9 +220,10 @@ class RevSalesSyncController extends Controller
                     $sid = $sale['SID'] ?? $sale['sid'] ?? null;
                     $quantity = $sale['quantity_sold'] ?? $sale['QuantitySold'] ?? $sale['quantity'] ?? 1;
                     
-                    // Use the book's price for calculating earnings (70% goes to author)
+                    // Use the book's price for calculating earnings using commission settings
                     $bookPrice = $book->price ?? 0;
-                    $authorEarnings = $bookPrice;
+                    $payoutService = app('App\\Services\\PayoutService');
+                    $authorEarnings = ($bookPrice * $quantity) * ($payoutService->getAuthorCommissionPercentage() / 100);
                     
                     // Create a unique identifier for this sale record
                     // Using a combination of barcode, SID, and potentially invoice ID to identify unique sales
@@ -275,7 +276,7 @@ class RevSalesSyncController extends Controller
                             'invoice_id' => $sale['invoice_id'] ?? $sale['InvoiceID'] ?? null,
                             'quantity_sold' => $quantity,
                             'book_price' => $bookPrice,
-                            'author_percentage' => 0.7,
+                            'author_percentage' => $payoutService->getAuthorCommissionPercentage() / 100,
                             'author_earnings' => $authorEarnings,
                             'sale_date' => now(), // We'll use current time since no sale date in data
                             'barcode' => $barcode,

@@ -156,7 +156,7 @@ class ReportsController extends Controller
             'total_sales' => $currentMetrics['total_sales'],
             'avg_order_value' => $currentMetrics['avg_order_value'],
             'platform_commission' => $currentMetrics['platform_commission'],
-            'commission_rate' => 15, // This should come from settings
+            'commission_rate' => app('App\\Services\\PayoutService')->getPlatformCommissionPercentage(),
             'revenue_change' => $this->calculatePercentageChange($previousMetrics['total_revenue'], $currentMetrics['total_revenue']),
             'sales_change' => $this->calculatePercentageChange($previousMetrics['total_sales'], $currentMetrics['total_sales']),
             'aov_change' => $this->calculatePercentageChange($previousMetrics['avg_order_value'], $currentMetrics['avg_order_value']),
@@ -251,10 +251,10 @@ class ReportsController extends Controller
                 ->sum('amount'),
             'platform_revenue' => WalletTransaction::where('type', 'sale')
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('amount') * 0.15,
+                ->sum('amount') * (app('App\\Services\\PayoutService')->getPlatformCommissionPercentage() / 100),
             'author_earnings' => WalletTransaction::where('type', 'sale')
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('amount') * 0.85,
+                ->sum('amount') * (app('App\\Services\\PayoutService')->getAuthorCommissionPercentage() / 100),
             'payouts_paid' => WalletTransaction::where('type', 'payout')
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->sum('amount'),
@@ -315,7 +315,7 @@ class ReportsController extends Controller
             ->count();
 
         $avgOrderValue = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
-        $platformCommission = $totalRevenue * 0.15; // 15% commission
+        $platformCommission = $totalRevenue * (app('App\\Services\\PayoutService')->getPlatformCommissionPercentage() / 100); // Use commission from settings
 
         return [
             'total_revenue' => $totalRevenue,

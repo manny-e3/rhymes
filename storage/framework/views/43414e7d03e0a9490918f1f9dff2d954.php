@@ -764,6 +764,13 @@ unset($__errorArgs, $__bag); ?>
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                // Disable the button and show spinner
+                const buttons = document.querySelectorAll('[onclick*="requestBookRecall"]');
+                buttons.forEach(button => {
+                    button.disabled = true;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                });
+                
                 // Send the recall request
                 fetch(`<?php echo e(route('author.books.recall', ['book' => '__BOOK_ID__'])); ?>`.replace('__BOOK_ID__', bookId), {
                     method: 'POST',
@@ -778,12 +785,21 @@ unset($__errorArgs, $__bag); ?>
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Re-enable buttons
+                    buttons.forEach(button => {
+                        button.disabled = false;
+                        button.innerHTML = 'Request Recall';
+                    });
+                    
                     if (data.success) {
                         Swal.fire({
                             title: 'Success!',
                             text: data.message,
                             icon: 'success',
                             confirmButtonColor: '#3085d6',
+                        }).then(() => {
+                            // Reload the page on success
+                            window.location.reload();
                         });
                     } else {
                         Swal.fire({
@@ -796,6 +812,13 @@ unset($__errorArgs, $__bag); ?>
                 })
                 .catch(error => {
                     console.error('Recall request error:', error);
+                    
+                    // Re-enable buttons
+                    buttons.forEach(button => {
+                        button.disabled = false;
+                        button.innerHTML = 'Request Recall';
+                    });
+                    
                     Swal.fire({
                         title: 'Error!',
                         text: 'An error occurred while sending the recall request.',

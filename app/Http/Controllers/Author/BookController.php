@@ -32,7 +32,8 @@ class BookController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $books = $this->bookService->getUserBooks($user);
+         $books = $this->bookService->getUserBooks($user);
+       
         
         // Fetch categories from ERPREV API
         $categoriesResult = $this->revService->getItemCategories();

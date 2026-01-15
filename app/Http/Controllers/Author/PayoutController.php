@@ -15,7 +15,6 @@ class PayoutController extends Controller
         private PayoutService $payoutService
     ) {
         $this->middleware(['auth', 'role:author|admin']);
-        // Removed OTP middleware
     }
 
     public function index(Request $request)

@@ -119,9 +119,10 @@ class SyncRevSalesJob implements ShouldQueue
                         continue;
                     }
                     
-                    // Calculate author earnings (70% goes to author, 30% to platform)
-                    $authorEarnings = $totalAmount * 0.7;
-                    $platformFee = $totalAmount * 0.3;
+                    // Calculate author earnings using commission settings from PayoutService
+                    $payoutService = app('App\\Services\\PayoutService');
+                    $authorEarnings = $payoutService->calculateAuthorEarnings($totalAmount);
+                    $platformFee = $payoutService->calculatePlatformFee($totalAmount);
                     
                     // Create wallet transaction for the author
                     $transaction = WalletTransaction::create([

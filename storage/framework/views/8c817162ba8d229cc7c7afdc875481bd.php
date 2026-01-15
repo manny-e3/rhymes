@@ -1,12 +1,10 @@
-@extends('layouts.author')
+<?php $__env->startSection('title', 'Payment Details | Rhymes Author Platform'); ?>
 
-@section('title', 'Payment Details | Rhymes Author Platform')
+<?php $__env->startSection('page-title', 'Payment Details'); ?>
 
-@section('page-title', 'Payment Details')
+<?php $__env->startSection('page-description', 'Configure your payment method for receiving payouts'); ?>
 
-@section('page-description', 'Configure your payment method for receiving payouts')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
         <div class="nk-content-body">
@@ -21,7 +19,7 @@
                     <div class="nk-block-head-content">
                         <div class="nk-block-tools g-3">
                             <div class="nk-block-tools-opt">
-                                <a href="{{ route('author.payouts.index') }}" class="btn btn-outline-light">
+                                <a href="<?php echo e(route('author.payouts.index')); ?>" class="btn btn-outline-light">
                                     <em class="icon ni ni-arrow-left"></em><span>Back to Payouts</span>
                                 </a>
                             </div>
@@ -42,45 +40,48 @@
                                     </div>
                                 </div>
 
-                                @if(session('success'))
+                                <?php if(session('success')): ?>
                                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                        {{ session('success') }}
+                                        <?php echo e(session('success')); ?>
+
                                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                     </div>
-                                @endif
+                                <?php endif; ?>
 
-                                @if($errors->any())
+                                <?php if($errors->any()): ?>
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        @foreach($errors->all() as $error)
-                                            <div>{{ $error }}</div>
-                                        @endforeach
+                                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div><?php echo e($error); ?></div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                     </div>
-                                @endif
+                                <?php endif; ?>
 
-                                <form action="{{ route('author.payouts.payment-details.update') }}" method="POST" id="paymentDetailsForm">
-                                    @csrf
-                                    @method('PUT')
+                                <form action="<?php echo e(route('author.payouts.payment-details.update')); ?>" method="POST" id="paymentDetailsForm">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('PUT'); ?>
                                     
                                     <div class="row g-4">
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label class="form-label">Payment Method</label>
                                                 <div class="form-control-wrap">
-                                                    <select class="form-select @error('payment_method') is-invalid @enderror" 
+                                                    <select class="form-select <?php $__errorArgs = ['payment_method'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                             id="payment_method" 
                                                             name="payment_method" 
                                                             required>
                                                         <option value="">Select Payment Method</option>
-                                                        <option value="bank_transfer" {{ old('payment_method', $user->payment_details['payment_method'] ?? '') == 'bank_transfer' ? 'selected' : '' }}>
+                                                        <option value="bank_transfer" <?php echo e(old('payment_method', $user->payment_details['payment_method'] ?? '') == 'bank_transfer' ? 'selected' : ''); ?>>
                                                             Bank Transfer
                                                         </option>
-                                                        {{-- <option value="paypal" {{ old('payment_method', $user->payment_details['payment_method'] ?? '') == 'paypal' ? 'selected' : '' }}>
-                                                            PayPal
-                                                        </option>
-                                                        <option value="stripe" {{ old('payment_method', $user->payment_details['payment_method'] ?? '') == 'stripe' ? 'selected' : '' }}>
-                                                            Stripe
-                                                        </option> --}}
+                                                        
                                                     </select>
                                                 </div>
                                             </div>
@@ -91,11 +92,18 @@
                                                 <label class="form-label" for="account_holder_name">Account Holder Name</label>
                                                 <div class="form-control-wrap">
                                                     <input type="text" 
-                                                           class="form-control @error('account_holder_name') is-invalid @enderror" 
+                                                           class="form-control <?php $__errorArgs = ['account_holder_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                            id="account_holder_name" 
                                                            name="account_holder_name" 
                                                            placeholder="Full name on account" 
-                                                           value="{{ old('account_holder_name', $user->payment_details['account_holder_name'] ?? '') }}"
+                                                           value="<?php echo e(old('account_holder_name', $user->payment_details['account_holder_name'] ?? '')); ?>"
                                                            required>
                                                 </div>
                                             </div>
@@ -108,11 +116,18 @@
                                                     <label class="form-label" for="account_number">Account Number</label>
                                                     <div class="form-control-wrap">
                                                         <input type="text" 
-                                                               class="form-control @error('account_number') is-invalid @enderror" 
+                                                               class="form-control <?php $__errorArgs = ['account_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                                id="account_number" 
                                                                name="account_number" 
                                                                placeholder="Bank account number" 
-                                                               value="{{ old('account_number', $user->payment_details['account_number'] ?? '') }}">
+                                                               value="<?php echo e(old('account_number', $user->payment_details['account_number'] ?? '')); ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -121,11 +136,18 @@
                                                     <label class="form-label" for="bank_name">Bank Name</label>
                                                     <div class="form-control-wrap">
                                                         <input type="text" 
-                                                               class="form-control @error('bank_name') is-invalid @enderror" 
+                                                               class="form-control <?php $__errorArgs = ['bank_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                                id="bank_name" 
                                                                name="bank_name" 
                                                                placeholder="Name of your bank" 
-                                                               value="{{ old('bank_name', $user->payment_details['bank_name'] ?? '') }}">
+                                                               value="<?php echo e(old('bank_name', $user->payment_details['bank_name'] ?? '')); ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -138,11 +160,18 @@
                                                     <label class="form-label" for="paypal_email">PayPal Email</label>
                                                     <div class="form-control-wrap">
                                                         <input type="email" 
-                                                               class="form-control @error('paypal_email') is-invalid @enderror" 
+                                                               class="form-control <?php $__errorArgs = ['paypal_email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                                id="paypal_email" 
                                                                name="paypal_email" 
                                                                placeholder="your.email@example.com" 
-                                                               value="{{ old('paypal_email', $user->payment_details['paypal_email'] ?? '') }}">
+                                                               value="<?php echo e(old('paypal_email', $user->payment_details['paypal_email'] ?? '')); ?>">
                                                         <div class="form-note">
                                                             Enter the email address associated with your PayPal account
                                                         </div>
@@ -158,11 +187,18 @@
                                                     <label class="form-label" for="stripe_account_id">Stripe Account ID</label>
                                                     <div class="form-control-wrap">
                                                         <input type="text" 
-                                                               class="form-control @error('stripe_account_id') is-invalid @enderror" 
+                                                               class="form-control <?php $__errorArgs = ['stripe_account_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                                id="stripe_account_id" 
                                                                name="stripe_account_id" 
                                                                placeholder="acct_xxxxxxxxxx" 
-                                                               value="{{ old('stripe_account_id', $user->payment_details['stripe_account_id'] ?? '') }}">
+                                                               value="<?php echo e(old('stripe_account_id', $user->payment_details['stripe_account_id'] ?? '')); ?>">
                                                         <div class="form-note">
                                                             Your Stripe Connect account ID for receiving payments
                                                         </div>
@@ -177,7 +213,7 @@
                                                     <em class="icon ni ni-check"></em>
                                                     <span>Save Payment Details</span>
                                                 </button>
-                                                <a href="{{ route('author.payouts.index') }}" class="btn btn-outline-light ms-2">Cancel</a>
+                                                <a href="<?php echo e(route('author.payouts.index')); ?>" class="btn btn-outline-light ms-2">Cancel</a>
                                             </div>
                                         </div>
                                     </div>
@@ -197,35 +233,12 @@
                                         <ul class="list-unstyled mb-0">
                                             <li>• Processing time: 3-5 business days</li>
                                             <li>• No processing fees</li>
-                                            {{-- <li>• Minimum payout: ₦10.00</li>
-                                            <li>• Available worldwide</li> --}}
+                                            
                                         </ul>
                                     </div>
                                 </div>
 
-                                {{-- <div class="payment-method-info" id="paypal_info" style="display: none;">
-                                    <div class="alert alert-primary">
-                                        <h6><em class="icon ni ni-paypal"></em> PayPal</h6>
-                                        <ul class="list-unstyled mb-0">
-                                            <li>• Processing time: 1-2 business days</li>
-                                            <li>• No processing fees</li>
-                                            <li>• Minimum payout: ₦10.00</li>
-                                            <li>• Available in 200+ countries</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="payment-method-info" id="stripe_info" style="display: none;">
-                                    <div class="alert alert-success">
-                                        <h6><em class="icon ni ni-cc-stripe"></em> Stripe</h6>
-                                        <ul class="list-unstyled mb-0">
-                                            <li>• Processing time: 2-7 business days</li>
-                                            <li>• No processing fees</li>
-                                            <li>• Minimum payout: ₦10.00</li>
-                                            <li>• Available in 40+ countries</li>
-                                        </ul>
-                                    </div>
-                                </div> --}}
+                                
 
                                 <div class="alert alert-warning mt-3">
                                     <em class="icon ni ni-alert-circle"></em>
@@ -239,9 +252,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const paymentMethodSelect = document.getElementById('payment_method');
@@ -323,4 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.author', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/author/payouts/payment-details.blade.php ENDPATH**/ ?>

@@ -265,7 +265,20 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
-                                                                       
+                                                                        @if($book->recall_requested)
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                        </li>
+                                                                        @else
+                                                                        <li>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#recallBookModal-{{ $book->id }}"><em class="icon ni ni-exclamation-circle"></em><span>Recall Book</span></a>
+                                                                        </li>
+                                                                        @endif
+                                                                                                                                            
                                                                     @elseif($book->status === 'edited_pending_approval')
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
@@ -512,6 +525,11 @@
                                        {{ $book->status === 'stocked' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="stock-{{$book->id}}">Stock</label>
                             </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="recalled-{{$book->id}}" value="recalled" 
+                                       {{ $book->status === 'recalled' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="recalled-{{$book->id}}">Recall Book</label>
+                            </div>
                             
                         </div>
                     </div>
@@ -709,6 +727,10 @@
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#stockBookModal-{{$book->id}}">Stock Book</button>
                 @elseif($book->status === 'stocked')
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
+                @elseif($book->status === 'recalled')
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
@@ -979,6 +1001,39 @@
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Approve Recall</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Recall Book Modal for each book -->
+@foreach($books as $book)
+<div class="modal fade" tabindex="-1" id="recallBookModal-{{$book->id}}" aria-labelledby="recallBookModalLabel-{{$book->id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recallBookModalLabel-{{$book->id}}">Recall Book - {{ $book->title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.books.review', $book) }}">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="recalled">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <p>Are you sure you want to recall this book? This will change the book status to "Recalled" and notify the author.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Notes (Required)</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reason for recalling the book..." required></textarea>
+                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Recall Book</button>
                 </div>
             </form>
         </div>

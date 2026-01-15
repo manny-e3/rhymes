@@ -49,7 +49,7 @@ class BookReviewController extends Controller
             $query->where('genre', $request->genre);
         }
         
-        $books = $query->latest()->paginate(15);
+        $books = $query->orderBy('updated_at', 'desc')->paginate(15);
         
         // Fetch categories from ERPREV API for genre filter
         $categoriesResult = $this->revService->getItemCategories();
@@ -113,7 +113,7 @@ class BookReviewController extends Controller
         
         try {
             $validated = $request->validate([
-                'status' => 'required|in:pending_review,send_review_copy,rejected,approved_awaiting_delivery,stocked',
+                'status' => 'required|in:pending_review,send_review_copy,rejected,approved_awaiting_delivery,stocked,recalled',
                 'admin_notes' => 'nullable|string',
                 'rev_book_id' => 'nullable|string|unique:books,rev_book_id,' . $book->id . ',id',
                 'quantity' => 'nullable|integer|min:1', // Keep quantity validation

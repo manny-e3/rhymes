@@ -18,7 +18,7 @@ class BookService
     {
         return Book::where('user_id', $user->id)
             ->whereNull('deleted_at')
-            ->latest()
+            ->orderBy('updated_at', 'desc')
             ->paginate($perPage);
     }
 

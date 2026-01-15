@@ -182,9 +182,10 @@ class SyncRevInventoryJob implements ShouldQueue
                                 ->first();
                             
                             if (!$existingTransaction) {
-                                // Calculate author earnings (70% goes to author, 30% to platform)
-                                $authorEarnings = $salesValue * 0.7;
-                                $platformFee = $salesValue * 0.3;
+                                // Calculate author earnings using commission settings from PayoutService
+                                $payoutService = app('App\\Services\\PayoutService');
+                                $authorEarnings = $payoutService->calculateAuthorEarnings($salesValue);
+                                $platformFee = $payoutService->calculatePlatformFee($salesValue);
                                 
                                 // Create wallet transaction for the author
                                 WalletTransaction::create([

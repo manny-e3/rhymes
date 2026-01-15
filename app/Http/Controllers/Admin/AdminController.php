@@ -90,8 +90,9 @@ class AdminController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('amount');
             
-        $platformRevenue = $grossRevenue * 0.15; // 15% commission
-        $authorEarnings = $grossRevenue * 0.85; // 85% to authors
+        $payoutService = app('App\\Services\\PayoutService');
+        $platformRevenue = $grossRevenue * ($payoutService->getPlatformCommissionPercentage() / 100); // Use commission from settings
+        $authorEarnings = $grossRevenue * ($payoutService->getAuthorCommissionPercentage() / 100); // Use commission from settings
         
         // Payout calculations
         $payoutsPaid = WalletTransaction::where('type', 'payout')

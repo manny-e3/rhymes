@@ -153,32 +153,19 @@ class PayoutService
         // Check frequency limit from settings
         $frequencyDays = $this->getSetting('payout_frequency_days', 1);
         
-        // Check if required days have elapsed since last eligible transaction
-        $lastEligibleTransaction = $this->getLastEligibleTransactionDate($user);
+        // Check if required days have elapsed since last payout request
+        $lastPayoutRequest = $this->getLastPayoutRequestDate($user);
         
-        if ($lastEligibleTransaction) {
-            $daysSinceLastTransaction = $lastEligibleTransaction->diffInDays(now());
+        if ($lastPayoutRequest) {
+            $daysSinceLastRequest = $lastPayoutRequest->diffInDays(now());
             
-            if ($daysSinceLastTransaction < $frequencyDays) {
-                $daysRemaining = $frequencyDays - $daysSinceLastTransaction;
+            if ($daysSinceLastRequest < $frequencyDays) {
+                $daysRemaining = $frequencyDays - $daysSinceLastRequest;
+                $roundedDays = ceil($daysRemaining); // Round up to nearest whole day for readability
+                $roundedDays = max(1, $roundedDays); // Ensure at least 1 day is shown
                 return [
                     'eligible' => false,
-                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
-                ];
-            }
-        }
-
-        // Check if required days have elapsed since last approved payout
-        $lastApprovedPayout = $this->getLastApprovedPayoutDate($user);
-        
-        if ($lastApprovedPayout) {
-            $daysSinceLastPayout = $lastApprovedPayout->diffInDays(now());
-            
-            if ($daysSinceLastPayout < $frequencyDays) {
-                $daysRemaining = $frequencyDays - $daysSinceLastPayout;
-                return [
-                    'eligible' => false,
-                    'reason' => "You must wait {$daysRemaining} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
+                    'reason' => "You must wait {$roundedDays} more day(s) before requesting another payout. Payouts can only be requested once every {$frequencyDays} days."
                 ];
             }
         }
@@ -209,6 +196,16 @@ class PayoutService
             ->where('status', 'approved')
             ->orderBy('processed_at', 'desc')
             ->first()?->processed_at;
+    }
+
+    /**
+     * Get the date of the last payout request for the user (any status)
+     */
+    private function getLastPayoutRequestDate(User $user)
+    {
+        return $user->payouts()
+            ->orderBy('created_at', 'desc')
+            ->first()?->created_at;
     }
 
     /**
@@ -325,5 +322,41 @@ class PayoutService
     {
         $value = Setting::get($key, $default);
         return $value !== null ? $value : $default;
+    }
+    
+    /**
+     * Get author commission percentage from settings
+     */
+    public function getAuthorCommissionPercentage(): float
+    {
+        // Default to 70% for authors (30% platform commission)
+        return (float) $this->getSetting('author_commission_percentage', 70.0);
+    }
+    
+    /**
+     * Get platform commission percentage from settings
+     */
+    public function getPlatformCommissionPercentage(): float
+    {
+        // Calculate platform commission as 100% - author commission
+        return 100.0 - $this->getAuthorCommissionPercentage();
+    }
+    
+    /**
+     * Calculate author earnings based on commission settings
+     */
+    public function calculateAuthorEarnings(float $totalAmount): float
+    {
+        $authorPercentage = $this->getAuthorCommissionPercentage();
+        return $totalAmount * ($authorPercentage / 100);
+    }
+    
+    /**
+     * Calculate platform fee based on commission settings
+     */
+    public function calculatePlatformFee(float $totalAmount): float
+    {
+        $platformPercentage = $this->getPlatformCommissionPercentage();
+        return $totalAmount * ($platformPercentage / 100);
     }
 }
