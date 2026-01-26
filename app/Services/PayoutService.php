@@ -64,7 +64,7 @@ class PayoutService
         }
 
         // Validate minimum amount from settings
-        $minPayoutAmount = $this->getSetting('min_payout_amount', 300000);
+        $minPayoutAmount = $this->getSetting('min_payout_amount', 50000);
         if ($data['amount_requested'] < $minPayoutAmount) {
             throw ValidationException::withMessages([
                 'amount_requested' => 'Minimum payout amount is ₦' . number_format($minPayoutAmount, 2)
@@ -140,7 +140,7 @@ class PayoutService
     public function validatePayoutEligibility(User $user): array
     {
         // Check available balance from settings
-        $minPayoutAmount = $this->getSetting('min_payout_amount', 300000);
+        $minPayoutAmount = $this->getSetting('min_payout_amount', 50000);
         $availableBalance = $this->walletService->getAvailableBalance($user);
         
         if ($availableBalance < $minPayoutAmount) {
@@ -213,7 +213,7 @@ class PayoutService
      */
     public function calculatePayoutFee(float $amount): array
     {
-        $feePercentage = $this->getSetting('payout_fee', 2.5); // Get from settings
+        $feePercentage = $this->getSetting('payout_fee', 0); // Get from settings (now 0%)
         $fee = ($amount * $feePercentage) / 100;
         $netAmount = $amount - $fee;
 
@@ -307,11 +307,11 @@ class PayoutService
     public function getPayoutInformation(): array
     {
         return [
-            'minimum_amount' => $this->getSetting('min_payout_amount', 300000),
+            'minimum_amount' => $this->getSetting('min_payout_amount', 50000),
             'processing_time_min' => $this->getSetting('payout_processing_time_min', 3),
             'processing_time_max' => $this->getSetting('payout_processing_time_max', 5),
-            'frequency_days' => $this->getSetting('payout_frequency_days', 30),
-            'fee_percentage' => $this->getSetting('payout_fee', 2.5),
+            'frequency_days' => $this->getSetting('payout_frequency_days', 1),
+            'fee_percentage' => $this->getSetting('payout_fee', 0),
         ];
     }
 
@@ -329,8 +329,8 @@ class PayoutService
      */
     public function getAuthorCommissionPercentage(): float
     {
-        // Default to 70% for authors (30% platform commission)
-        return (float) $this->getSetting('author_commission_percentage', 70.0);
+        // Default to 75% for authors (25% platform commission)
+        return (float) $this->getSetting('author_commission_percentage', 75.0);
     }
     
     /**

@@ -109,14 +109,21 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Minimum Payout Amount (₦)</label>
-                                                <input type="number" class="form-control" name="min_payout_amount" value="{{ $settings['min_payout_amount'] ?? 300000 }}" min="1" step="0.01" required>
+                                                <input type="number" class="form-control" name="min_payout_amount" value="{{ $settings['min_payout_amount'] ?? 50000 }}" min="1" step="0.01" required>
                                                 <div class="form-note">Authors must have at least this amount to request a payout</div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <label class="form-label">Author Commission Percentage (%)</label>
+                                                <input type="number" class="form-control" name="author_commission_percentage" value="{{ $settings['author_commission_percentage'] ?? 75 }}" min="0" max="100" step="0.1" required>
+                                                <div class="form-note">Percentage of sales that goes to authors (platform gets the remainder)</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
                                                 <label class="form-label">Payout Frequency Limit (Days)</label>
-                                                <input type="number" class="form-control" name="payout_frequency_days" value="{{ $settings['payout_frequency_days'] ?? 30 }}" min="1" max="365" required>
+                                                <input type="number" class="form-control" name="payout_frequency_days" value="{{ $settings['payout_frequency_days'] ?? 1 }}" min="1" max="365" required>
                                                 <div class="form-note">Authors can only request payouts once every X days</div>
                                             </div>
                                         </div>
@@ -158,7 +165,7 @@
 
                     <!-- Quick Actions -->
                     <div class="col-lg-4">
-                        <div class="card card-bordered">
+                        {{-- <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-3">
                                     <div class="card-title">
@@ -174,7 +181,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <!-- Payout Information Preview -->
                         <div class="card card-bordered mt-4">
@@ -188,7 +195,11 @@
                                 <ul class="nk-list-meta">
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Minimum Payout:</span>
-                                        <span class="nk-list-meta-value">₦{{ number_format($settings['min_payout_amount'] ?? 300000, 2) }}</span>
+                                        <span class="nk-list-meta-value">₦{{ number_format($settings['min_payout_amount'] ?? 50000, 2) }}</span>
+                                    </li>
+                                    <li class="nk-list-meta-item">
+                                        <span class="nk-list-meta-label">Author Commission:</span>
+                                        <span class="nk-list-meta-value">{{ $settings['author_commission_percentage'] ?? 75 }}% (Platform: {{ 100 - ($settings['author_commission_percentage'] ?? 75) }}%)</span>
                                     </li>
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Processing Time:</span>
@@ -196,7 +207,7 @@
                                     </li>
                                     <li class="nk-list-meta-item">
                                         <span class="nk-list-meta-label">Frequency Limit:</span>
-                                        <span class="nk-list-meta-value">Once every {{ $settings['payout_frequency_days'] ?? 30 }} days</span>
+                                        <span class="nk-list-meta-value">Once every {{ $settings['payout_frequency_days'] ?? 1 }} day(s)</span>
                                     </li>
                                 </ul>
                             </div>

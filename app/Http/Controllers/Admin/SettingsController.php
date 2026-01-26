@@ -26,6 +26,7 @@ class SettingsController extends Controller
             'contact_email' => Setting::get('contact_email', ''),
             'support_email' => Setting::get('support_email', ''),
             'min_payout_amount' => Setting::get('min_payout_amount', 50),
+            'author_commission_percentage' => Setting::get('author_commission_percentage', 75),
             'payout_frequency_days' => Setting::get('payout_frequency_days', 30),
             'payout_processing_time_min' => Setting::get('payout_processing_time_min', 3),
             'payout_processing_time_max' => Setting::get('payout_processing_time_max', 5),
@@ -49,6 +50,7 @@ class SettingsController extends Controller
                 'contact_email' => 'required|email',
                 'support_email' => 'required|email',
                 'min_payout_amount' => 'required|numeric|min:1',
+                'author_commission_percentage' => 'required|numeric|min:0|max:100',
                 'payout_frequency_days' => 'required|integer|min:1|max:365',
                 'payout_processing_time_min' => 'required|integer|min:1|max:30',
                 'payout_processing_time_max' => 'required|integer|min:1|max:30',
@@ -80,6 +82,7 @@ class SettingsController extends Controller
             Setting::set('contact_email', $validated['contact_email']);
             Setting::set('support_email', $validated['support_email']);
             Setting::set('min_payout_amount', $validated['min_payout_amount']);
+            Setting::set('author_commission_percentage', $validated['author_commission_percentage']);
             Setting::set('payout_frequency_days', $validated['payout_frequency_days']);
             Setting::set('payout_processing_time_min', $validated['payout_processing_time_min']);
             Setting::set('payout_processing_time_max', $validated['payout_processing_time_max']);

@@ -1,21 +1,19 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', $user->name . ' | User Details'); ?>
 
-@section('title', $user->name . ' | User Details')
+<?php $__env->startSection('page-title', 'User Details'); ?>
 
-@section('page-title', 'User Details')
+<?php $__env->startSection('page-description', 'View and manage user information'); ?>
 
-@section('page-description', 'View and manage user information')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
         <div class="nk-content-body">
             <div class="nk-block-head nk-block-head-sm">
                 <div class="nk-block-between">
                     <div class="nk-block-head-content">
-                        <h3 class="nk-block-title page-title">{{ $user->name }}</h3>
+                        <h3 class="nk-block-title page-title"><?php echo e($user->name); ?></h3>
                         <div class="nk-block-des text-soft">
-                            <p>User ID: #{{ $user->id }} • Joined {{ $user->created_at->format('M d, Y') }}</p>
+                            <p>User ID: #<?php echo e($user->id); ?> • Joined <?php echo e($user->created_at->format('M d, Y')); ?></p>
                         </div>
                     </div>
                     <div class="nk-block-head-content">
@@ -23,8 +21,8 @@
                             <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
-                                    <li><a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li>
-                                    <li><a href="{{ route('admin.users.index') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-arrow-left"></em><span>Back to Users</span></a></li>
+                                    <li><a href="<?php echo e(route('admin.users.edit', $user)); ?>" class="btn btn-primary"><em class="icon ni ni-edit"></em><span>Edit User</span></a></li>
+                                    <li><a href="<?php echo e(route('admin.users.index')); ?>" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-arrow-left"></em><span>Back to Users</span></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -43,21 +41,21 @@
                                         <h6 class="title">User Profile</h6>
                                     </div>
                                     <div class="card-tools">
-                                        @if($user->email_verified_at)
+                                        <?php if($user->email_verified_at): ?>
                                             <span class="badge badge-success">Verified</span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="badge badge-warning">Unverified</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 
                                 <div class="user-card">
                                     <div class="user-avatar lg bg-primary">
-                                        <span>{{ strtoupper(substr($user->name, 0, 2)) }}</span>
+                                        <span><?php echo e(strtoupper(substr($user->name, 0, 2))); ?></span>
                                     </div>
                                     <div class="user-info">
-                                        <h5>{{ $user->name }}</h5>
-                                        <span class="sub-text">{{ $user->email }}</span>
+                                        <h5><?php echo e($user->name); ?></h5>
+                                        <span class="sub-text"><?php echo e($user->email); ?></span>
                                     </div>
                                 </div>
                                 
@@ -66,51 +64,51 @@
                                         <li class="nk-list-meta-item">
                                             <span class="nk-list-meta-label">Role:</span>
                                             <span class="nk-list-meta-value">
-                                                @foreach($user->roles as $role)
-                                                    <span class="badge badge-dim bg-outline-primary">{{ ucfirst($role->name) }}</span>
-                                                @endforeach
+                                                <?php $__currentLoopData = $user->roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <span class="badge badge-dim bg-outline-primary"><?php echo e(ucfirst($role->name)); ?></span>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </span>
                                         </li>
-                                        @if($user->phone)
+                                        <?php if($user->phone): ?>
                                             <li class="nk-list-meta-item">
                                                 <span class="nk-list-meta-label">Phone:</span>
-                                                <span class="nk-list-meta-value">{{ $user->phone }}</span>
+                                                <span class="nk-list-meta-value"><?php echo e($user->phone); ?></span>
                                             </li>
-                                        @endif
-                                        @if($user->website)
+                                        <?php endif; ?>
+                                        <?php if($user->website): ?>
                                             <li class="nk-list-meta-item">
                                                 <span class="nk-list-meta-label">Website:</span>
                                                 <span class="nk-list-meta-value">
-                                                    <a href="{{ $user->website }}" target="_blank" class="link">{{ $user->website }}</a>
+                                                    <a href="<?php echo e($user->website); ?>" target="_blank" class="link"><?php echo e($user->website); ?></a>
                                                 </span>
                                             </li>
-                                        @endif
+                                        <?php endif; ?>
                                         <li class="nk-list-meta-item">
                                             <span class="nk-list-meta-label">Member Since:</span>
-                                            <span class="nk-list-meta-value">{{ $user->created_at->format('M d, Y') }}</span>
+                                            <span class="nk-list-meta-value"><?php echo e($user->created_at->format('M d, Y')); ?></span>
                                         </li>
-                                        @if($user->email_verified_at)
+                                        <?php if($user->email_verified_at): ?>
                                             <li class="nk-list-meta-item">
                                                 <span class="nk-list-meta-label">Verified:</span>
-                                                <span class="nk-list-meta-value">{{ $user->email_verified_at->format('M d, Y') }}</span>
+                                                <span class="nk-list-meta-value"><?php echo e($user->email_verified_at->format('M d, Y')); ?></span>
                                             </li>
-                                        @endif
+                                        <?php endif; ?>
                                     </ul>
                                 </div>
                                 
-                                @if($user->bio)
+                                <?php if($user->bio): ?>
                                     <div class="user-bio mt-4">
                                         <h6 class="overline-title-alt">About</h6>
-                                        <p>{{ $user->bio }}</p>
+                                        <p><?php echo e($user->bio); ?></p>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
 
                     <!-- User Statistics & Activity -->
                     <div class="col-xxl-8">
-                        @if($user->hasRole('author'))
+                        <?php if($user->hasRole('author')): ?>
                             <!-- Author Statistics -->
                             <div class="card card-bordered card-full mb-4">
                                 <div class="card-inner">
@@ -131,7 +129,7 @@
                                                     </div>
                                                     <div class="inbox-item-body">
                                                         <p class="inbox-item-text">Total Books</p>
-                                                        <h4 class="inbox-item-title">{{ number_format($stats['total_books']) }}</h4>
+                                                        <h4 class="inbox-item-title"><?php echo e(number_format($stats['total_books'])); ?></h4>
                                                     </div>
                                                 </div>
                                             </div>
@@ -146,7 +144,7 @@
                                                     </div>
                                                     <div class="inbox-item-body">
                                                         <p class="inbox-item-text">Published</p>
-                                                        <h4 class="inbox-item-title">{{ number_format($stats['published_books']) }}</h4>
+                                                        <h4 class="inbox-item-title"><?php echo e(number_format($stats['published_books'])); ?></h4>
                                                     </div>
                                                 </div>
                                             </div>
@@ -161,7 +159,7 @@
                                                     </div>
                                                     <div class="inbox-item-body">
                                                         <p class="inbox-item-text">Pending</p>
-                                                        <h4 class="inbox-item-title">{{ number_format($stats['pending_books']) }}</h4>
+                                                        <h4 class="inbox-item-title"><?php echo e(number_format($stats['pending_books'])); ?></h4>
                                                     </div>
                                                 </div>
                                             </div>
@@ -176,14 +174,14 @@
                                                     </div>
                                                     <div class="inbox-item-body">
                                                         <p class="inbox-item-text">Total Earnings</p>
-                                                        <h4 class="inbox-item-title">₦{{ number_format($stats['total_earnings'], 2) }}</h4>
+                                                        <h4 class="inbox-item-title">₦<?php echo e(number_format($stats['total_earnings'], 2)); ?></h4>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                  @if($user->books->count() > 0)
+                                  <?php if($user->books->count() > 0): ?>
                                 <div class="card card-bordered card-full mb-4">
                                     <div class="card-inner">
                                         <div class="card-title-group align-start mb-3">
@@ -199,36 +197,36 @@
                                                 <div class="nk-tb-col tb-col-lg"><span>Created</span></div>
                                                 <div class="nk-tb-col"><span>Action</span></div>
                                             </div>
-                                            @foreach($user->books->take(5) as $book)
+                                            <?php $__currentLoopData = $user->books->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
-                                                        <span class="tb-lead">{{ $book->title }}</span>
-                                                        <span class="tb-sub text-primary">{{ $book->genre }}</span>
+                                                        <span class="tb-lead"><?php echo e($book->title); ?></span>
+                                                        <span class="tb-sub text-primary"><?php echo e($book->genre); ?></span>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
-                                                        @if($book->status === 'pending')
+                                                        <?php if($book->status === 'pending'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-warning">Pending</span>
-                                                        @elseif($book->status === 'accepted')
+                                                        <?php elseif($book->status === 'accepted'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-success">Published</span>
-                                                        @elseif($book->status === 'rejected')
+                                                        <?php elseif($book->status === 'rejected'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-danger">Rejected</span>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-lg">
-                                                        <span class="tb-sub">{{ $book->created_at->format('M d, Y') }}</span>
+                                                        <span class="tb-sub"><?php echo e($book->created_at->format('M d, Y')); ?></span>
                                                     </div>
                                                     <div class="nk-tb-col">
-                                                        <a href="{{ route('admin.books.show', $book) }}" class="btn btn-sm btn-outline-light">View</a>
+                                                        <a href="<?php echo e(route('admin.books.show', $book)); ?>" class="btn btn-sm btn-outline-light">View</a>
                                                     </div>
                                                 </div>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endif
+                            <?php endif; ?>
 
 
-                            @if($user->payouts->count() > 0)
+                            <?php if($user->payouts->count() > 0): ?>
                                 <div class="card card-bordered card-full">
                                     <div class="card-inner">
                                         <div class="card-title-group align-start mb-3">
@@ -243,37 +241,37 @@
                                                 <div class="nk-tb-col tb-col-md"><span>Status</span></div>
                                                 <div class="nk-tb-col tb-col-lg"><span>Requested</span></div>
                                             </div>
-                                            @foreach($user->payouts->take(5) as $payout)
+                                            <?php $__currentLoopData = $user->payouts->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payout): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
-                                                        <span class="tb-lead">${{ number_format($payout->amount_requested, 2) }}</span>
-                                                        <span class="tb-sub">Fee: ${{ number_format($payout->processing_fee, 2) }}</span>
+                                                        <span class="tb-lead">$<?php echo e(number_format($payout->amount_requested, 2)); ?></span>
+                                                        <span class="tb-sub">Fee: $<?php echo e(number_format($payout->processing_fee, 2)); ?></span>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
-                                                        @if($payout->status === 'pending')
+                                                        <?php if($payout->status === 'pending'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-warning">Pending</span>
-                                                        @elseif($payout->status === 'approved')
+                                                        <?php elseif($payout->status === 'approved'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-success">Approved</span>
-                                                        @elseif($payout->status === 'denied')
+                                                        <?php elseif($payout->status === 'denied'): ?>
                                                             <span class="badge badge-dot badge-dot-xs bg-danger">Denied</span>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-lg">
-                                                        <span class="tb-sub">{{ $payout->created_at->format('M d, Y') }}</span>
+                                                        <span class="tb-sub"><?php echo e($payout->created_at->format('M d, Y')); ?></span>
                                                     </div>
                                                 </div>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             </div>
                             
                             <!-- Recent Books -->
                           
                             <!-- Payout History -->
                             
-                        @else
+                        <?php else: ?>
                             <!-- Non-Author User Actions -->
                             <div class="card card-bordered card-full">
                                 <div class="card-inner">
@@ -289,9 +287,9 @@
                                                 <div class="alert-cta">
                                                     <h6>Promote to Author</h6>
                                                     <p>This user is not currently an author. You can promote them to author status to allow them to publish books.</p>
-                                                    <form method="POST" action="{{ route('admin.users.promote-author', $user) }}">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-info" data-confirm-promote data-confirm-message="Are you sure you want to promote {{ $user->name }} to author? This will give them author privileges and allow them to publish books.">
+                                                    <form method="POST" action="<?php echo e(route('admin.users.promote-author', $user)); ?>">
+                                                        <?php echo csrf_field(); ?>
+                                                        <button type="submit" class="btn btn-info" data-confirm-promote data-confirm-message="Are you sure you want to promote <?php echo e($user->name); ?> to author? This will give them author privileges and allow them to publish books.">
                                                             Promote to Author
                                                         </button>
                                                     </form>
@@ -301,7 +299,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -321,7 +319,7 @@
                             <p>View detailed activity log for this user</p>
                         </div>
                         <div class="card-tools">
-                            <a href="{{ route('admin.users.activities', $user) }}" class="btn btn-primary">
+                            <a href="<?php echo e(route('admin.users.activities', $user)); ?>" class="btn btn-primary">
                                 <em class="icon ni ni-activity"></em>
                                 <span>View All Activities</span>
                             </a>
@@ -334,9 +332,11 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/users/show.blade.php ENDPATH**/ ?>

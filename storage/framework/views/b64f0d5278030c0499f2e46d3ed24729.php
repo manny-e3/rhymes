@@ -1,12 +1,10 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'User Activity | Admin Panel'); ?>
 
-@section('title', 'User Activity | Admin Panel')
+<?php $__env->startSection('page-title', 'User Activity'); ?>
 
-@section('page-title', 'User Activity')
+<?php $__env->startSection('page-description', 'Track user activities and platform events'); ?>
 
-@section('page-description', 'Track user activities and platform events')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- content @s -->
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
@@ -25,12 +23,12 @@
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
                                     <li>
-                                        <form method="GET" action="{{ route('admin.users.activity') }}">
+                                        <form method="GET" action="<?php echo e(route('admin.users.activity')); ?>">
                                             <div class="form-control-wrap">
                                                 <select name="period" class="form-select" onchange="this.form.submit()">
-                                                    <option value="7" {{ request('period', 30) == 7 ? 'selected' : '' }}>Last 7 days</option>
-                                                    <option value="30" {{ request('period', 30) == 30 ? 'selected' : '' }}>Last 30 days</option>
-                                                    <option value="90" {{ request('period', 30) == 90 ? 'selected' : '' }}>Last 90 days</option>
+                                                    <option value="7" <?php echo e(request('period', 30) == 7 ? 'selected' : ''); ?>>Last 7 days</option>
+                                                    <option value="30" <?php echo e(request('period', 30) == 30 ? 'selected' : ''); ?>>Last 30 days</option>
+                                                    <option value="90" <?php echo e(request('period', 30) == 90 ? 'selected' : ''); ?>>Last 90 days</option>
                                                 </select>
                                             </div>
                                         </form>
@@ -52,7 +50,7 @@
                             </div>
                         </div>
 
-                        @if($paginatedActivities->count() > 0)
+                        <?php if($paginatedActivities->count() > 0): ?>
                             <div class="table-responsive">
                                                                               <table class="datatable-init-export nowrap table" data-export-title="Export">
     <thead>
@@ -66,60 +64,62 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($paginatedActivities as $activity)
+                                        <?php $__currentLoopData = $paginatedActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td class="tb-col-date">
-                                                <span class="sub-text">{{ $activity->created_at->format('M d, Y H:i') }}</span>
+                                                <span class="sub-text"><?php echo e($activity->created_at->format('M d, Y H:i')); ?></span>
                                                 <br>
-                                                <span class="sub-text sub-date">{{ $activity->created_at->diffForHumans() }}</span>
+                                                <span class="sub-text sub-date"><?php echo e($activity->created_at->diffForHumans()); ?></span>
                                             </td>
                                             <td class="tb-col-user">
-                                                @if($activity->user)
-                                                    <a href="{{ route('admin.users.show', $activity->user) }}" class="text-primary">
-                                                        {{ $activity->user->name }}
+                                                <?php if($activity->user): ?>
+                                                    <a href="<?php echo e(route('admin.users.show', $activity->user)); ?>" class="text-primary">
+                                                        <?php echo e($activity->user->name); ?>
+
                                                     </a>
                                                     <br>
-                                                    <span class="sub-text">{{ $activity->user->email }}</span>
-                                                @else
+                                                    <span class="sub-text"><?php echo e($activity->user->email); ?></span>
+                                                <?php else: ?>
                                                     <span class="sub-text">System</span>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                             <td class="tb-col-type">
-                                                <span class="badge bg-primary">{{ ucfirst(str_replace('_', ' ', $activity->activity_type)) }}</span>
+                                                <span class="badge bg-primary"><?php echo e(ucfirst(str_replace('_', ' ', $activity->activity_type))); ?></span>
                                             </td>
                                             <td class="tb-col-desc">
-                                                <span>{{ $activity->description }}</span>
-                                                @if($activity->metadata)
+                                                <span><?php echo e($activity->description); ?></span>
+                                                <?php if($activity->metadata): ?>
                                                    
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                             <td class="tb-col-ip">
-                                                <span class="sub-text">{{ $activity->ip_address ?? 'N/A' }}</span>
+                                                <span class="sub-text"><?php echo e($activity->ip_address ?? 'N/A'); ?></span>
                                             </td>
                                             <td class="tb-col-agent">
-                                                <span class="sub-text" style="font-size: 0.75rem;">{{ Illuminate\Support\Str::limit($activity->user_agent ?? 'N/A', 50) }}</span>
+                                                <span class="sub-text" style="font-size: 0.75rem;"><?php echo e(Illuminate\Support\Str::limit($activity->user_agent ?? 'N/A', 50)); ?></span>
                                             </td>
                                         </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                 </table>
                             </div>
 
                             <div class="mt-4">
-                                @if ($paginatedActivities->hasPages())
+                                <?php if($paginatedActivities->hasPages()): ?>
                                     <div>
-                                        {{ $paginatedActivities->appends([
+                                        <?php echo e($paginatedActivities->appends([
                                            
-                                        ])->links('vendor.pagination.bootstrap-4') }}
+                                        ])->links('vendor.pagination.bootstrap-4')); ?>
+
                                     </div>
-                                @endif
+                                <?php endif; ?>
                                                            </div>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-5">
                                 <em class="icon ni ni-activity" style="font-size: 3rem; opacity: 0.3;"></em>
                                 <p class="text-soft mt-2">No user activities found</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div><!-- .nk-block -->
@@ -127,9 +127,9 @@
     </div>
 </div>
 <!-- content @e -->
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     $('#user-activities-table').DataTable({
@@ -147,4 +147,5 @@ $(document).ready(function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/users/activity.blade.php ENDPATH**/ ?>

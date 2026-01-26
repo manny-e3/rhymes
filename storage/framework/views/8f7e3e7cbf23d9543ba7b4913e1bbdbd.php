@@ -72,9 +72,7 @@ unset($__errorArgs, $__bag); ?>"
                                                     <div class="form-note">
                                                         Minimum: ₦<?php echo e(number_format($payoutInfo['minimum_amount'] ?? 300000, 2)); ?> | Available: ₦<?php echo e(number_format($availableBalance, 2)); ?>
 
-                                                        <?php if($payoutStats['pending'] > 0): ?>
-                                                            <br><small class="text-warning">(₦<?php echo e(number_format($payoutStats['pending'], 2)); ?> pending in other requests)</small>
-                                                        <?php endif; ?>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -85,12 +83,12 @@ unset($__errorArgs, $__bag); ?>"
                                                     <em class="icon ni ni-wallet-out"></em>
                                                     <span>Request Payout</span>
                                                 </button>
-                                                <?php if($availableBalance < ($payoutInfo['minimum_amount'] ?? 300000)): ?>
+                                                <?php if($availableBalance < ($payoutInfo['minimum_amount'])): ?>
                                                     <div class="form-note text-danger mt-2">
                                                         <?php if($payoutStats['pending'] > 0): ?>
                                                             Insufficient available balance. You have ₦<?php echo e(number_format($payoutStats['pending'], 2)); ?> in pending payouts.
                                                         <?php else: ?>
-                                                            Minimum balance of ₦<?php echo e(number_format($payoutInfo['minimum_amount'] ?? 300000, 2)); ?> required for payout
+                                                            Minimum balance of ₦<?php echo e(number_format($payoutInfo['minimum_amount'])); ?> required for payout
                                                         <?php endif; ?>
                                                     </div>
                                                 <?php endif; ?>
@@ -120,7 +118,7 @@ unset($__errorArgs, $__bag); ?>"
                                     <span class="text-soft">Ready for withdrawal</span>
                                     <?php if($payoutStats['pending'] > 0): ?>
                                         <br><small class="text-warning">Total Balance: ₦<?php echo e(number_format($walletBalance, 2)); ?></small>
-                                        <br><small class="text-warning">Pending: ₦<?php echo e(number_format($payoutStats['pending'], 2)); ?></small>
+                                        
                                     <?php endif; ?>
                                 </div>
                             </div>

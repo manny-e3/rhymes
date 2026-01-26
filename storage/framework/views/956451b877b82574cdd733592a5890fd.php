@@ -1,12 +1,12 @@
-@extends('layouts.admin')
 
-@section('title', $user->name . ' - User Activities | Admin Panel')
 
-@section('page-title', $user->name . ' - User Activities')
+<?php $__env->startSection('title', $user->name . ' - User Activities | Admin Panel'); ?>
 
-@section('page-description', 'Activity log for user: ' . $user->name . ' (' . $user->email . ')')
+<?php $__env->startSection('page-title', $user->name . ' - User Activities'); ?>
 
-@section('content')
+<?php $__env->startSection('page-description', 'Activity log for user: ' . $user->name . ' (' . $user->email . ')'); ?>
+
+<?php $__env->startSection('content'); ?>
 <!-- content @s -->
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
@@ -14,9 +14,9 @@
             <div class="nk-block-head nk-block-head-sm">
                 <div class="nk-block-between">
                     <div class="nk-block-head-content">
-                        <h3 class="nk-block-title page-title">Activities for {{ $user->name }}</h3>
+                        <h3 class="nk-block-title page-title">Activities for <?php echo e($user->name); ?></h3>
                         <div class="nk-block-des text-soft">
-                            <p>User ID: #{{ $user->id }} • Joined {{ $user->created_at->format('M d, Y') }}</p>
+                            <p>User ID: #<?php echo e($user->id); ?> • Joined <?php echo e($user->created_at->format('M d, Y')); ?></p>
                         </div>
                     </div><!-- .nk-block-head-content -->
                     <div class="nk-block-head-content">
@@ -25,23 +25,23 @@
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
                                     <li>
-                                        <form method="GET" action="{{ route('admin.users.activities', $user) }}">
+                                        <form method="GET" action="<?php echo e(route('admin.users.activities', $user)); ?>">
                                             <div class="form-control-wrap">
                                                 <select name="period" class="form-select" onchange="this.form.submit()">
-                                                    <option value="7" {{ request('period', 30) == 7 ? 'selected' : '' }}>Last 7 days</option>
-                                                    <option value="30" {{ request('period', 30) == 30 ? 'selected' : '' }}>Last 30 days</option>
-                                                    <option value="90" {{ request('period', 30) == 90 ? 'selected' : '' }}>Last 90 days</option>
+                                                    <option value="7" <?php echo e(request('period', 30) == 7 ? 'selected' : ''); ?>>Last 7 days</option>
+                                                    <option value="30" <?php echo e(request('period', 30) == 30 ? 'selected' : ''); ?>>Last 30 days</option>
+                                                    <option value="90" <?php echo e(request('period', 30) == 90 ? 'selected' : ''); ?>>Last 90 days</option>
                                                 </select>
                                             </div>
                                         </form>
                                     </li>
                                     <li>
-                                        <a href="{{ route('admin.users.show', $user) }}" class="btn btn-white btn-dim btn-outline-light">
+                                        <a href="<?php echo e(route('admin.users.show', $user)); ?>" class="btn btn-white btn-dim btn-outline-light">
                                             <em class="icon ni ni-user"></em><span>User Profile</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('admin.users.index') }}" class="btn btn-white btn-dim btn-outline-light">
+                                        <a href="<?php echo e(route('admin.users.index')); ?>" class="btn btn-white btn-dim btn-outline-light">
                                             <em class="icon ni ni-users"></em><span>All Users</span>
                                         </a>
                                     </li>
@@ -62,7 +62,7 @@
                             </div>
                         </div>
 
-                        @if($paginatedActivities->count() > 0)
+                        <?php if($paginatedActivities->count() > 0): ?>
                             <div class="table-responsive">
                                 <table class="table table-tranx table-striped" id="user-activities-table">
                                     <thead>
@@ -75,55 +75,56 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($paginatedActivities as $activity)
+                                        <?php $__currentLoopData = $paginatedActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td class="tb-col-date">
-                                                <span class="sub-text">{{ $activity->created_at->format('M d, Y H:i') }}</span>
+                                                <span class="sub-text"><?php echo e($activity->created_at->format('M d, Y H:i')); ?></span>
                                                 <br>
-                                                <span class="sub-text sub-date">{{ $activity->created_at->diffForHumans() }}</span>
+                                                <span class="sub-text sub-date"><?php echo e($activity->created_at->diffForHumans()); ?></span>
                                             </td>
                                             <td class="tb-col-type">
-                                                <span class="badge bg-primary">{{ ucfirst(str_replace('_', ' ', $activity->activity_type)) }}</span>
+                                                <span class="badge bg-primary"><?php echo e(ucfirst(str_replace('_', ' ', $activity->activity_type))); ?></span>
                                             </td>
                                             <td class="tb-col-desc">
-                                                <span>{{ $activity->description }}</span>
-                                                @if($activity->metadata)
+                                                <span><?php echo e($activity->description); ?></span>
+                                                <?php if($activity->metadata): ?>
                                                     <div class="mt-1">
                                                         <details>
                                                             <summary class="text-muted small">View Details</summary>
-                                                            <pre class="mb-0" style="font-size: 0.75rem; background: #f8f9fa; padding: 8px; border-radius: 4px; max-height: 100px; overflow-y: auto;">{{ json_encode($activity->metadata, JSON_PRETTY_PRINT) }}</pre>
+                                                            <pre class="mb-0" style="font-size: 0.75rem; background: #f8f9fa; padding: 8px; border-radius: 4px; max-height: 100px; overflow-y: auto;"><?php echo e(json_encode($activity->metadata, JSON_PRETTY_PRINT)); ?></pre>
                                                         </details>
                                                     </div>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                             <td class="tb-col-ip">
-                                                <span class="sub-text">{{ $activity->ip_address ?? 'N/A' }}</span>
+                                                <span class="sub-text"><?php echo e($activity->ip_address ?? 'N/A'); ?></span>
                                             </td>
                                             <td class="tb-col-agent">
-                                                <span class="sub-text" style="font-size: 0.75rem;">{{ Illuminate\Support\Str::limit($activity->user_agent ?? 'N/A', 50) }}</span>
+                                                <span class="sub-text" style="font-size: 0.75rem;"><?php echo e(Illuminate\Support\Str::limit($activity->user_agent ?? 'N/A', 50)); ?></span>
                                             </td>
                                         </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                 </table>
                             </div>
 
                             <div class="mt-4">
-                                @if ($paginatedActivities->hasPages())
+                                <?php if($paginatedActivities->hasPages()): ?>
                                     <div>
-                                        {{ $paginatedActivities->appends([
+                                        <?php echo e($paginatedActivities->appends([
                                            
-                                        ])->links('vendor.pagination.bootstrap-4') }}
+                                        ])->links('vendor.pagination.bootstrap-4')); ?>
+
                                     </div>
-                                @endif
-                                {{-- {{ $paginatedActivities->appends(['period' => request('period')])->links() }} --}}
+                                <?php endif; ?>
+                                
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-5">
                                 <em class="icon ni ni-activity" style="font-size: 3rem; opacity: 0.3;"></em>
                                 <p class="text-soft mt-2">No activities found for this user</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div><!-- .nk-block -->
@@ -131,9 +132,9 @@
     </div>
 </div>
 <!-- content @e -->
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     $('#user-activities-table').DataTable({
@@ -151,4 +152,5 @@ $(document).ready(function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/users/user-activities.blade.php ENDPATH**/ ?>

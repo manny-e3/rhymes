@@ -66,9 +66,9 @@
                                                            value="{{ old('amount_requested') }}">
                                                     <div class="form-note">
                                                         Minimum: ₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }} | Available: ₦{{ number_format($availableBalance, 2) }}
-                                                        @if($payoutStats['pending'] > 0)
+                                                        {{-- @if($payoutStats['pending'] > 0)
                                                             <br><small class="text-warning">(₦{{ number_format($payoutStats['pending'], 2) }} pending in other requests)</small>
-                                                        @endif
+                                                        @endif --}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -79,12 +79,12 @@
                                                     <em class="icon ni ni-wallet-out"></em>
                                                     <span>Request Payout</span>
                                                 </button>
-                                                @if($availableBalance < ($payoutInfo['minimum_amount'] ?? 300000))
+                                                @if($availableBalance < ($payoutInfo['minimum_amount']))
                                                     <div class="form-note text-danger mt-2">
                                                         @if($payoutStats['pending'] > 0)
                                                             Insufficient available balance. You have ₦{{ number_format($payoutStats['pending'], 2) }} in pending payouts.
                                                         @else
-                                                            Minimum balance of ₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }} required for payout
+                                                            Minimum balance of ₦{{ number_format($payoutInfo['minimum_amount']) }} required for payout
                                                         @endif
                                                     </div>
                                                 @endif
@@ -114,7 +114,7 @@
                                     <span class="text-soft">Ready for withdrawal</span>
                                     @if($payoutStats['pending'] > 0)
                                         <br><small class="text-warning">Total Balance: ₦{{ number_format($walletBalance, 2) }}</small>
-                                        <br><small class="text-warning">Pending: ₦{{ number_format($payoutStats['pending'], 2) }}</small>
+                                        {{-- <br><small class="text-warning">Pending: ₦{{ number_format($payoutStats['pending'], 2) }}</small> --}}
                                     @endif
                                 </div>
                             </div>
