@@ -220,10 +220,21 @@ class RevSalesSyncController extends Controller
                     $sid = $sale['SID'] ?? $sale['sid'] ?? null;
                     $quantity = $sale['quantity_sold'] ?? $sale['QuantitySold'] ?? $sale['quantity'] ?? 1;
                     
-                    // Use the book's price for calculating earnings using commission settings
-                    $bookPrice = $book->price ?? 0;
-                    $payoutService = app('App\\Services\\PayoutService');
-                    $authorEarnings = ($bookPrice * $quantity) * ($payoutService->getAuthorCommissionPercentage() / 100);
+                    // Use SellingPrice from ERP endpoint directly (no calculations)
+                    $sellingPrice = $sale['SellingPrice'] ?? $sale['selling_price'] ?? $sale['UnitPrice'] ?? $sale['unit_price'] ?? 0;
+                    
+                    if ($sellingPrice <= 0) {
+                        Log::warning('Invalid or missing selling price in sale record', [
+                            'sale' => $sale,
+                            'book_id' => $book->id,
+                            'book_title' => $book->title
+                        ]);
+                        $errorCount++;
+                        continue;
+                    }
+                    
+                    // Use the raw selling price directly as the wallet amount
+                    $walletAmount = $sellingPrice;
                     
                     // Create a unique identifier for this sale record
                     // Using a combination of barcode, SID, and potentially invoice ID to identify unique sales
@@ -243,7 +254,7 @@ class RevSalesSyncController extends Controller
                         ->where('type', 'sale')
                         ->where('meta->barcode', $barcode)
                         ->where('meta->quantity_sold', $quantity)
-                        ->where('amount', $authorEarnings)
+                        ->where('amount', $walletAmount)
                         ->whereDate('created_at', now()->toDateString())
                         ->first();
                     
@@ -258,9 +269,9 @@ class RevSalesSyncController extends Controller
                         'isbn' => $book->isbn,
                         'barcode' => $barcode,
                         'product_id' => $productId,
-                        'book_price' => $bookPrice,
+                        'selling_price' => $sellingPrice,
                         'quantity' => $quantity,
-                        'author_earnings' => $authorEarnings,
+                        'wallet_amount' => $walletAmount,
                         'user_id' => $book->user_id
                     ]);
                     
@@ -269,20 +280,19 @@ class RevSalesSyncController extends Controller
                         'user_id' => $book->user_id, // Explicitly set the user_id
                         'book_id' => $book->id,
                         'type' => 'sale',
-                        'amount' => $authorEarnings,
+                        'amount' => $walletAmount,
                         'meta' => [
                             'erprev_unique_id' => $uniqueId,
                             'erprev_sid' => $sid,
                             'invoice_id' => $sale['invoice_id'] ?? $sale['InvoiceID'] ?? null,
                             'quantity_sold' => $quantity,
-                            'book_price' => $bookPrice,
-                            'author_percentage' => $payoutService->getAuthorCommissionPercentage() / 100,
-                            'author_earnings' => $authorEarnings,
+                            'selling_price' => $sellingPrice,
+                            'wallet_amount' => $walletAmount,
                             'sale_date' => now(), // We'll use current time since no sale date in data
                             'barcode' => $barcode,
                             'product_id' => $productId,
                             'location' => $sale['location'] ?? $sale['Location'] ?? null,
-                            'description' => "Sale of {$quantity} copies of '{$book->title}'",
+                            'description' => "Sale of {$quantity} copies of '{$book->title}' at {$sellingPrice} each",
                         ],
                     ]);
                     
