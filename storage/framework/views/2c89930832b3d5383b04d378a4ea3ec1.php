@@ -116,9 +116,7 @@
                                         <li class="nk-menu-item">
                                             <a href="<?php echo e(route('admin.books.index')); ?>" class="nk-menu-link"><span class="nk-menu-text">All Books</span></a>
                                         </li>
-                                        <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.books.logs')); ?>" class="nk-menu-link"><span class="nk-menu-text">Review Logs</span></a>
-                                        </li>
+                                        
                                         <li class="nk-menu-item">
                                             <a href="<?php echo e(route('admin.books.pending')); ?>" class="nk-menu-link"><span class="nk-menu-text">Pending Review</span></a>
                                         </li>
