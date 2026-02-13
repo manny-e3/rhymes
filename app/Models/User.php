@@ -35,9 +35,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'payment_details',
         'promoted_to_author_at',
-        'otp_code',
         'otp_expires_at',
         'otp_enabled',
+        'address',
+        'display_name',
+        'date_of_birth',
+        'social_links',
     ];
 
     /**
@@ -67,6 +70,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'otp_expires_at' => 'datetime',
             'otp_enabled' => 'boolean',
             'is_active' => 'boolean',
+            'social_links' => 'array',
+            'date_of_birth' => 'date',
         ];
     }
 

@@ -25,7 +25,7 @@ class RevService
         
         // Remove any protocol prefix if present, then construct the base URL
         $accountUrl = preg_replace('#^https?://#', '', $accountUrl);
-        $this->baseUrl = "https://{$accountUrl}/api/1.0";
+        $this->baseUrl = "http://{$accountUrl}/api/1.0";
         $this->apiKey = config('services.erprev.api_key');
         $this->apiSecret = config('services.erprev.api_secret');
         $this->enabled = config('services.erprev.enabled', false);

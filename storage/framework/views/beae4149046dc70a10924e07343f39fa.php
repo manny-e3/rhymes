@@ -1,36 +1,35 @@
-@extends('layouts.author')
-@section('title', 'My Profile | Rhymes Author Platform')
-@section('page-title', 'My Profile')
-@section('page-description', 'Manage your profile here')
-@section('content')
+<?php $__env->startSection('title', 'My Profile | Rhymes Author Platform'); ?>
+<?php $__env->startSection('page-title', 'My Profile'); ?>
+<?php $__env->startSection('page-description', 'Manage your profile here'); ?>
+<?php $__env->startSection('content'); ?>
 
-@if(session('payment-success'))
+<?php if(session('payment-success')): ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
             icon: 'success',
             title: 'Success!',
-            text: '{{ session('payment-success') }}',
+            text: '<?php echo e(session('payment-success')); ?>',
             timer: 3000,
             showConfirmButton: false
         });
     });
 </script>
-@endif
+<?php endif; ?>
 
-@if(session('payment-error'))
+<?php if(session('payment-error')): ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: '{{ session('payment-error') }}',
+            text: '<?php echo e(session('payment-error')); ?>',
             timer: 3000,
             showConfirmButton: false
         });
     });
 </script>
-@endif
+<?php endif; ?>
 
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
@@ -60,71 +59,38 @@
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                         <div class="data-col">
                                             <span class="data-label">Full Name</span>
-                                            <span class="data-value">{{ $user->name }}</span>
+                                            <span class="data-value"><?php echo e($user->name); ?></span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                     </div><!-- data-item -->
-                                    {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
-                                        <div class="data-col">
-                                            <span class="data-label">Display Name</span>
-                                            <span class="data-value {{ !isset($user->profile_data['display_name']) ? 'text-soft' : '' }}">{{ $user->profile_data['display_name'] ?? 'Not set' }}</span>
-                                        </div>
-                                        <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
-                                    </div><!-- data-item --> --}}
+                                    
                                     <div class="data-item">
                                         <div class="data-col">
                                             <span class="data-label">Email</span>
-                                            <span class="data-value">{{ $user->email }}</span>
+                                            <span class="data-value"><?php echo e($user->email); ?></span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more disable"><em class="icon ni ni-lock-alt"></em></span></div>
                                     </div><!-- data-item -->
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                         <div class="data-col">
                                             <span class="data-label">Phone Number</span>
-                                            <span class="data-value {{ !$user->phone ? 'text-soft' : '' }}">{{ $user->phone ?? 'Not added yet' }}</span>
+                                            <span class="data-value <?php echo e(!$user->phone ? 'text-soft' : ''); ?>"><?php echo e($user->phone ?? 'Not added yet'); ?></span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                     </div><!-- data-item -->
-                                    {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
-                                        <div class="data-col">
-                                            <span class="data-label">Date of Birth</span>
-                                            <span class="data-value {{ !isset($user->profile_data['date_of_birth']) ? 'text-soft' : '' }}">
-                                                {{ isset($user->profile_data['date_of_birth']) ? \Carbon\Carbon::parse($user->profile_data['date_of_birth'])->format('M d, Y') : 'Not added yet' }}
-                                            </span>
-                                        </div> 
-                                        <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
-                                    </div><!-- data-item --> --}}
+                                    
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                         <div class="data-col">
                                             <span class="data-label">Address</span>
-                                            <span class="data-value {{ !$user->address ? 'text-soft' : '' }}">
-                                                {{ $user->address ?? 'Not added yet' }}
+                                            <span class="data-value <?php echo e(!$user->address ? 'text-soft' : ''); ?>">
+                                                <?php echo e($user->address ?? 'Not added yet'); ?>
+
                                             </span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                     </div><!-- data-item -->
-                                    {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
-                                        <div class="data-col">
-                                            <span class="data-label">Bio</span>
-                                            <span class="data-value {{ !isset($user->profile_data['bio']) ? 'text-soft' : '' }}">
-                                                {{ $user->profile_data['bio'] ?? 'Not added yet' }}
-                                            </span>
-                                        </div>
-                                        <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
-                                    </div> --}}
-                                    {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
-                                        <div class="data-col">
-                                            <span class="data-label">Website</span>
-                                            <span class="data-value {{ !isset($user->profile_data['website']) ? 'text-soft' : '' }}">
-                                                @if(isset($user->profile_data['website']))
-                                                    <a href="{{ $user->profile_data['website'] }}" target="_blank" class="link link-primary">{{ $user->profile_data['website'] }}</a>
-                                                @else
-                                                    Not added yet
-                                                @endif
-                                            </span>
-                                        </div>
-                                        <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
-                                    </div> --}}
+                                    
+                                    
                                 </div><!-- data-list -->
                                 
                                 <div class="nk-data data-list">
@@ -134,57 +100,55 @@
                                     <div class="data-item">
                                         <div class="data-col">
                                             <span class="data-label">Total Books</span>
-                                            <span class="data-value">{{ $totalBooks }}</span>
+                                            <span class="data-value"><?php echo e($totalBooks); ?></span>
                                         </div>
-                                        <div class="data-col data-col-end"><a href="{{ route('author.books.index') }}" class="link link-primary">View Books</a></div>
+                                        <div class="data-col data-col-end"><a href="<?php echo e(route('author.books.index')); ?>" class="link link-primary">View Books</a></div>
                                     </div><!-- data-item -->
                                     <div class="data-item">
                                         <div class="data-col">
                                             <span class="data-label">Published Books</span>
-                                            <span class="data-value">{{ $publishedBooks }}</span>
+                                            <span class="data-value"><?php echo e($publishedBooks); ?></span>
                                         </div>
-                                        <div class="data-col data-col-end"><a href="{{ route('author.books.index') }}?status=published" class="link link-primary">View Published</a></div>
+                                        <div class="data-col data-col-end"><a href="<?php echo e(route('author.books.index')); ?>?status=published" class="link link-primary">View Published</a></div>
                                     </div><!-- data-item -->
                                     <div class="data-item">
                                         <div class="data-col">
                                             <span class="data-label">Wallet Balance</span>
-                                            <span class="data-value">₦{{ number_format($walletBalance, 2) }}</span>
+                                            <span class="data-value">₦<?php echo e(number_format($walletBalance, 2)); ?></span>
                                         </div>
-                                        <div class="data-col data-col-end"><a href="{{ route('author.wallet.index') }}" class="link link-primary">View Wallet</a></div>
+                                        <div class="data-col data-col-end"><a href="<?php echo e(route('author.wallet.index')); ?>" class="link link-primary">View Wallet</a></div>
                                     </div><!-- data-item -->
                                     <div class="data-item">
                                         <div class="data-col">
                                             <span class="data-label">Member Since</span>
-                                            <span class="data-value">{{ $user->created_at->format('M d, Y') }}</span>
+                                            <span class="data-value"><?php echo e($user->created_at->format('M d, Y')); ?></span>
                                         </div>
                                         <div class="data-col data-col-end">
-                                            {{-- @if($user->promoted_to_author_at)
-                                                <span class="badge badge-success">Author since {{ $user->promoted_to_author_at->format('M Y') }}</span>
-                                            @endif --}}
+                                            
                                         </div>
                                     </div><!-- data-item -->
                                 </div><!-- data-list -->
 
-                                @if(isset($user->social_links) && !empty(array_filter($user->social_links)))
+                                <?php if(isset($user->social_links) && !empty(array_filter($user->social_links))): ?>
                                 <div class="nk-data data-list">
                                     <div class="data-head">
                                         <h6 class="overline-title">Social Links</h6>
                                     </div>
-                                    @foreach($user->social_links as $platform => $url)
-                                        @if($url)
+                                    <?php $__currentLoopData = $user->social_links; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $platform => $url): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if($url): ?>
                                         <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                             <div class="data-col">
-                                                <span class="data-label">{{ ucfirst($platform) }}</span>
+                                                <span class="data-label"><?php echo e(ucfirst($platform)); ?></span>
                                                 <span class="data-value">
-                                                    <a href="{{ $url }}" target="_blank" class="link link-primary">{{ $url }}</a>
+                                                    <a href="<?php echo e($url); ?>" target="_blank" class="link link-primary"><?php echo e($url); ?></a>
                                                 </span>
                                             </div>
                                             <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                         </div><!-- data-item -->
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div><!-- data-list -->
-                                @endif
+                                <?php endif; ?>
                                 
                                 <div class="nk-data data-list">
                                     <div class="data-head">
@@ -193,12 +157,13 @@
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                         <div class="data-col">
                                             <span class="data-label">Payment Method</span>
-                                            <span class="data-value {{ !isset($user->payment_details['payment_method']) ? 'text-soft' : '' }}">
-                                                @if(isset($user->payment_details['payment_method']))
-                                                    {{ ucwords(str_replace('_', ' ', $user->payment_details['payment_method'])) }}
-                                                @else
+                                            <span class="data-value <?php echo e(!isset($user->payment_details['payment_method']) ? 'text-soft' : ''); ?>">
+                                                <?php if(isset($user->payment_details['payment_method'])): ?>
+                                                    <?php echo e(ucwords(str_replace('_', ' ', $user->payment_details['payment_method']))); ?>
+
+                                                <?php else: ?>
                                                     Not configured
-                                                @endif
+                                                <?php endif; ?>
                                             </span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
@@ -206,46 +171,47 @@
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                         <div class="data-col">
                                             <span class="data-label">Account Holder</span>
-                                            <span class="data-value {{ !isset($user->payment_details['account_holder_name']) ? 'text-soft' : '' }}">
-                                                {{ $user->payment_details['account_holder_name'] ?? 'Not set' }}
+                                            <span class="data-value <?php echo e(!isset($user->payment_details['account_holder_name']) ? 'text-soft' : ''); ?>">
+                                                <?php echo e($user->payment_details['account_holder_name'] ?? 'Not set'); ?>
+
                                             </span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                     </div><!-- data-item -->
-                                    @if(isset($user->payment_details['payment_method']))
-                                        @if($user->payment_details['payment_method'] === 'bank_transfer')
+                                    <?php if(isset($user->payment_details['payment_method'])): ?>
+                                        <?php if($user->payment_details['payment_method'] === 'bank_transfer'): ?>
                                             <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                                 <div class="data-col">
                                                     <span class="data-label">Bank Name</span>
-                                                    <span class="data-value">{{ $user->payment_details['bank_name'] ?? 'Not set' }}</span>
+                                                    <span class="data-value"><?php echo e($user->payment_details['bank_name'] ?? 'Not set'); ?></span>
                                                 </div>
                                                 <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                             </div><!-- data-item -->
                                             <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                                 <div class="data-col">
                                                     <span class="data-label">Account Number</span>
-                                                    <span class="data-value">{{ $user->payment_details['account_number'] ?? 'Not set' }}</span>
+                                                    <span class="data-value"><?php echo e($user->payment_details['account_number'] ?? 'Not set'); ?></span>
                                                 </div>
                                                 <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                             </div><!-- data-item -->
-                                        @elseif($user->payment_details['payment_method'] === 'paypal')
+                                        <?php elseif($user->payment_details['payment_method'] === 'paypal'): ?>
                                             <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                                 <div class="data-col">
                                                     <span class="data-label">PayPal Email</span>
-                                                    <span class="data-value">{{ $user->payment_details['paypal_email'] ?? 'Not set' }}</span>
+                                                    <span class="data-value"><?php echo e($user->payment_details['paypal_email'] ?? 'Not set'); ?></span>
                                                 </div>
                                                 <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                             </div><!-- data-item -->
-                                        @elseif($user->payment_details['payment_method'] === 'stripe')
+                                        <?php elseif($user->payment_details['payment_method'] === 'stripe'): ?>
                                             <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                                 <div class="data-col">
                                                     <span class="data-label">Stripe Account</span>
-                                                    <span class="data-value">{{ $user->payment_details['stripe_account_id'] ?? 'Not set' }}</span>
+                                                    <span class="data-value"><?php echo e($user->payment_details['stripe_account_id'] ?? 'Not set'); ?></span>
                                                 </div>
                                                 <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                             </div><!-- data-item -->
-                                        @endif
-                                    @endif
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                     <div class="data-item" data-bs-toggle="modal" data-bs-target="#payment-details">
                                         <div class="data-col">
                                             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#payment-details">Update Payment Details</button>
@@ -262,16 +228,16 @@
                             <div class="card-inner-group" data-simplebar>
                                 <div class="card-inner">
                                     <div class="user-card">
-                                        <div class="user-avatar {{ $user->avatar ? '' : 'bg-primary' }}">
-                                            @if($user->avatar)
-                                                <img src="{{ asset('storage/images/avatar/' . $user->avatar) }}" alt="{{ $user->name }}">
-                                            @else
-                                                <span>{{ strtoupper(substr($user->name, 0, 2)) }}</span>
-                                            @endif
+                                        <div class="user-avatar <?php echo e($user->avatar ? '' : 'bg-primary'); ?>">
+                                            <?php if($user->avatar): ?>
+                                                <img src="<?php echo e(asset('storage/images/avatar/' . $user->avatar)); ?>" alt="<?php echo e($user->name); ?>">
+                                            <?php else: ?>
+                                                <span><?php echo e(strtoupper(substr($user->name, 0, 2))); ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="user-info">
-                                            <span class="lead-text">{{ $user->name }}</span>
-                                            <span class="sub-text">{{ $user->email }}</span>
+                                            <span class="lead-text"><?php echo e($user->name); ?></span>
+                                            <span class="sub-text"><?php echo e($user->email); ?></span>
                                         </div>
                                         <div class="user-action">
                                             <div class="dropdown">
@@ -290,18 +256,14 @@
                                 <div class="card-inner">
                                     <div class="user-account-info py-0">
                                         <h6 class="overline-title-alt">Author Wallet</h6>
-                                        <div class="user-balance">₦{{ number_format($walletBalance, 2) }} <small class="currency">NGN</small></div>
-                                        <div class="user-balance-sub">Total Books <span>{{ $totalBooks }}</span></div>
+                                        <div class="user-balance">₦<?php echo e(number_format($walletBalance, 2)); ?> <small class="currency">NGN</small></div>
+                                        <div class="user-balance-sub">Total Books <span><?php echo e($totalBooks); ?></span></div>
                                     </div>
                                 </div><!-- .card-inner -->
                                 <div class="card-inner p-0">
                                     <ul class="link-list-menu">
-                                        <li><a class="active" href="{{ route('author.profile.edit') }}"><em class="icon ni ni-user-fill-c"></em><span>Personal Information</span></a></li>
-                                        {{-- <li><a href="{{ route('author.books.index') }}"><em class="icon ni ni-book-fill"></em><span>My Books</span></a></li>
-                                        <li><a href="{{ route('author.wallet.index') }}"><em class="icon ni ni-wallet-fill"></em><span>Wallet & Earnings</span></a></li>
-                                        <li><a href="{{ route('author.payouts.index') }}"><em class="icon ni ni-tranx"></em><span>Payouts</span></a></li>
-                                        <li><a href="{{ route('dashboard') }}"><em class="icon ni ni-dashboard-fill"></em><span>Dashboard</span></a></li>
-                                    </ul> --}}
+                                        <li><a class="active" href="<?php echo e(route('author.profile.edit')); ?>"><em class="icon ni ni-user-fill-c"></em><span>Personal Information</span></a></li>
+                                        
                                 </div><!-- .card-inner -->
                             </div><!-- .card-inner-group -->
                         </div><!-- card-aside -->
@@ -312,13 +274,13 @@
     </div>
 </div>
 
-@include('author.profile.modals.edit-profile')
-@include('author.profile.modals.change-password')
-@include('author.profile.modals.upload-avatar')
-@include('author.profile.modals.payment-details')
-@endsection
+<?php echo $__env->make('author.profile.modals.edit-profile', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php echo $__env->make('author.profile.modals.change-password', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php echo $__env->make('author.profile.modals.upload-avatar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php echo $__env->make('author.profile.modals.payment-details', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
@@ -329,7 +291,7 @@ $(document).ready(function() {
         const formData = new FormData(this);
         
         $.ajax({
-            url: '{{ route("author.profile.update") }}',
+            url: '<?php echo e(route("author.profile.update")); ?>',
             method: 'PATCH',
             data: formData,
             processData: false,
@@ -381,7 +343,7 @@ $(document).ready(function() {
         const formData = new FormData(this);
         
         $.ajax({
-            url: '{{ route("author.profile.password.update") }}',
+            url: '<?php echo e(route("author.profile.password.update")); ?>',
             method: 'PUT',
             data: formData,
             processData: false,
@@ -420,7 +382,7 @@ $(document).ready(function() {
         const formData = new FormData(this);
         
         $.ajax({
-            url: '{{ route("author.profile.avatar.update") }}',
+            url: '<?php echo e(route("author.profile.avatar.update")); ?>',
             method: 'POST',
             data: formData,
             processData: false,
@@ -482,4 +444,5 @@ $(document).ready(function() {
     // This is just for consistency - the form will submit normally without JavaScript
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.author', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/author/profile/index.blade.php ENDPATH**/ ?>

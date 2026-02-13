@@ -7,16 +7,16 @@
                 <h5 class="title">Change Profile Photo</h5>
                 <p class="text-soft">Upload a new profile photo. Recommended size is 400x400 pixels.</p>
                 <form id="avatar-form" class="form-validate is-alter" enctype="multipart/form-data">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <div class="row gy-4">
                         <div class="col-12">
                             <div class="form-group">
                                 <div class="user-avatar user-avatar-xl mx-auto mb-3">
-                                    @if($user->avatar)
-                                        <img src="{{ asset('storage/images/avatar/' . $user->avatar) }}" alt="{{ $user->name }}" id="avatar-preview">
-                                    @else
-                                        <span id="avatar-initials">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
-                                    @endif
+                                    <?php if($user->avatar): ?>
+                                        <img src="<?php echo e(asset('storage/images/avatar/' . $user->avatar)); ?>" alt="<?php echo e($user->name); ?>" id="avatar-preview">
+                                    <?php else: ?>
+                                        <span id="avatar-initials"><?php echo e(strtoupper(substr($user->name, 0, 2))); ?></span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Preview avatar before upload
 document.getElementById('avatar-file').addEventListener('change', function(e) {
@@ -70,4 +70,5 @@ document.getElementById('avatar-file').addEventListener('change', function(e) {
     }
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/author/profile/modals/upload-avatar.blade.php ENDPATH**/ ?>

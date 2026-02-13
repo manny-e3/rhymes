@@ -77,25 +77,26 @@
                                                         <td class="nk-tb-col tb-col-lg">
                                                             <ul class="list-status">
                                                                 <?php if($book->status === 'pending_review'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-warning">Pending Review</span>
-                                                                    <?php elseif($book->status === 'send_review_copy'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-info">Send Review Copy</span>
-                                                                    <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-success">Approved - Awaiting Delivery</span>
-                                                                    <?php elseif($book->status === 'rejected'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
-                                                                    <?php elseif($book->status === 'stocked'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
-                                                                    <?php elseif($book->status === 'edited_pending_approval'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-info">Edited - Notified</span>
-                                                                    <?php elseif($book->status === 'recall_requested'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
-                                                                    <?php elseif($book->status === 'recalled'): ?>
-                                                                        <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
-                                                                    <?php endif; ?>
-                                                                                                    <?php if($book->trashed()): ?>
-                                                                    <li><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Deleted</span></li>
-                                                                <?php endif; ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Pending Review</span>
+                                            <?php elseif($book->status === 'send_review_copy'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-info">Send Review Copy</span>
+                                            <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-success">Approved - Awaiting Delivery</span>
+                                            <?php elseif($book->status === 'rejected'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
+                                            <?php elseif($book->status === 'stocked'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
+                                            <?php elseif($book->status === 'edited_pending_approval'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
+                                            <?php elseif($book->status === 'recall_requested'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
+                                            <?php elseif($book->status === 'recalled'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
+                                            <?php endif; ?>
+                                           
+                                            <?php if($book->trashed()): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-secondary">Deleted</span>
+                                            <?php endif; ?>
                                                             </ul>
                                                         </td>
                                             
@@ -135,7 +136,7 @@
                                                                                             </a>
                                                                                         </li>
                                                                                         <?php endif; ?>
-                                                                                        <?php if($book->status !== 'recall_requested' && $book->status !== 'recalled'): ?>
+                                                                                        <?php if($book->status === 'stocked' &&  $book->status !== 'recall_requested' && $book->status !== 'recalled'): ?>
                                                                                         <li class="divider"></li>
                                                                                         <li>
                                                                                             <a href="#" onclick="requestBookRecall(<?php echo e($book->id); ?>); return false;">
@@ -153,7 +154,10 @@
                                                                                         </a>
                                                                                     </li>
                                                                                 <?php else: ?>
-                                                                                    <?php if($book->status === 'pending_review' || $book->status === 'rejected'): ?>
+                                                                                    <?php if($book->status === 'pending_review'): ?>
+                                                    
+                                                                                    <?php endif; ?>
+                                                                                         <?php if($book->status === 'rejected'): ?>
                                                                                         <li>
                                                                                             <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">
                                                                                                 <em class="icon ni ni-repeat"></em>
@@ -608,14 +612,14 @@ unset($__errorArgs, $__bag); ?>
                                                 <div class="form-control-wrap">
                                                     <span class="badge badge-sm 
                                                         <?php switch($book->status):
-                                                            case ('pending_review'): ?> badge-warning <?php break; ?>
-                                                            <?php case ('send_review_copy'): ?> badge-info <?php break; ?>
-                                                            <?php case ('approved_awaiting_delivery'): ?> badge-success <?php break; ?>
-                                                            <?php case ('stocked'): ?> badge-info <?php break; ?>
-                                                            <?php case ('edited_pending_approval'): ?> badge-warning <?php break; ?>
-                                                            <?php case ('recall_requested'): ?> badge-warning <?php break; ?>
-                                                            <?php case ('recalled'): ?> badge-danger <?php break; ?>
-                                                            <?php case ('rejected'): ?> badge-danger <?php break; ?>
+                                                            case ('pending_review'): ?> badge-dim bg-warning <?php break; ?>
+                                                            <?php case ('send_review_copy'): ?> badge-dim bg-warning <?php break; ?>
+                                                            <?php case ('approved_awaiting_delivery'): ?> badge-dim bg-success <?php break; ?>
+                                                            <?php case ('stocked'): ?> badge-dim bg-success <?php break; ?>
+                                                            <?php case ('edited_pending_approval'): ?> badge-dim bg-warning <?php break; ?>
+                                                            <?php case ('recall_requested'): ?> badge-dim bg-warning <?php break; ?>
+                                                            <?php case ('recalled'): ?> badge-dim bg-secondary <?php break; ?>
+                                                            <?php case ('rejected'): ?> badge-dim bg-danger <?php break; ?>
                                                         <?php endswitch; ?>
                                                     "><?php echo e(ucfirst(str_replace('_', ' ', $book->status))); ?></span>
                                                 </div>
@@ -673,9 +677,7 @@ unset($__errorArgs, $__bag); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <?php if($book->status === 'pending_review' || $book->status === 'rejected' || $book->status === 'edited_pending_approval'): ?>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">Edit Book</button>
-                    <?php endif; ?>
+                    
                 </div>
             </div>
         </div>

@@ -82,15 +82,13 @@ class AuthorProfileController extends Controller
         $user->phone = $request->phone;
         
         // Update profile data
-        $profileData = $user->profile_data ?? [];
-        $profileData['display_name'] = $request->display_name;
-        $profileData['date_of_birth'] = $request->date_of_birth;
-        $profileData['address'] = $request->address;
-        $profileData['bio'] = $request->bio;
-        $profileData['website'] = $request->website;
-        $profileData['social_links'] = $request->social_links ?? [];
+        $user->display_name = $request->display_name;
+        $user->date_of_birth = $request->date_of_birth;
+        $user->address = $request->address;
+        $user->bio = $request->bio;
+        $user->website = $request->website;
+        $user->social_links = $request->social_links ?? [];
         
-        $user->profile_data = $profileData;
         $user->save();
 
         return response()->json([

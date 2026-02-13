@@ -155,9 +155,7 @@
                                         <h6 class="title">Book Sales Performance</h6>
                                         <p>Revenue breakdown by your published books</p>
                                     </div>
-                                    <div class="card-tools">
-                                        <a href="" class="link">View Details</a>
-                                    </div>
+                                    
                                 </div>
                                 <?php if(count($analytics['analytics']['book_sales']) > 0): ?>
                                     <div class="nk-tb-list nk-tb-orders">
@@ -203,9 +201,7 @@
                                         <h6 class="title">Recent Activity</h6>
                                         <p>Latest updates on your books and transactions</p>
                                     </div>
-                                    <div class="card-tools">
-                                        <a href="" class="link">View All</a>
-                                    </div>
+                                    
                                 </div>
                                 
                                 <?php if(count($analytics['recent']['books']) > 0 || count($analytics['recent']['transactions']) > 0): ?>

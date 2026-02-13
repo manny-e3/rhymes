@@ -6,24 +6,24 @@
             <div class="modal-body modal-body-lg">
                 <h5 class="title">Update Profile</h5>
                 <form id="profile-edit-modal-form" class="form-validate is-alter">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <div class="row gy-4">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label" for="full-name">Full Name</label>
-                                <input type="text" class="form-control form-control-lg" id="full-name" name="name" value="{{ $user->name }}" placeholder="Enter Full name" required>
+                                <input type="text" class="form-control form-control-lg" id="full-name" name="name" value="<?php echo e($user->name); ?>" placeholder="Enter Full name" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label" for="phone-no">Phone Number</label>
-                                <input type="text" class="form-control form-control-lg" id="phone-no" name="phone" value="{{ $user->phone ?? '' }}" placeholder="Phone Number">
+                                <input type="text" class="form-control form-control-lg" id="phone-no" name="phone" value="<?php echo e($user->phone ?? ''); ?>" placeholder="Phone Number">
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="form-label" for="address-line-1">Address</label>
-                                <input type="text" class="form-control form-control-lg" id="address-line-1" name="address" value="{{ $user->address }}" placeholder="Enter your address">
+                                <input type="text" class="form-control form-control-lg" id="address-line-1" name="address" value="<?php echo e($user->address); ?>" placeholder="Enter your address">
                             </div>
                         </div>
                         <div class="col-12">
@@ -43,7 +43,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     $(document).ready(function() {
         // Check if form exists before binding event
@@ -73,7 +73,7 @@
                 submitBtn.prop('disabled', true).text('Updating...');
                 
                 $.ajax({
-                    url: '{{ route("author.profile.update") }}',
+                    url: '<?php echo e(route("author.profile.update")); ?>',
                     method: 'POST',
                     data: formData,
                     processData: false,
@@ -131,4 +131,5 @@
         }
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/author/profile/modals/edit-profile.blade.php ENDPATH**/ ?>
