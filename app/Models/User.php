@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'payment_details',
         'promoted_to_author_at',
+        'otp_code',
         'otp_expires_at',
         'otp_enabled',
         'address',
@@ -112,8 +113,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function generateOTP()
     {
-        // Generate a 6-digit random number
-        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Generate a 6-digit random number (100000-999999) to avoid leading zero issues
+        $otpCode = (string) random_int(100000, 999999);
         
         // Set expiration time (10 minutes from now)
         $expiresAt = now()->addMinutes(10);
@@ -145,12 +146,24 @@ class User extends Authenticatable implements MustVerifyEmail
         }
         
         // Check if OTP has expired
+        if (!$this->otp_expires_at) {
+            return false;
+        }
+
         if ($this->otp_expires_at->isPast()) {
             return false;
         }
         
         // Check if OTP matches
-        return hash_equals($this->otp_code, $otpCode);
+        if (is_null($this->otp_code)) {
+            return false;
+        }
+
+        // Case insensitive comparison for user input just in case
+        $otpCode = trim($otpCode);
+        $storedCode = trim((string)$this->otp_code);
+
+        return hash_equals($storedCode, $otpCode);
     }
 
     /**

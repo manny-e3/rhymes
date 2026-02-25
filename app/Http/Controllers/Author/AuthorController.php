@@ -11,9 +11,12 @@ use Carbon\Carbon;
 
 class AuthorController extends Controller
 {
-    public function __construct()
+    protected $walletService;
+
+    public function __construct(\App\Services\WalletService $walletService)
     {
         $this->middleware(['auth', 'role:author']);
+        $this->walletService = $walletService;
     }
 
     public function dashboard()
@@ -55,7 +58,9 @@ class AuthorController extends Controller
             ->sum('amount_requested');
 
         // Calculate available balance (earnings minus payouts)
-        $availableBalance = $totalEarnings - $totalPayouts - $pendingPayouts;
+        // Calculate available balance (earnings minus payouts)
+        $walletData = $this->walletService->getWalletOverview($user);
+        $availableBalance = $walletData['available_balance'];
 
         // Get recent data
         $recentBooks = Book::where('user_id', $user->id)

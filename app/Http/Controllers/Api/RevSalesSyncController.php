@@ -106,10 +106,6 @@ class RevSalesSyncController extends Controller
                 }
             }
             
-            Log::info('ERPREV Sales Sync API - Starting sync', [
-                'filters' => $filters,
-                'debug_mode' => $debug
-            ]);
             
             // Fetch sales data from ERPREV
             $result = $this->revService->getSalesItems($filters);
@@ -153,9 +149,6 @@ class RevSalesSyncController extends Controller
             // Get book mapping by ISBN for matching
             $bookIsbnMap = $this->getBookIsbnMap();
             
-            Log::info('ERPREV Sales Sync - Data maps created', [
-                'book_map_size' => count($bookIsbnMap)
-            ]);
             
             // Process each sale record
             foreach ($salesData as $sale) {
@@ -165,7 +158,6 @@ class RevSalesSyncController extends Controller
                     $productId = $sale['ProductID'] ?? $sale['product_id'] ?? null;
                     
                     if (!$barcode && !$productId) {
-                        Log::warning('Missing barcode and product ID in sale record', ['sale' => $sale]);
                         $errorCount++;
                         continue;
                     }
@@ -179,10 +171,6 @@ class RevSalesSyncController extends Controller
                     }
                     
                     if (!$book) {
-                        Log::warning('Book with ISBN/ProductID not found in system', [
-                            'barcode' => $barcode,
-                            'product_id' => $productId
-                        ]);
                         $bookNotFoundCount++;
                         $errorCount++;
                         continue;
@@ -190,11 +178,6 @@ class RevSalesSyncController extends Controller
                     
                     // Check if book has been accepted
                     if ($book->status !== 'accepted' && $book->status !== 'stocked') {
-                        Log::warning('Book not accepted or stocked', [
-                            'book_id' => $book->id,
-                            'book_title' => $book->title,
-                            'status' => $book->status
-                        ]);
                         $bookNotAcceptedCount++;
                         $errorCount++;
                         continue;
@@ -202,11 +185,6 @@ class RevSalesSyncController extends Controller
                     
                     // Ensure the book has a user_id
                     if (!$book->user_id) {
-                        Log::warning('Book has no associated user', [
-                            'book_id' => $book->id,
-                            'book_title' => $book->title,
-                            'user_id' => $book->user_id
-                        ]);
                         $errorCount++;
                         continue;
                     }
@@ -224,11 +202,6 @@ class RevSalesSyncController extends Controller
                     $sellingPrice = $sale['SellingPrice'] ?? $sale['selling_price'] ?? $sale['UnitPrice'] ?? $sale['unit_price'] ?? 0;
                     
                     if ($sellingPrice <= 0) {
-                        Log::warning('Invalid or missing selling price in sale record', [
-                            'sale' => $sale,
-                            'book_id' => $book->id,
-                            'book_title' => $book->title
-                        ]);
                         $errorCount++;
                         continue;
                     }
@@ -263,18 +236,6 @@ class RevSalesSyncController extends Controller
                         continue;
                     }
                     
-                    Log::info('ERPREV Sales Sync - Processing sale', [
-                        'book_id' => $book->id,
-                        'book_title' => $book->title,
-                        'isbn' => $book->isbn,
-                        'barcode' => $barcode,
-                        'product_id' => $productId,
-                        'selling_price' => $sellingPrice,
-                        'quantity' => $quantity,
-                        'wallet_amount' => $walletAmount,
-                        'user_id' => $book->user_id
-                    ]);
-                    
                     // Create wallet transaction for the author using book price (70% to author)
                     $transaction = WalletTransaction::create([
                         'user_id' => $book->user_id, // Explicitly set the user_id
@@ -298,11 +259,6 @@ class RevSalesSyncController extends Controller
                     
                     $processedCount++;
                 } catch (\Exception $e) {
-                    Log::error('ERPREV Sales Sync API - Error processing sale', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                        'sale_data' => $sale ?? null
-                    ]);
                     $errorCount++;
                 }
             }
@@ -311,15 +267,18 @@ class RevSalesSyncController extends Controller
             $executionTime = ($endTime - $startTime) * 1000; // Convert to milliseconds
             
             // Log summary
-            Log::info('ERPREV Sales Sync API - Completed', [
-                'processed' => $processedCount,
-                'duplicates' => $duplicateCount,
-                'books_not_found' => $bookNotFoundCount,
-                'books_not_accepted' => $bookNotAcceptedCount,
-                'other_errors' => ($errorCount - $bookNotFoundCount - $duplicateCount - $bookNotAcceptedCount),
-                'filters' => $filters,
-                'execution_time_ms' => round($executionTime, 2)
-            ]);
+            // Log summary only if there's a change or error
+            if ($processedCount > 0 || $errorCount > 0) {
+                Log::info('ERPREV Sales Sync API - Completed', [
+                    'processed' => $processedCount,
+                    'duplicates' => $duplicateCount,
+                    'books_not_found' => $bookNotFoundCount,
+                    'books_not_accepted' => $bookNotAcceptedCount,
+                    'other_errors' => ($errorCount - $bookNotFoundCount - $duplicateCount - $bookNotAcceptedCount),
+                    'filters' => $filters,
+                    'execution_time_ms' => round($executionTime, 2)
+                ]);
+            }
             
             return response()->json([
                 'success' => true,

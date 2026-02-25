@@ -96,8 +96,8 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">₦<?php echo e(number_format($analytics['stats']['wallet_balance'], 2)); ?></span>
-                                    <span class="sub-title">Available: $<?php echo e(number_format($analytics['stats']['available_balance'], 2)); ?></span>
+                                    <span class="amount">₦<?php echo e(number_format($analytics['stats']['available_balance'], 2)); ?></span>
+                                    
                                 </div>
                             </div>
                         </div>

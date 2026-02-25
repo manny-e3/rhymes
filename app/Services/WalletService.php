@@ -20,9 +20,11 @@ class WalletService
         $transactions = $this->getPaginatedTransactionsByUser($user->id, $filters);
         $salesByBook = $this->getSalesByBookForUser($user->id);
         $analytics = $this->getWalletAnalytics($user);
+        $availableBalance = $this->getAvailableBalance($user);
 
         return [
             'balance' => $balance,
+            'available_balance' => $availableBalance,
             'transactions' => $transactions,
             'salesByBook' => $salesByBook,
             'analytics' => $analytics,

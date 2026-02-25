@@ -220,7 +220,13 @@ class NotificationManager {
 
     async loadUnreadNotifications() {
         try {
-            const response = await fetch(`${getBaseUrl()}/notifications/unread`);
+            const response = await fetch(`${getBaseUrl()}/notifications/unread`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            });
             const data = await response.json();
 
             this.unreadCount = data.unread_count;
