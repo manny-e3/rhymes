@@ -56,15 +56,32 @@
                                             <span class="badge badge-info">Stocked</span>
                                         @elseif($book->status === 'edited_pending_approval')
                                             <span class="badge badge-warning">Edited - Awaiting Approval</span>
-                                        @elseif($book->status === 'recall_requested')
-                                            <span class="badge badge-warning">Recall Requested</span>
+                                        @elseif($book->status === 'retrieval_requested')
+                                            <span class="badge badge-warning">Retrieval Requested</span>
                                         @elseif($book->status === 'recalled')
-                                            <span class="badge badge-danger">Recalled</span>
+                                            <span class="badge badge-danger">Retrieved</span>
                                         @endif
                                     </div>
                                 </div>
                                 
                                 <div class="row g-4">
+                                    <div class="col-12">
+                                        <div class="form-group text-center">
+                                            <label class="form-label">Book Cover</label>
+                                            <div class="mt-2">
+                                                @if($book->image)
+                                                    <img src="{{ Storage::url($book->image) }}" alt="{{ $book->title }}" class="img-thumbnail" style="max-height: 300px;">
+                                                    <div class="mt-2">
+                                                        <a href="{{ Storage::url($book->image) }}" class="btn btn-sm btn-outline-primary" download>
+                                                            <em class="icon ni ni-download-cloud"></em><span>Download Image</span>
+                                                        </a>
+                                                    </div>
+                                                @else
+                                                    <div class="p-4 bg-light text-soft">No image uploaded</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label class="form-label">Title</label>
@@ -120,19 +137,27 @@
                                         </div>
                                     @endif
                                     
-                                    <!-- Recall Request Information -->
-                                    @if($book->recall_requested)
+                                    <!-- Retrieval Request Information -->
+                                    @if($book->status === 'retrieval_requested' || ($book->status === 'retrieved' && $book->retrieval_location))
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label class="form-label">Recall Request</label>
+                                                <label class="form-label">Retrieval Request</label>
                                                 <div class="alert alert-warning">
                                                     <div class="alert-body">
-                                                        <h6>Recall Requested</h6>
-                                                        <p><strong>Requested at:</strong> {{ $book->recall_requested_at->format('M d, Y \a\t h:i A') }}</p>
-                                                        @if($book->recall_reason)
-                                                            <p><strong>Reason:</strong> {{ $book->recall_reason }}</p>
+                                                        <h6>Retrieval Requested</h6>
+                                                        <p><strong>Location:</strong> {{ $book->retrieval_location }}</p>
+                                                        <p><strong>Quantity:</strong> {{ $book->retrieval_quantity }} copies</p>
+                                                        @if($book->retrieval_reason)
+                                                            <p><strong>Reason:</strong> {{ $book->retrieval_reason }}</p>
                                                         @else
                                                             <p><strong>Reason:</strong> No reason provided</p>
+                                                        @endif
+                                                        
+                                                        @if($book->status === 'retrieval_requested')
+                                                            <div class="mt-3">
+                                                                <button class="btn btn-success" onclick="handleRetrieval({{ $book->id }}, 'approve')">Approve Retrieval</button>
+                                                                <button class="btn btn-danger" onclick="handleRetrieval({{ $book->id }}, 'deny')">Deny Retrieval</button>
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -206,8 +231,8 @@
                                                             </tr>
                                                             <tr>
                                                                 <td><strong>Type</strong></td>
-                                                                <td>{{ $book->original_data['book_type'] ?? 'N/A' }}</td>
-                                                                <td>{{ $book->book_type }}</td>
+                                                                <td>{{ ucwords(str_replace('_', ' ', $book->original_data['book_type'] ?? 'N/A')) }}</td>
+                                                                <td>{{ ucwords(str_replace('_', ' ', $book->book_type)) }}</td>
                                                                 <td>
                                                                     @if(($book->original_data['book_type'] ?? '') !== $book->book_type)
                                                                         <span class="badge bg-warning">Changed</span>
@@ -584,6 +609,52 @@ function submitReview() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
     modal.hide();
 }
+    /**
+     * Handle retrieval actions (approve/deny)
+     */
+    function handleRetrieval(bookId, action) {
+        const actionText = action === 'approve' ? 'approve' : 'deny';
+        const confirmBtnClass = action === 'approve' ? 'btn-success' : 'btn-danger';
+        
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `You are about to ${actionText} this retrieval request.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `Yes, ${actionText} it!`,
+            confirmButtonColor: action === 'approve' ? '#1ee0ac' : '#e85347',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch(`/admin/books/${bookId}/retrieval-action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ action: action })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        return data;
+                    } else {
+                        throw new Error(data.message || `Failed to ${actionText} retrieval request`);
+                    }
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(`Request failed: ${error}`);
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Success!', result.value.message, 'success').then(() => {
+                    location.reload();
+                });
+            }
+        });
+    }
 </script>
 @endpush
 @endsection

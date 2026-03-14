@@ -91,6 +91,7 @@
                         <div class="card-inner p-0">
                             <div class="nk-tb-list nk-tb-ulist">
                                 <div class="nk-tb-item nk-tb-head">
+                                    <div class="nk-tb-col"><span class="sub-text">Cover</span></div>
                                     <div class="nk-tb-col"><span class="sub-text">Book</span></div>
                                     <div class="nk-tb-col tb-col-mb"><span class="sub-text">Author</span></div>
                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
@@ -146,10 +147,22 @@
                                 @forelse($books as $book)
                                     <div class="nk-tb-item">
                                         <div class="nk-tb-col">
-                                            <div class="user-card">
-                                                <div class="user-avatar bg-primary-dim">
-                                                    <em class="icon ni ni-book"></em>
+                                            @if($book->image)
+                                                <div class="user-card">
+                                                    <div class="user-avatar bg-transparent">
+                                                        <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover">
+                                                            <img src="{{ asset('storage/' . $book->image) }}" alt="{{ $book->title }}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        </a>
+                                                    </div>
                                                 </div>
+                                            @else
+                                                <div class="user-avatar bg-light">
+                                                    <em class="icon ni ni-img-fill text-soft" style="font-size: 20px;"></em>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="nk-tb-col">
+                                            <div class="user-card">
                                                 <div class="user-info">
                                                     <span class="tb-lead">{{ $book->title }}</span>
                                                     <span>{{ $book->genre }} • ₦{{ number_format($book->price, 2) }}</span>
@@ -173,10 +186,10 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                             @elseif($book->status === 'edited_pending_approval')
                                                 <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
-                                            @elseif($book->status === 'recall_requested')
-                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
+                                            @elseif($book->status === 'retrieval_requested')
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Retrieval Requested</span>
                                             @elseif($book->status === 'recalled')
-                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Retrieved</span>
                                             @endif
                                            
                                             @if($book->trashed())
@@ -210,13 +223,13 @@
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="#" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-{{$book->id}}"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
-                                                                 @if($book->status == 'recall_requested')
+                                                                 @if($book->status == 'retrieval_requested')
                                                                         <li class="divider"></li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRetrievalModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Retrieval</span></a>
                                                                         </li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRetrievalModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Retrieval</span></a>
                                                                         </li>
                                                                         @endif
                                                                        
@@ -265,17 +278,17 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
-                                                                        @if($book->recall_requested)
+                                                                        @if($book->status === 'retrieval_requested')
                                                                         <li class="divider"></li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRetrievalModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Retrieval</span></a>
                                                                         </li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRetrievalModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Retrieval</span></a>
                                                                         </li>
                                                                         @else
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#recallBookModal-{{ $book->id }}"><em class="icon ni ni-exclamation-circle"></em><span>Recall Book</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#recallBookModal-{{ $book->id }}"><em class="icon ni ni-exclamation-circle"></em><span>Retrieve Book</span></a>
                                                                         </li>
                                                                         @endif
                                                                                                                                             
@@ -283,13 +296,13 @@
                                                                         <li>
                                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
                                                                         </li>
-                                                                        @if($book->recall_requested)
+                                                                        @if($book->status === 'retrieval_requested')
                                                                         <li class="divider"></li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRecallModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRetrievalModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Retrieval</span></a>
                                                                         </li>
                                                                         <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRecallModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Recall</span></a>
+                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRetrievalModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Retrieval</span></a>
                                                                         </li>
                                                                         @endif
                                                                     @else
@@ -361,7 +374,26 @@
                 @csrf
                 @method('PATCH')
                 <div class="modal-body">
-                    <div class="row mb-3">
+                    <div class="row g-4 mb-3">
+                        <div class="col-md-4">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 150px;">
+                                    @if($book->image)
+                                        <img src="{{ asset('storage/' . $book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 200px; object-fit: contain;">
+                                        <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-xs btn-outline-primary">
+                                            <em class="icon ni ni-download"></em><span>Download</span>
+                                        </a>
+                                    @else
+                                        <div class="text-center text-soft">
+                                            <em class="icon ni ni-book-read" style="font-size: 32px;"></em>
+                                            <p class="mt-1 small">No Cover</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row mb-3">
                         <div class="col-md-6">
                             <p><strong>Author:</strong> {{ $book->user->name }}</p>
                             <p><strong>Email:</strong> {{ $book->user->email }}</p>
@@ -376,6 +408,10 @@
                                     <span class="badge badge-sm badge-dim bg-outline-info">Send Review Copy</span>
                                 @elseif($book->status === 'approved_awaiting_delivery')
                                     <span class="badge badge-sm badge-dim bg-outline-success">Approved - AWaiting Delivery</span>
+                                    @elseif($book->status === 'retrieval_requested')
+                                        <span class="badge badge-sm badge-dim bg-outline-warning">Retrieval Requested</span>
+                                    @elseif($book->status === 'recalled')
+                                        <span class="badge badge-sm badge-dim bg-outline-danger">Retrieved</span>
                                 @elseif($book->status === 'rejected')
                                     <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
                                 @elseif($book->status === 'stocked')
@@ -392,6 +428,8 @@
                             <p><strong>Submitted:</strong> {{ $book->created_at->format('M d, Y') }}</p>
                         </div>
                     </div>
+                </div>
+            </div>
                                     
                     <!-- Original vs New Data Comparison for edited books -->
                     @if($book->status === 'edited_pending_approval' && $book->original_data)
@@ -481,6 +519,30 @@
                                                 @endif
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td><strong>Image</strong></td>
+                                            <td>
+                                                @if(isset($book->original_data['image']))
+                                                    <img src="{{ Storage::url($book->original_data['image']) }}" alt="Original" style="max-height: 50px;">
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($book->image)
+                                                    <img src="{{ Storage::url($book->image) }}" alt="New" style="max-height: 50px;">
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if(($book->original_data['image'] ?? '') !== $book->image)
+                                                    <span class="badge bg-warning">Changed</span>
+                                                @else
+                                                    <span class="badge bg-success">Unchanged</span>
+                                                @endif
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -528,7 +590,7 @@
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="status" id="recalled-{{$book->id}}" value="recalled" 
                                        {{ $book->status === 'recalled' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="recalled-{{$book->id}}">Recall Book</label>
+                                <label class="form-check-label" for="recalled-{{$book->id}}">Retrieve Book</label>
                             </div>
                             
                         </div>
@@ -566,7 +628,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row mb-4">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card card-bordered h-100">
+                            <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 200px;">
+                                @if($book->image)
+                                    <img src="{{ asset('storage/' . $book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 280px; object-fit: contain;">
+                                    <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-sm btn-outline-primary">
+                                        <em class="icon ni ni-download"></em><span>Download Cover</span>
+                                    </a>
+                                @else
+                                    <div class="text-center text-soft">
+                                        <em class="icon ni ni-book-read" style="font-size: 48px;"></em>
+                                        <p class="mt-2 small">No Cover</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-3">
                     <div class="col-md-6">
                         <h6 class="small text-muted">Book Information</h6>
                         <table class="table table-borderless table-sm">
@@ -617,7 +698,7 @@
                                     @elseif($book->status === 'stocked')
                                         <span class="badge badge-sm bg-info">Stocked</span>
                                     @elseif($book->status === 'recalled')
-                                        <span class="badge badge-sm bg-warning">recalled</span>
+                                        <span class="badge badge-sm bg-warning">Retrieved</span>
                                     @endif
                                 </td>
                             </tr>
@@ -652,6 +733,8 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
                 
                 @if($book->description)
                 <div class="row mb-4">
@@ -944,31 +1027,31 @@
 </div>
 @endforeach
 
-<!-- Deny Recall Modal for each book -->
+<!-- Deny Retrieval Modal for each book -->
 @foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="denyRecallModal-{{$book->id}}" aria-labelledby="denyRecallModalLabel-{{$book->id}}" aria-hidden="true">
+<div class="modal fade" tabindex="-1" id="denyRetrievalModal-{{$book->id}}" aria-labelledby="denyRetrievalModalLabel-{{$book->id}}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="denyRecallModalLabel-{{$book->id}}">Deny Recall Request - {{ $book->title }}</h5>
+                <h5 class="modal-title" id="denyRetrievalModalLabel-{{$book->id}}">Deny Retrieval Request - {{ $book->title }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('admin.books.recall-action', $book) }}">
+            <form method="POST" action="{{ route('admin.books.retrieval-action', $book) }}">
                 @csrf
                 <input type="hidden" name="action" value="deny">
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        <p>Are you sure you want to deny this recall request? This will cancel the recall and maintain the book's current status.</p>
+                        <p>Are you sure you want to deny this retrieval request? This will cancel the retrieval and maintain the book's current status.</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about why the recall was denied..."></textarea>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about why the retrieval was denied..."></textarea>
                         <div class="form-note">These notes will be included in the email sent to the author.</div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Deny Recall</button>
+                    <button type="submit" class="btn btn-danger">Deny Retrieval</button>
                 </div>
             </form>
         </div>
@@ -982,15 +1065,15 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="approveRecallModalLabel-{{$book->id}}">Approve Recall Request - {{ $book->title }}</h5>
+                <h5 class="modal-title" id="approveRetrievalModalLabel-{{$book->id}}">Approve Retrieval Request - {{ $book->title }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('admin.books.recall-action', $book) }}">
+            <form method="POST" action="{{ route('admin.books.retrieval-action', $book) }}">
                 @csrf
                 <input type="hidden" name="action" value="approve">
                 <div class="modal-body">
                     <div class="alert alert-warning">
-                        <p>Are you sure you want to approve this recall request? This will update the book status to "Recalled".</p>
+                        <p>Are you sure you want to approve this retrieval request? This will update the book status to "Retrieved".</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Admin Notes (Optional)</label>
@@ -1000,7 +1083,7 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Approve Recall</button>
+                    <button type="submit" class="btn btn-success">Approve Retrieval</button>
                 </div>
             </form>
         </div>
@@ -1008,13 +1091,13 @@
 </div>
 @endforeach
 
-<!-- Recall Book Modal for each book -->
+<!-- Retrieval Book Modal for each book -->
 @foreach($books as $book)
 <div class="modal fade" tabindex="-1" id="recallBookModal-{{$book->id}}" aria-labelledby="recallBookModalLabel-{{$book->id}}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="recallBookModalLabel-{{$book->id}}">Recall Book - {{ $book->title }}</h5>
+                <h5 class="modal-title" id="recallBookModalLabel-{{$book->id}}">Retrieve Book - {{ $book->title }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('admin.books.review', $book) }}">
@@ -1023,17 +1106,17 @@
                 <input type="hidden" name="status" value="recalled">
                 <div class="modal-body">
                     <div class="alert alert-warning">
-                        <p>Are you sure you want to recall this book? This will change the book status to "Recalled" and notify the author.</p>
+                        <p>Are you sure you want to retrieve this book? This will change the book status to "Retrieved" and notify the author.</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Admin Notes (Required)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reason for recalling the book..." required></textarea>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reason for retrieving the book..." required></textarea>
                         <div class="form-note">These notes will be included in the email sent to the author.</div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Recall Book</button>
+                    <button type="submit" class="btn btn-warning">Retrieve Book</button>
                 </div>
             </form>
         </div>
@@ -1222,12 +1305,12 @@ function handleRecallRequest(bookId, action) {
     let title, text, confirmText;
     
     if (action === 'approve') {
-        title = 'Approve Recall Request';
-        text = 'Are you sure you want to approve this recall request?';
+        title = 'Approve Retrieval Request';
+        text = 'Are you sure you want to approve this retrieval request?';
         confirmText = 'Approve';
     } else {
-        title = 'Deny Recall Request';
-        text = 'Are you sure you want to deny this recall request?';
+        title = 'Deny Retrieval Request';
+        text = 'Are you sure you want to deny this retrieval request?';
         confirmText = 'Deny';
     }
     
@@ -1242,8 +1325,8 @@ function handleRecallRequest(bookId, action) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Make AJAX request to handle the recall action
-            fetch(`/admin/books/${bookId}/recall-action`, {
+            // Make AJAX request to handle the retrieval action
+            fetch(`/admin/books/${bookId}/retrieval-action`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

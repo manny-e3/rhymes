@@ -253,7 +253,7 @@ class BookReviewService
     {
         Log::debug('BookReviewService: Validating review data', $data);
         
-        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked', 'recall_requested', 'recalled'];
+        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked', 'retrieval_requested', 'retrieved'];
         
         if (!isset($data['status']) || !in_array($data['status'], $validStatuses)) {
             Log::error('BookReviewService: Invalid book status provided', [

@@ -23,15 +23,21 @@ class Book extends Model
         'rev_book_id',
         'quantity', // Added quantity field
         'original_data',
-        'recall_requested',
-        'recall_reason',
-        'recall_requested_at',
+        'retrieval_requested',
+        'retrieval_reason',
+        'retrieval_requested_at',
+        'image',
+        'retrieval_location',
+        'retrieval_quantity',
     ];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'retrieval_requested' => 'boolean',
+            'retrieval_requested_at' => 'datetime',
+            'original_data' => 'array',
         ];
     }
 

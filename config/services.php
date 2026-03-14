@@ -56,4 +56,8 @@ return [
         'app_cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
     ],
 
+    'zeptomail' => [
+        'domain_key' => env('MAIL_PASSWORD'), // Using MAIL_PASSWORD as it holds the token
+    ],
+
 ];

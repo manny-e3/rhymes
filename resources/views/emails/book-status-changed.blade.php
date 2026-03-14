@@ -370,11 +370,11 @@
                     </a>
                 </div>
             @elseif(trim($newStatus) === 'recalled')
-                <p>Your book "<strong>{{ $book->title }}</strong>" status has been updated to <strong>{{ ucfirst(str_replace('_', ' ', $newStatus)) }}</strong>.</p>
+                <p>Your book "<strong>{{ $book->title }}</strong>" status has been updated to <strong>Retrieved</strong>.</p>
                 
                 <div class="status-box rejected-info">
-                    <h3 class="status-title"><i>⚠️</i> Book Recalled</h3>
-                    <p>Your book has been recalled from our inventory.</p>
+                    <h3 class="status-title"><i>⚠️</i> Book Retrieved</h3>
+                    <p>Your book has been retrieved from our inventory.</p>
                     
                     @if((isset($adminNotes) && $adminNotes) || $book->admin_notes)
                         <div class="admin-notes">
@@ -389,7 +389,7 @@
                         <p>No additional notes provided.</p>
                     @endif
                     
-                    <p>If you have questions about this recall, please contact us.</p>
+                    <p>If you have questions about this retrieval, please contact us.</p>
                 </div>
                 
                 <div class="cta-button-container">

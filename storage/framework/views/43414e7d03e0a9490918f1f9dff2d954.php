@@ -32,6 +32,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>S/N</th>
+                                                        <th>Cover</th>
                                                         <th>Book Details</th>
                                                         <th>ISBN</th>
                                                         <th>Type</th>
@@ -49,6 +50,15 @@
                                                         <td class="nk-tb-col">
                                                             <span><?php echo e($loop->iteration); ?></span>
                                                         </td>
+                                                        <td class="nk-tb-col">
+                                                            <div class="user-avatar bg-light border">
+                                                                <?php if($book->image): ?>
+                                                                    <img src="<?php echo e(asset('storage/' . $book->image)); ?>" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                                <?php else: ?>
+                                                                    <em class="icon ni ni-book-read text-soft"></em>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </td>
                                             
                                                         <td class="nk-tb-col">
                                                             <div class="user-card">
@@ -64,7 +74,7 @@
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-mb">
-                                                            <?php echo e($book->book_type); ?>
+                                                            <?php echo e(ucwords(str_replace('_', ' ', $book->book_type))); ?>
 
                                                         </td>
                                             
@@ -88,10 +98,10 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                             <?php elseif($book->status === 'edited_pending_approval'): ?>
                                                 <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
-                                            <?php elseif($book->status === 'recall_requested'): ?>
-                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
-                                            <?php elseif($book->status === 'recalled'): ?>
-                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
+                                            <?php elseif($book->status === 'retrieval_requested'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Retrieval Requested</span>
+                                            <?php elseif($book->status === 'retrieved'): ?>
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Retrieved</span>
                                             <?php endif; ?>
                                            
                                             <?php if($book->trashed()): ?>
@@ -124,24 +134,24 @@
                                                                                 <li>
                                                                                     <a href="#" data-bs-toggle="modal" data-bs-target="#viewBook-<?php echo e($book->id); ?>">
                                                                                         <em class="icon ni ni-eye"></em>
-                                                                                        <span>View Details</span>
+                                                                                        <span>View Book</span>
                                                                                     </a>
                                                                                 </li>
 
-                                                                                 <?php if($book->status === 'stocked' || $book->status === 'edited_pending_approval' || $book->status === 'recall_requested'): ?>
+                                                                                 <?php if($book->status === 'stocked'): ?>
                                                                                  <li>
-                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">
-                                                                                                <em class="icon ni ni-repeat"></em>
-                                                                                                <span>Edit</span>
-                                                                                            </a>
-                                                                                        </li>
+                                                                                             <a href="<?php echo e(route('author.books.edit', $book->id)); ?>">
+                                                                                                 <em class="icon ni ni-edit-fill"></em>
+                                                                                                 <span>Edit Book</span>
+                                                                                             </a>
+                                                                                         </li>
                                                                                         <?php endif; ?>
-                                                                                        <?php if($book->status === 'stocked' &&  $book->status !== 'recall_requested' && $book->status !== 'recalled'): ?>
+                                                                                        <?php if($book->status === 'stocked' &&  $book->status !== 'retrieval_requested' && $book->status !== 'retrieved'): ?>
                                                                                         <li class="divider"></li>
                                                                                         <li>
-                                                                                            <a href="#" onclick="requestBookRecall(<?php echo e($book->id); ?>); return false;">
+                                                                                            <a href="#" onclick="requestBookRetrieval(<?php echo e($book->id); ?>); return false;">
                                                                                                 <em class="icon ni ni-exclamation-circle"></em>
-                                                                                                <span>Request Recall</span>
+                                                                                                <span>Retrieval of Book</span>
                                                                                             </a>
                                                                                         </li>
                                                                                         <?php endif; ?>
@@ -158,12 +168,12 @@
                                                     
                                                                                     <?php endif; ?>
                                                                                          <?php if($book->status === 'rejected'): ?>
-                                                                                        <li>
-                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-<?php echo e($book->id); ?>">
-                                                                                                <em class="icon ni ni-repeat"></em>
-                                                                                                <span>Edit</span>
-                                                                                            </a>
-                                                                                        </li>
+                                                                                         <li>
+                                                                                             <a href="<?php echo e(route('author.books.edit', $book->id)); ?>">
+                                                                                                 <em class="icon ni ni-edit"></em>
+                                                                                                 <span>Edit & Resubmit</span>
+                                                                                             </a>
+                                                                                         </li>
 
                                                                                         <li class="divider"></li>
                                                                                         <li>
@@ -198,356 +208,9 @@
                 <!-- footer @s -->
 
 
-                <div class="modal fade" id="addBook" tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Book</h5>
-                    <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <em class="icon ni ni-cross"></em>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="<?php echo e(route('author.books.store')); ?>">
-                        <?php echo csrf_field(); ?>
-                        <div class="row g-4">
-                            <!-- ISBN -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="isbn">ISBN</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="isbn" name="isbn" value="<?php echo e(old('isbn')); ?>" required>
-                                        <?php $__errorArgs = ['isbn'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                    <span class="form-note">Enter the 13-digit ISBN of your book</span>
-                                </div>
-                            </div>
+      
 
-                            <!-- Title -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="title">Book Title</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="title" name="title" value="<?php echo e(old('title')); ?>" required>
-                                        <?php $__errorArgs = ['title'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Genre -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="genre">Genre</label>
-                                    <div class="form-control-wrap">
-                                        <select class="form-select form-select-search" id="genre" name="genre" required>
-                                            <option value="">Select Genre</option>
-                                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <?php if(is_array($category)): ?>
-                                                    <option value="<?php echo e($category['name']); ?>" <?php echo e(old('genre') == $category['name'] ? 'selected' : ''); ?> data-id="<?php echo e($category['id']); ?>"><?php echo e($category['name']); ?></option>
-                                                <?php else: ?>
-                                                    <option value="<?php echo e($category); ?>" <?php echo e(old('genre') == $category ? 'selected' : ''); ?>><?php echo e($category); ?></option>
-                                                <?php endif; ?>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </select>
-                                        <?php $__errorArgs = ['genre'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Price -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="price">Price (₦)</label>
-                                    <div class="form-control-wrap">
-                                        <input type="number" class="form-control" id="price" name="price" value="<?php echo e(old('price')); ?>" step="0.01" min="0" required>
-                                        <?php $__errorArgs = ['price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Book Type -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label">Book Type</label>
-                                    <ul class="custom-control-group g-3 align-center">
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="physical" id="book_type_physical" <?php echo e(old('book_type') == 'physical' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="book_type_physical">Physical Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="digital" id="book_type_digital" <?php echo e(old('book_type') == 'digital' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="book_type_digital">Digital Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="both" id="book_type_both" <?php echo e(old('book_type') == 'both' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="book_type_both">Both Physical and Digital</label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    <?php $__errorArgs = ['book_type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label" for="description">Book Description</label>
-                                    <div class="form-control-wrap">
-                                        <textarea class="form-control" id="description" name="description" rows="6" required><?php echo e(old('description')); ?></textarea>
-                                        <?php $__errorArgs = ['description'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                    <span class="form-note">Provide a detailed description of your book, including plot summary, target audience, and key themes.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-lg btn-primary">Submit Book for Review</button>
-                            <a href="<?php echo e(route('author.books.index')); ?>" class="btn btn-lg btn-light">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer bg-light">
-                    <span class="sub-text">Modal Footer Text</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <!-- Edit Book Modal -->
-    <div class="modal fade" id="editBook-<?php echo e($book->id); ?>" tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Book</h5>
-                    <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <em class="icon ni ni-cross"></em>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="<?php echo e(route('author.books.update', $book->id)); ?>" id="editBookForm-<?php echo e($book->id); ?>">
-                        <?php echo csrf_field(); ?>
-                        <?php echo method_field('PUT'); ?>
-                        <div class="row g-4">
-                            <!-- ISBN -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_isbn_<?php echo e($book->id); ?>">ISBN</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="edit_isbn_<?php echo e($book->id); ?>" name="isbn" value="<?php echo e($book->isbn); ?>" required>
-                                        <?php $__errorArgs = ['isbn'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                    <span class="form-note">13-digit ISBN of your book</span>
-                                </div>
-                            </div>
-
-                            <!-- Title -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_title_<?php echo e($book->id); ?>">Book Title</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="edit_title_<?php echo e($book->id); ?>" name="title" value="<?php echo e($book->title); ?>" required>
-                                        <?php $__errorArgs = ['title'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Genre -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_genre_<?php echo e($book->id); ?>">Genre</label>
-                                    <div class="form-control-wrap">
-                                        <select class="form-select form-select-search" id="edit_genre_<?php echo e($book->id); ?>" name="genre" required>
-                                            <option value="">Select Genre</option>
-                                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <?php if(is_array($category)): ?>
-                                                    <option value="<?php echo e($category['name']); ?>" <?php echo e($book->genre == $category['name'] ? 'selected' : ''); ?> data-id="<?php echo e($category['id']); ?>"><?php echo e($category['name']); ?></option>
-                                                <?php else: ?>
-                                                    <option value="<?php echo e($category); ?>" <?php echo e($book->genre == $category ? 'selected' : ''); ?>><?php echo e($category); ?></option>
-                                                <?php endif; ?>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </select>
-                                        <?php $__errorArgs = ['genre'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Price -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_price_<?php echo e($book->id); ?>">Price (₦)</label>
-                                    <div class="form-control-wrap">
-                                        <input type="number" class="form-control" id="edit_price_<?php echo e($book->id); ?>" name="price" value="<?php echo e($book->price); ?>" step="0.01" min="0" required>
-                                        <?php $__errorArgs = ['price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Book Type -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label">Book Type</label>
-                                    <ul class="custom-control-group g-3 align-center">
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="physical" id="edit_book_type_physical_<?php echo e($book->id); ?>" <?php echo e($book->book_type == 'physical' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="edit_book_type_physical_<?php echo e($book->id); ?>">Physical Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="digital" id="edit_book_type_digital_<?php echo e($book->id); ?>" <?php echo e($book->book_type == 'digital' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="edit_book_type_digital_<?php echo e($book->id); ?>">Digital Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="both" id="edit_book_type_both_<?php echo e($book->id); ?>" <?php echo e($book->book_type == 'both' ? 'checked' : ''); ?>>
-                                                <label class="custom-control-label" for="edit_book_type_both_<?php echo e($book->id); ?>">Both Physical and Digital</label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    <?php $__errorArgs = ['book_type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_description_<?php echo e($book->id); ?>">Book Description</label>
-                                    <div class="form-control-wrap">
-                                        <textarea class="form-control" id="edit_description_<?php echo e($book->id); ?>" name="description" rows="6" required><?php echo e($book->description); ?></textarea>
-                                        <?php $__errorArgs = ['description'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                            <span class="invalid-feedback" role="alert"><?php echo e($message); ?></span>
-                                        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                    </div>
-                                    <span class="form-note">Provide a detailed description of your book, including plot summary, target audience, and key themes.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-lg btn-primary">Update Book</button>
-                            <a href="#" class="btn btn-lg btn-light" data-bs-dismiss="modal">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+  
 
     <?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <!-- View Book Modal -->
@@ -562,8 +225,22 @@ unset($__errorArgs, $__bag); ?>
                 </div>
                 <div class="modal-body">
                     <div class="row g-4">
-                        <div class="col-12">
-                            <div class="card">
+                        <div class="col-lg-4">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner d-flex align-items-center justify-content-center p-2 bg-light" style="min-height: 250px;">
+                                    <?php if($book->image): ?>
+                                        <img src="<?php echo e(asset('storage/' . $book->image)); ?>" class="rounded shadow-sm" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 350px; object-fit: contain;">
+                                    <?php else: ?>
+                                        <div class="text-center text-soft">
+                                            <em class="icon ni ni-book-read" style="font-size: 64px;"></em>
+                                            <p class="mt-2">No Cover Available</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card card-bordered h-100">
                                 <div class="card-inner">
                                     <div class="row g-4">
                                         <div class="col-md-6">
@@ -602,7 +279,7 @@ unset($__errorArgs, $__bag); ?>
                                             <div class="form-group">
                                                 <label class="form-label">Book Type</label>
                                                 <div class="form-control-wrap">
-                                                    <input type="text" class="form-control" value="<?php echo e(ucfirst($book->book_type)); ?>" readonly>
+                                                    <input type="text" class="form-control" value="<?php echo e(ucwords(str_replace('_', ' ', $book->book_type))); ?>" readonly>
                                                 </div>
                                             </div>
                                         </div>
@@ -617,8 +294,8 @@ unset($__errorArgs, $__bag); ?>
                                                             <?php case ('approved_awaiting_delivery'): ?> badge-dim bg-success <?php break; ?>
                                                             <?php case ('stocked'): ?> badge-dim bg-success <?php break; ?>
                                                             <?php case ('edited_pending_approval'): ?> badge-dim bg-warning <?php break; ?>
-                                                            <?php case ('recall_requested'): ?> badge-dim bg-warning <?php break; ?>
-                                                            <?php case ('recalled'): ?> badge-dim bg-secondary <?php break; ?>
+                                                            <?php case ('retrieval_requested'): ?> badge-dim bg-warning <?php break; ?>
+                                                            <?php case ('retrieved'): ?> badge-dim bg-secondary <?php break; ?>
                                                             <?php case ('rejected'): ?> badge-dim bg-danger <?php break; ?>
                                                         <?php endswitch; ?>
                                                     "><?php echo e(ucfirst(str_replace('_', ' ', $book->status))); ?></span>
@@ -701,12 +378,6 @@ unset($__errorArgs, $__bag); ?>
             allowClear: true,
             width: '100%'
         });
-        
-        $('[id^="edit_genre_"]').select2({
-            placeholder: "Select Genre",
-            allowClear: true,
-            width: '100%'
-        });
     });
     
     // Delete book function with SweetAlert confirmation
@@ -742,55 +413,75 @@ unset($__errorArgs, $__bag); ?>
         });
     }
     
-    function requestBookRecall(bookId) {
-        // Show a prompt for the recall reason
+    /**
+     * Request book retrieval
+     */
+    function requestBookRetrieval(bookId) {
         Swal.fire({
-            title: 'Request Book Recall',
-            text: 'Do you want to recall this book? This will notify the admin.',
-            input: 'textarea',
-            inputPlaceholder: 'Optional: Provide a reason for the recall request...',
-            inputAttributes: {
-                'aria-label': 'Provide a reason for the recall request'
-            },
+            title: 'Retrieval of Book',
+            html: `
+                <div class="text-start mb-3">
+                    <label class="form-label" for="retrieval_location">Location for Retrieval <span class="text-danger">*</span></label>
+                    <input type="text" id="retrieval_location" class="swal2-input m-0 w-100" placeholder="e.g. Lagos Warehouse">
+                </div>
+                <div class="text-start mb-3">
+                    <label class="form-label" for="retrieval_quantity">Quantity to Retrieve <span class="text-danger">*</span></label>
+                    <input type="number" id="retrieval_quantity" class="swal2-input m-0 w-100" placeholder="Quantity" min="1">
+                </div>
+                <div class="text-start">
+                    <label class="form-label" for="recall_reason">Reason (Optional)</label>
+                    <textarea id="recall_reason" class="swal2-textarea m-0 w-100" placeholder="Optional reason..."></textarea>
+                </div>
+            `,
+            icon: 'info',
             showCancelButton: true,
-            confirmButtonText: 'Request Recall',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            reverseButtons: true,
-            inputValidator: (value) => {
-                if (value && value.length > 1000) {
-                    return 'Recall reason cannot exceed 1000 characters.';
+            confirmButtonText: 'Submit Request',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                const location = document.getElementById('retrieval_location').value;
+                const quantity = document.getElementById('retrieval_quantity').value;
+                const reason = document.getElementById('recall_reason').value;
+                
+                if (!location) {
+                    Swal.showValidationMessage('Retrieval location is required');
+                    return false;
                 }
-                return null;
-            }
+                if (!quantity || quantity < 1) {
+                    Swal.showValidationMessage('A valid quantity is required');
+                    return false;
+                }
+                
+                return {
+                    retrieval_location: location,
+                    retrieval_quantity: quantity,
+                    recall_reason: reason
+                };
+            },
+            allowOutsideClick: () => !Swal.isLoading()
         }).then((result) => {
             if (result.isConfirmed) {
-                // Disable the button and show spinner
-                const buttons = document.querySelectorAll('[onclick*="requestBookRecall"]');
+                // Disable all recall buttons
+                const buttons = document.querySelectorAll('a[onclick^="requestBookRetrieval"]');
                 buttons.forEach(button => {
                     button.disabled = true;
                     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
                 });
                 
-                // Send the recall request
-                fetch(`<?php echo e(route('author.books.recall', ['book' => '__BOOK_ID__'])); ?>`.replace('__BOOK_ID__', bookId), {
+                fetch(`/author/books/${bookId}/retrieval`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        recall_reason: result.value || null
-                    })
+                    body: JSON.stringify(result.value)
                 })
                 .then(response => response.json())
                 .then(data => {
                     // Re-enable buttons
                     buttons.forEach(button => {
                         button.disabled = false;
-                        button.innerHTML = 'Request Recall';
+                        button.innerHTML = 'Retrieval of Book';
                     });
                     
                     if (data.success) {
@@ -806,24 +497,24 @@ unset($__errorArgs, $__bag); ?>
                     } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: data.message || 'An error occurred while requesting the recall.',
+                            text: data.message || 'An error occurred while requesting the retrieval.',
                             icon: 'error',
                             confirmButtonColor: '#d33',
                         });
                     }
                 })
                 .catch(error => {
-                    console.error('Recall request error:', error);
+                    console.error('Retrieval request error:', error);
                     
                     // Re-enable buttons
                     buttons.forEach(button => {
                         button.disabled = false;
-                        button.innerHTML = 'Request Recall';
+                        button.innerHTML = 'Retrieval of Book';
                     });
                     
                     Swal.fire({
                         title: 'Error!',
-                        text: 'An error occurred while sending the recall request.',
+                        text: 'An error occurred while sending the retrieval request.',
                         icon: 'error',
                         confirmButtonColor: '#d33',
                     });

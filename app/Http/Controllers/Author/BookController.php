@@ -114,6 +114,11 @@ class BookController extends Controller
                 $this->bookService->validateBookData($request->all())
             );
 
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('books', 'public');
+                $validated['image'] = $path;
+            }
+
             $this->bookService->createBook($user, $validated);
 
             return redirect()->route('author.books.index')
@@ -205,6 +210,15 @@ class BookController extends Controller
             $validated = $request->validate(
                 $this->bookService->validateBookData($request->all(), $book)
             );
+
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($book->image) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($book->image);
+                }
+                $path = $request->file('image')->store('books', 'public');
+                $validated['image'] = $path;
+            }
 
             $this->bookService->updateBook($book, $validated);
 
@@ -307,34 +321,38 @@ class BookController extends Controller
     }
     
     /**
-     * Request to recall a book
+     * Request to retrieve a book
      */
-    public function requestRecall(Request $request, Book $book)
+    public function requestRetrieval(Request $request, Book $book)
     {
-        $this->authorize('recall', $book);
+        $this->authorize('recall', $book); // Keep using 'recall' policy for now or rename later
         
         try {
             $validated = $request->validate([
-                'recall_reason' => 'nullable|string|max:1000',
+                'retrieval_reason' => 'nullable|string|max:1000',
+                'retrieval_location' => 'required|string|max:255',
+                'retrieval_quantity' => 'required|integer|min:1',
             ]);
             
-            // Update the book with recall request information and change status to recall_requested
+            // Update the book with retrieval request information and change status to retrieval_requested
             $book->update([
-                'recall_requested' => true,
-                'recall_reason' => $validated['recall_reason'] ?? null,
-                'recall_requested_at' => now(),
-                'status' => 'recall_requested',
+                'retrieval_requested' => true,
+                'retrieval_reason' => $validated['retrieval_reason'] ?? null,
+                'retrieval_location' => $validated['retrieval_location'],
+                'retrieval_quantity' => $validated['retrieval_quantity'],
+                'retrieval_requested_at' => now(),
+                'status' => 'retrieval_requested',
             ]);
             
-            // Notify admins about the recall request
-            $this->bookService->notifyAdminsAboutBookRecall($book, $validated['recall_reason'] ?? null);
+            // Notify admins about the retrieval request
+            $this->bookService->notifyAdminsAboutBookRetrieval($book, $validated['retrieval_reason'] ?? null);
             
             return response()->json([
                 'success' => true,
-                'message' => 'Recall request sent successfully. Admins have been notified.',
+                'message' => 'Retrieval request sent successfully. Admins have been notified.',
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Book recall request error: ' . $e->getMessage(), [
+            \Illuminate\Support\Facades\Log::error('Book retrieval request error: ' . $e->getMessage(), [
                 'book_id' => $book->id,
                 'request_data' => $request->all(),
                 'exception' => $e
@@ -342,7 +360,7 @@ class BookController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while sending the recall request. Please try again.',
+                'message' => 'An error occurred while sending the retrieval request. Please try again.',
             ], 500);
         }
     }

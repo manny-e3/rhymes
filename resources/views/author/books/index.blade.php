@@ -33,6 +33,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>S/N</th>
+                                                        <th>Cover</th>
                                                         <th>Book Details</th>
                                                         <th>ISBN</th>
                                                         <th>Type</th>
@@ -50,6 +51,15 @@
                                                         <td class="nk-tb-col">
                                                             <span>{{ $loop->iteration }}</span>
                                                         </td>
+                                                        <td class="nk-tb-col">
+                                                            <div class="user-avatar bg-light border">
+                                                                @if($book->image)
+                                                                    <img src="{{ asset('storage/' . $book->image) }}" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                                @else
+                                                                    <em class="icon ni ni-book-read text-soft"></em>
+                                                                @endif
+                                                            </div>
+                                                        </td>
                                             
                                                         <td class="nk-tb-col">
                                                             <div class="user-card">
@@ -64,7 +74,7 @@
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-mb">
-                                                            {{ $book->book_type }}
+                                                            {{ ucwords(str_replace('_', ' ', $book->book_type)) }}
                                                         </td>
                                             
                                                         {{-- <td class="nk-tb-col tb-col-mb">
@@ -89,10 +99,10 @@
                                                 <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
                                             @elseif($book->status === 'edited_pending_approval')
                                                 <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
-                                            @elseif($book->status === 'recall_requested')
-                                                <span class="badge badge-sm badge-dim bg-outline-warning">Recall Requested</span>
-                                            @elseif($book->status === 'recalled')
-                                                <span class="badge badge-sm badge-dim bg-outline-danger">Recalled</span>
+                                            @elseif($book->status === 'retrieval_requested')
+                                                <span class="badge badge-sm badge-dim bg-outline-warning">Retrieval Requested</span>
+                                            @elseif($book->status === 'retrieved')
+                                                <span class="badge badge-sm badge-dim bg-outline-danger">Retrieved</span>
                                             @endif
                                            
                                             @if($book->trashed())
@@ -125,24 +135,24 @@
                                                                                 <li>
                                                                                     <a href="#" data-bs-toggle="modal" data-bs-target="#viewBook-{{ $book->id }}">
                                                                                         <em class="icon ni ni-eye"></em>
-                                                                                        <span>View Details</span>
+                                                                                        <span>View Book</span>
                                                                                     </a>
                                                                                 </li>
 
-                                                                                 @if($book->status === 'stocked' || $book->status === 'edited_pending_approval' || $book->status === 'recall_requested')
+                                                                                 @if($book->status === 'stocked')
                                                                                  <li>
-                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-{{ $book->id }}">
-                                                                                                <em class="icon ni ni-repeat"></em>
-                                                                                                <span>Edit</span>
-                                                                                            </a>
-                                                                                        </li>
+                                                                                             <a href="{{ route('author.books.edit', $book->id) }}">
+                                                                                                 <em class="icon ni ni-edit-fill"></em>
+                                                                                                 <span>Edit Book</span>
+                                                                                             </a>
+                                                                                         </li>
                                                                                         @endif
-                                                                                        @if($book->status === 'stocked' &&  $book->status !== 'recall_requested' && $book->status !== 'recalled')
+                                                                                        @if($book->status === 'stocked' &&  $book->status !== 'retrieval_requested' && $book->status !== 'retrieved')
                                                                                         <li class="divider"></li>
                                                                                         <li>
-                                                                                            <a href="#" onclick="requestBookRecall({{ $book->id }}); return false;">
+                                                                                            <a href="#" onclick="requestBookRetrieval({{ $book->id }}); return false;">
                                                                                                 <em class="icon ni ni-exclamation-circle"></em>
-                                                                                                <span>Request Recall</span>
+                                                                                                <span>Retrieval of Book</span>
                                                                                             </a>
                                                                                         </li>
                                                                                         @endif
@@ -159,12 +169,12 @@
                                                     
                                                                                     @endif
                                                                                          @if($book->status === 'rejected')
-                                                                                        <li>
-                                                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#editBook-{{ $book->id }}">
-                                                                                                <em class="icon ni ni-repeat"></em>
-                                                                                                <span>Edit</span>
-                                                                                            </a>
-                                                                                        </li>
+                                                                                         <li>
+                                                                                             <a href="{{ route('author.books.edit', $book->id) }}">
+                                                                                                 <em class="icon ni ni-edit"></em>
+                                                                                                 <span>Edit & Resubmit</span>
+                                                                                             </a>
+                                                                                         </li>
 
                                                                                         <li class="divider"></li>
                                                                                         <li>
@@ -199,272 +209,9 @@
                 <!-- footer @s -->
 
 
-                <div class="modal fade" id="addBook" tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Book</h5>
-                    <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <em class="icon ni ni-cross"></em>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ route('author.books.store') }}">
-                        @csrf
-                        <div class="row g-4">
-                            <!-- ISBN -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="isbn">ISBN</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="isbn" name="isbn" value="{{ old('isbn') }}" required>
-                                        @error('isbn')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <span class="form-note">Enter the 13-digit ISBN of your book</span>
-                                </div>
-                            </div>
+      
 
-                            <!-- Title -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="title">Book Title</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
-                                        @error('title')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Genre -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="genre">Genre</label>
-                                    <div class="form-control-wrap">
-                                        <select class="form-select form-select-search" id="genre" name="genre" required>
-                                            <option value="">Select Genre</option>
-                                            @foreach($categories as $category)
-                                                @if(is_array($category))
-                                                    <option value="{{ $category['name'] }}" {{ old('genre') == $category['name'] ? 'selected' : '' }} data-id="{{ $category['id'] }}">{{ $category['name'] }}</option>
-                                                @else
-                                                    <option value="{{ $category }}" {{ old('genre') == $category ? 'selected' : '' }}>{{ $category }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('genre')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Price -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="price">Price (₦)</label>
-                                    <div class="form-control-wrap">
-                                        <input type="number" class="form-control" id="price" name="price" value="{{ old('price') }}" step="0.01" min="0" required>
-                                        @error('price')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Book Type -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label">Book Type</label>
-                                    <ul class="custom-control-group g-3 align-center">
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="physical" id="book_type_physical" {{ old('book_type') == 'physical' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="book_type_physical">Physical Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="digital" id="book_type_digital" {{ old('book_type') == 'digital' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="book_type_digital">Digital Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="both" id="book_type_both" {{ old('book_type') == 'both' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="book_type_both">Both Physical and Digital</label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    @error('book_type')
-                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label" for="description">Book Description</label>
-                                    <div class="form-control-wrap">
-                                        <textarea class="form-control" id="description" name="description" rows="6" required>{{ old('description') }}</textarea>
-                                        @error('description')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <span class="form-note">Provide a detailed description of your book, including plot summary, target audience, and key themes.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-lg btn-primary">Submit Book for Review</button>
-                            <a href="{{ route('author.books.index') }}" class="btn btn-lg btn-light">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer bg-light">
-                    <span class="sub-text">Modal Footer Text</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @foreach($books as $book)
-    <!-- Edit Book Modal -->
-    <div class="modal fade" id="editBook-{{$book->id}}" tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Book</h5>
-                    <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <em class="icon ni ni-cross"></em>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ route('author.books.update', $book->id) }}" id="editBookForm-{{$book->id}}">
-                        @csrf
-                        @method('PUT')
-                        <div class="row g-4">
-                            <!-- ISBN -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_isbn_{{$book->id}}">ISBN</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="edit_isbn_{{$book->id}}" name="isbn" value="{{$book->isbn}}" required>
-                                        @error('isbn')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <span class="form-note">13-digit ISBN of your book</span>
-                                </div>
-                            </div>
-
-                            <!-- Title -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_title_{{$book->id}}">Book Title</label>
-                                    <div class="form-control-wrap">
-                                        <input type="text" class="form-control" id="edit_title_{{$book->id}}" name="title" value="{{$book->title}}" required>
-                                        @error('title')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Genre -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_genre_{{$book->id}}">Genre</label>
-                                    <div class="form-control-wrap">
-                                        <select class="form-select form-select-search" id="edit_genre_{{$book->id}}" name="genre" required>
-                                            <option value="">Select Genre</option>
-                                            @foreach($categories as $category)
-                                                @if(is_array($category))
-                                                    <option value="{{ $category['name'] }}" {{ $book->genre == $category['name'] ? 'selected' : '' }} data-id="{{ $category['id'] }}">{{ $category['name'] }}</option>
-                                                @else
-                                                    <option value="{{ $category }}" {{ $book->genre == $category ? 'selected' : '' }}>{{ $category }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('genre')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Price -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_price_{{$book->id}}">Price (₦)</label>
-                                    <div class="form-control-wrap">
-                                        <input type="number" class="form-control" id="edit_price_{{$book->id}}" name="price" value="{{$book->price}}" step="0.01" min="0" required>
-                                        @error('price')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Book Type -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label">Book Type</label>
-                                    <ul class="custom-control-group g-3 align-center">
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="physical" id="edit_book_type_physical_{{$book->id}}" {{ $book->book_type == 'physical' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="edit_book_type_physical_{{$book->id}}">Physical Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="digital" id="edit_book_type_digital_{{$book->id}}" {{ $book->book_type == 'digital' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="edit_book_type_digital_{{$book->id}}">Digital Book Only</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" class="custom-control-input" name="book_type" value="both" id="edit_book_type_both_{{$book->id}}" {{ $book->book_type == 'both' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="edit_book_type_both_{{$book->id}}">Both Physical and Digital</label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    @error('book_type')
-                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label class="form-label" for="edit_description_{{$book->id}}">Book Description</label>
-                                    <div class="form-control-wrap">
-                                        <textarea class="form-control" id="edit_description_{{$book->id}}" name="description" rows="6" required>{{$book->description}}</textarea>
-                                        @error('description')
-                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                    <span class="form-note">Provide a detailed description of your book, including plot summary, target audience, and key themes.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-lg btn-primary">Update Book</button>
-                            <a href="#" class="btn btn-lg btn-light" data-bs-dismiss="modal">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endforeach
+  
 
     @foreach($books as $book)
     <!-- View Book Modal -->
@@ -479,8 +226,22 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-4">
-                        <div class="col-12">
-                            <div class="card">
+                        <div class="col-lg-4">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner d-flex align-items-center justify-content-center p-2 bg-light" style="min-height: 250px;">
+                                    @if($book->image)
+                                        <img src="{{ asset('storage/' . $book->image) }}" class="rounded shadow-sm" alt="{{ $book->title }}" style="max-width: 100%; max-height: 350px; object-fit: contain;">
+                                    @else
+                                        <div class="text-center text-soft">
+                                            <em class="icon ni ni-book-read" style="font-size: 64px;"></em>
+                                            <p class="mt-2">No Cover Available</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card card-bordered h-100">
                                 <div class="card-inner">
                                     <div class="row g-4">
                                         <div class="col-md-6">
@@ -519,7 +280,7 @@
                                             <div class="form-group">
                                                 <label class="form-label">Book Type</label>
                                                 <div class="form-control-wrap">
-                                                    <input type="text" class="form-control" value="{{ucfirst($book->book_type)}}" readonly>
+                                                    <input type="text" class="form-control" value="{{ ucwords(str_replace('_', ' ', $book->book_type)) }}" readonly>
                                                 </div>
                                             </div>
                                         </div>
@@ -534,8 +295,8 @@
                                                             @case('approved_awaiting_delivery') badge-dim bg-success @break
                                                             @case('stocked') badge-dim bg-success @break
                                                             @case('edited_pending_approval') badge-dim bg-warning @break
-                                                            @case('recall_requested') badge-dim bg-warning @break
-                                                            @case('recalled') badge-dim bg-secondary @break
+                                                            @case('retrieval_requested') badge-dim bg-warning @break
+                                                            @case('retrieved') badge-dim bg-secondary @break
                                                             @case('rejected') badge-dim bg-danger @break
                                                         @endswitch
                                                     ">{{ucfirst(str_replace('_', ' ', $book->status))}}</span>
@@ -620,12 +381,6 @@
             allowClear: true,
             width: '100%'
         });
-        
-        $('[id^="edit_genre_"]').select2({
-            placeholder: "Select Genre",
-            allowClear: true,
-            width: '100%'
-        });
     });
     
     // Delete book function with SweetAlert confirmation
@@ -661,55 +416,75 @@
         });
     }
     
-    function requestBookRecall(bookId) {
-        // Show a prompt for the recall reason
+    /**
+     * Request book retrieval
+     */
+    function requestBookRetrieval(bookId) {
         Swal.fire({
-            title: 'Request Book Recall',
-            text: 'Do you want to recall this book? This will notify the admin.',
-            input: 'textarea',
-            inputPlaceholder: 'Optional: Provide a reason for the recall request...',
-            inputAttributes: {
-                'aria-label': 'Provide a reason for the recall request'
-            },
+            title: 'Retrieval of Book',
+            html: `
+                <div class="text-start mb-3">
+                    <label class="form-label" for="retrieval_location">Location for Retrieval <span class="text-danger">*</span></label>
+                    <input type="text" id="retrieval_location" class="swal2-input m-0 w-100" placeholder="e.g. Lagos Warehouse">
+                </div>
+                <div class="text-start mb-3">
+                    <label class="form-label" for="retrieval_quantity">Quantity to Retrieve <span class="text-danger">*</span></label>
+                    <input type="number" id="retrieval_quantity" class="swal2-input m-0 w-100" placeholder="Quantity" min="1">
+                </div>
+                <div class="text-start">
+                    <label class="form-label" for="recall_reason">Reason (Optional)</label>
+                    <textarea id="recall_reason" class="swal2-textarea m-0 w-100" placeholder="Optional reason..."></textarea>
+                </div>
+            `,
+            icon: 'info',
             showCancelButton: true,
-            confirmButtonText: 'Request Recall',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            reverseButtons: true,
-            inputValidator: (value) => {
-                if (value && value.length > 1000) {
-                    return 'Recall reason cannot exceed 1000 characters.';
+            confirmButtonText: 'Submit Request',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                const location = document.getElementById('retrieval_location').value;
+                const quantity = document.getElementById('retrieval_quantity').value;
+                const reason = document.getElementById('recall_reason').value;
+                
+                if (!location) {
+                    Swal.showValidationMessage('Retrieval location is required');
+                    return false;
                 }
-                return null;
-            }
+                if (!quantity || quantity < 1) {
+                    Swal.showValidationMessage('A valid quantity is required');
+                    return false;
+                }
+                
+                return {
+                    retrieval_location: location,
+                    retrieval_quantity: quantity,
+                    recall_reason: reason
+                };
+            },
+            allowOutsideClick: () => !Swal.isLoading()
         }).then((result) => {
             if (result.isConfirmed) {
-                // Disable the button and show spinner
-                const buttons = document.querySelectorAll('[onclick*="requestBookRecall"]');
+                // Disable all recall buttons
+                const buttons = document.querySelectorAll('a[onclick^="requestBookRetrieval"]');
                 buttons.forEach(button => {
                     button.disabled = true;
                     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
                 });
                 
-                // Send the recall request
-                fetch(`{{ route('author.books.recall', ['book' => '__BOOK_ID__']) }}`.replace('__BOOK_ID__', bookId), {
+                fetch(`/author/books/${bookId}/retrieval`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        recall_reason: result.value || null
-                    })
+                    body: JSON.stringify(result.value)
                 })
                 .then(response => response.json())
                 .then(data => {
                     // Re-enable buttons
                     buttons.forEach(button => {
                         button.disabled = false;
-                        button.innerHTML = 'Request Recall';
+                        button.innerHTML = 'Retrieval of Book';
                     });
                     
                     if (data.success) {
@@ -725,24 +500,24 @@
                     } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: data.message || 'An error occurred while requesting the recall.',
+                            text: data.message || 'An error occurred while requesting the retrieval.',
                             icon: 'error',
                             confirmButtonColor: '#d33',
                         });
                     }
                 })
                 .catch(error => {
-                    console.error('Recall request error:', error);
+                    console.error('Retrieval request error:', error);
                     
                     // Re-enable buttons
                     buttons.forEach(button => {
                         button.disabled = false;
-                        button.innerHTML = 'Request Recall';
+                        button.innerHTML = 'Retrieval of Book';
                     });
                     
                     Swal.fire({
                         title: 'Error!',
-                        text: 'An error occurred while sending the recall request.',
+                        text: 'An error occurred while sending the retrieval request.',
                         icon: 'error',
                         confirmButtonColor: '#d33',
                     });

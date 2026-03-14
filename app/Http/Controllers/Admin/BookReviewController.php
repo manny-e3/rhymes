@@ -113,7 +113,7 @@ class BookReviewController extends Controller
         
         try {
             $validated = $request->validate([
-                'status' => 'required|in:pending_review,send_review_copy,rejected,approved_awaiting_delivery,stocked,recalled',
+                'status' => 'required|in:pending_review,send_review_copy,rejected,approved_awaiting_delivery,stocked,retrieval_requested,recalled',
                 'admin_notes' => 'nullable|string',
                 'rev_book_id' => 'nullable|string|unique:books,rev_book_id,' . $book->id . ',id',
                 'quantity' => 'nullable|integer|min:1', // Keep quantity validation
@@ -474,9 +474,9 @@ class BookReviewController extends Controller
     }
     
     /**
-     * Handle recall action (approve/deny) for a book
+     * Handle retrieval action (approve/deny) for a book
      */
-    public function handleRecallAction(Request $request, Book $book)
+    public function handleRetrievalAction(Request $request, Book $book)
     {
         try {
             $validated = $request->validate([
@@ -488,52 +488,56 @@ class BookReviewController extends Controller
             $adminNotes = $validated['admin_notes'] ?? null;
             
             if ($action === 'approve') {
-                // Approve the recall - update book status to 'recalled'
+                // Approve the retrieval - update book status to 'retrieved'
                 $oldStatus = $book->status;
                 $book->update([
-                    'recall_requested' => false,
-                    'recall_reason' => null,
-                    'recall_requested_at' => null,
-                    'status' => 'recalled',
+                    'retrieval_requested' => false,
+                    'retrieval_reason' => null,
+                    'retrieval_requested_at' => null,
+                    'retrieval_location' => null,
+                    'retrieval_quantity' => null,
+                    'status' => 'retrieved',
                     'admin_notes' => $adminNotes, // Store admin notes
                 ]);
                 
-                // Notify the author about the recall approval
+                // Notify the author about the retrieval approval
                 $book->user->notify(new \App\Notifications\BookStatusChanged(
                     $book, 
                     $oldStatus, 
-                    'recalled', 
+                    'retrieved', 
                     $adminNotes
                 ));
                 
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => true,
-                        'message' => 'Recall request approved successfully. Book status updated to Recalled. Author has been notified.',
+                        'message' => 'Retrieval request approved successfully. Book status updated. Author has been notified.',
                     ]);
                 }
                 
-                return redirect()->back()->with('success', 'Recall request approved successfully. Book status updated to Recalled. Author has been notified.');
+                return redirect()->back()->with('success', 'Retrieval request approved successfully. Author has been notified.');
             } else {
-                // Deny the recall - clear the recall request and reset status if needed
+                // Deny the retrieval - clear the retrieval request and reset status if needed
                 $book->update([
-                    'recall_requested' => false,
-                    'recall_reason' => null,
-                    'recall_requested_at' => null,
-                    // Keep the original status or set to appropriate status
+                    'retrieval_requested' => false,
+                    'retrieval_reason' => null,
+                    'retrieval_requested_at' => null,
+                    'retrieval_location' => null,
+                    'retrieval_quantity' => null,
+                    'status' => 'stocked', // Reset to stocked if it was retrieval_requested
                 ]);
                 
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => true,
-                        'message' => 'Recall request denied successfully.',
+                        'message' => 'Retrieval request denied successfully.',
                     ]);
                 }
                 
-                return redirect()->back()->with('success', 'Recall request denied successfully.');
+                return redirect()->back()->with('success', 'Retrieval request denied successfully.');
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to handle book recall action', [
+            \Illuminate\Support\Facades\Log::error('Failed to handle book retrieval action', [
                 'book_id' => $book->id,
                 'book_title' => $book->title,
                 'action' => $request->action ?? 'unknown',
@@ -544,11 +548,11 @@ class BookReviewController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'An error occurred while processing the recall action. Please try again.',
+                    'message' => 'An error occurred while processing the retrieval action. Please try again.',
                 ], 500);
             }
             
-            return redirect()->back()->with('error', 'An error occurred while processing the recall action. Please try again.');
+            return redirect()->back()->with('error', 'An error occurred while processing the retrieval action. Please try again.');
         }
     }
 }

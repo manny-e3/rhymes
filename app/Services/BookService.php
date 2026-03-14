@@ -274,13 +274,15 @@ class BookService
             'title' => 'required|string|max:255',
             'genre' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'book_type' => 'required|in:physical,digital,both',
+            'book_type' => 'required|string', // Options: paperback, hardback, both
             'description' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ];
 
-        // If updating, exclude current book from ISBN uniqueness check
+        // If updating, exclude current book from ISBN uniqueness check and make image optional
         if ($book) {
             $rules['isbn'] = 'required|string|unique:books,isbn,' . $book->id;
+            $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120';
         }
 
         return $rules;
@@ -299,7 +301,7 @@ class BookService
      */
     public function updateBookStatus(Book $book, string $status, ?string $adminNotes = null): bool
     {
-        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked', 'recall_requested', 'recalled'];
+        $validStatuses = ['pending_review', 'send_review_copy', 'rejected', 'approved_awaiting_delivery', 'stocked', 'retrieval_requested', 'retrieved'];
         
         if (!in_array($status, $validStatuses)) {
             throw new \InvalidArgumentException('Invalid book status');
@@ -315,9 +317,9 @@ class BookService
     }
     
     /**
-     * Notify admins about book recall request
+     * Notify admins about book retrieval request
      */
-    public function notifyAdminsAboutBookRecall(Book $book, ?string $recallReason = null): void
+    public function notifyAdminsAboutBookRetrieval(Book $book, ?string $reason = null): void
     {
         try {
             // Get all admins
@@ -328,7 +330,7 @@ class BookService
             // Notify each admin
             foreach ($admins as $admin) {
                 try {
-                    $admin->notify(new \App\Notifications\BookRecallNotification($book, $recallReason));
+                    $admin->notify(new \App\Notifications\BookRetrievalNotification($book, $reason));
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Failed to send book recall notification to admin', [
                         'admin_id' => $admin->id,
@@ -341,7 +343,7 @@ class BookService
                 }
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to notify admins about book recall', [
+            \Illuminate\Support\Facades\Log::error('Failed to notify admins about book retrieval', [
                 'book_id' => $book->id,
                 'book_title' => $book->title,
                 'author_id' => $book->user_id,
