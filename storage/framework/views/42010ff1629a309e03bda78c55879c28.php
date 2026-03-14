@@ -236,13 +236,9 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" id="book_type" name="book_type" required>
                                                         <option value="">Select Type</option>
-                                                        <option value="digital" <?php echo e(old('book_type', $book->book_type) == 'digital' ? 'selected' : ''); ?>>Digital Only</option>
-                                                        <option value="physical_paperback" <?php echo e(old('book_type', $book->book_type) == 'physical_paperback' ? 'selected' : ''); ?>>Physical (Paperback)</option>
-                                                        <option value="physical_hardback" <?php echo e(old('book_type', $book->book_type) == 'physical_hardback' ? 'selected' : ''); ?>>Physical (Hardback)</option>
-                                                        <option value="physical_both" <?php echo e(old('book_type', $book->book_type) == 'physical_both' ? 'selected' : ''); ?>>Physical (Paperback & Hardback)</option>
-                                                        <option value="both_digital_paperback" <?php echo e(old('book_type', $book->book_type) == 'both_digital_paperback' ? 'selected' : ''); ?>>Digital & Physical (Paperback)</option>
-                                                        <option value="both_digital_hardback" <?php echo e(old('book_type', $book->book_type) == 'both_digital_hardback' ? 'selected' : ''); ?>>Digital & Physical (Hardback)</option>
-                                                        <option value="both_all" <?php echo e(old('book_type', $book->book_type) == 'both_all' ? 'selected' : ''); ?>>All (Digital, Paperback, Hardback)</option>
+                                                        <option value="paper_back" <?php echo e(old('book_type', $book->book_type) == 'paper_back' ? 'selected' : ''); ?>>Paper back</option>
+                                                        <option value="hard_back" <?php echo e(old('book_type', $book->book_type) == 'hard_back' ? 'selected' : ''); ?>>Hard back</option>
+                                                        <option value="both" <?php echo e(old('book_type', $book->book_type) == 'both' ? 'selected' : ''); ?>>Both</option>
                                                     </select>
                                                     <?php $__errorArgs = ['book_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -316,7 +312,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                                     
                                                     <div id="image-preview-container" <?php if(!$book->image): ?> style="display: none;" <?php endif; ?>>
-                                                        <img id="image-preview" src="<?php echo e($book->image ? asset('storage/' . $book->image) : '#'); ?>" alt="Preview">
+                                                        <img id="image-preview" src="<?php echo e($book->image ? asset($book->image) : '#'); ?>" alt="Preview">
                                                         <div class="remove-image" id="remove-image" title="Remove Image" style="<?php echo e($book->image ? 'display: flex;' : 'display: none;'); ?>">
                                                             <em class="icon ni ni-cross-sm"></em>
                                                         </div>

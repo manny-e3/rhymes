@@ -150,8 +150,8 @@
                                             @if($book->image)
                                                 <div class="user-card">
                                                     <div class="user-avatar bg-transparent">
-                                                        <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover">
-                                                            <img src="{{ asset('storage/' . $book->image) }}" alt="{{ $book->title }}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        <a href="{{ asset($book->image) }}" download="{{ Str::slug($book->title) }}-cover">
+                                                            <img src="{{ asset($book->image) }}" alt="{{ $book->title }}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
                                                         </a>
                                                     </div>
                                                 </div>
@@ -379,8 +379,8 @@
                             <div class="card card-bordered h-100">
                                 <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 150px;">
                                     @if($book->image)
-                                        <img src="{{ asset('storage/' . $book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 200px; object-fit: contain;">
-                                        <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-xs btn-outline-primary">
+                                        <img src="{{ asset($book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 200px; object-fit: contain;">
+                                        <a href="{{ asset($book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-xs btn-outline-primary">
                                             <em class="icon ni ni-download"></em><span>Download</span>
                                         </a>
                                     @else
@@ -523,14 +523,14 @@
                                             <td><strong>Image</strong></td>
                                             <td>
                                                 @if(isset($book->original_data['image']))
-                                                    <img src="{{ Storage::url($book->original_data['image']) }}" alt="Original" style="max-height: 50px;">
+                                                    <img src="{{ asset($book->original_data['image']) }}" alt="Original" style="max-height: 50px;">
                                                 @else
                                                     N/A
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($book->image)
-                                                    <img src="{{ Storage::url($book->image) }}" alt="New" style="max-height: 50px;">
+                                                    <img src="{{ asset($book->image) }}" alt="New" style="max-height: 50px;">
                                                 @else
                                                     N/A
                                                 @endif
@@ -633,8 +633,8 @@
                         <div class="card card-bordered h-100">
                             <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 200px;">
                                 @if($book->image)
-                                    <img src="{{ asset('storage/' . $book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 280px; object-fit: contain;">
-                                    <a href="{{ asset('storage/' . $book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-sm btn-outline-primary">
+                                    <img src="{{ asset($book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 280px; object-fit: contain;">
+                                    <a href="{{ asset($book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-sm btn-outline-primary">
                                         <em class="icon ni ni-download"></em><span>Download Cover</span>
                                     </a>
                                 @else

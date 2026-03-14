@@ -115,8 +115,10 @@ class BookController extends Controller
             );
 
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('books', 'public');
-                $validated['image'] = $path;
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('books'), $filename);
+                $validated['image'] = 'books/' . $filename;
             }
 
             $this->bookService->createBook($user, $validated);
@@ -214,10 +216,15 @@ class BookController extends Controller
             if ($request->hasFile('image')) {
                 // Delete old image if exists
                 if ($book->image) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($book->image);
+                    $oldPath = public_path($book->image);
+                    if (file_exists($oldPath)) {
+                        unlink($oldPath);
+                    }
                 }
-                $path = $request->file('image')->store('books', 'public');
-                $validated['image'] = $path;
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('books'), $filename);
+                $validated['image'] = 'books/' . $filename;
             }
 
             $this->bookService->updateBook($book, $validated);

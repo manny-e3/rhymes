@@ -215,7 +215,7 @@
                                                     @enderror
                                                     
                                                     <div id="image-preview-container" @if(!$book->image) style="display: none;" @endif>
-                                                        <img id="image-preview" src="{{ $book->image ? asset('storage/' . $book->image) : '#' }}" alt="Preview">
+                                                        <img id="image-preview" src="{{ $book->image ? asset($book->image) : '#' }}" alt="Preview">
                                                         <div class="remove-image" id="remove-image" title="Remove Image" style="{{ $book->image ? 'display: flex;' : 'display: none;' }}">
                                                             <em class="icon ni ni-cross-sm"></em>
                                                         </div>

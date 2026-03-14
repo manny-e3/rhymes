@@ -53,7 +53,7 @@
                                                         <td class="nk-tb-col">
                                                             <div class="user-avatar bg-light border">
                                                                 <?php if($book->image): ?>
-                                                                    <img src="<?php echo e(asset('storage/' . $book->image)); ?>" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                                    <img src="<?php echo e(asset($book->image)); ?>" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                                                 <?php else: ?>
                                                                     <em class="icon ni ni-book-read text-soft"></em>
                                                                 <?php endif; ?>
@@ -229,7 +229,7 @@
                             <div class="card card-bordered h-100">
                                 <div class="card-inner d-flex align-items-center justify-content-center p-2 bg-light" style="min-height: 250px;">
                                     <?php if($book->image): ?>
-                                        <img src="<?php echo e(asset('storage/' . $book->image)); ?>" class="rounded shadow-sm" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 350px; object-fit: contain;">
+                                        <img src="<?php echo e(asset($book->image)); ?>" class="rounded shadow-sm" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 350px; object-fit: contain;">
                                     <?php else: ?>
                                         <div class="text-center text-soft">
                                             <em class="icon ni ni-book-read" style="font-size: 64px;"></em>
