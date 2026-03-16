@@ -206,7 +206,7 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        $this->authorize('update', $book);
+       
         
         try {
             $validated = $request->validate(
@@ -266,7 +266,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        $this->authorize('delete', $book);
+      
         
         try {
             // Check if book has any transactions before deleting
