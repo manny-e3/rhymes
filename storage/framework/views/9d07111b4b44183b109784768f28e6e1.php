@@ -108,8 +108,8 @@
                                             <?php if($book->image): ?>
                                                 <div class="user-card">
                                                     <div class="user-avatar bg-transparent">
-                                                        <a href="<?php echo e(asset('storage/' . $book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover">
-                                                            <img src="<?php echo e(asset('storage/' . $book->image)); ?>" alt="<?php echo e($book->title); ?>" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        <a href="<?php echo e(asset($book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover">
+                                                            <img src="<?php echo e(asset($book->image)); ?>" alt="<?php echo e($book->title); ?>" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
                                                         </a>
                                                     </div>
                                                 </div>
@@ -338,8 +338,8 @@
                             <div class="card card-bordered h-100">
                                 <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 150px;">
                                     <?php if($book->image): ?>
-                                        <img src="<?php echo e(asset('storage/' . $book->image)); ?>" class="rounded shadow-sm mb-2" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 200px; object-fit: contain;">
-                                        <a href="<?php echo e(asset('storage/' . $book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover" class="btn btn-xs btn-outline-primary">
+                                        <img src="<?php echo e(asset($book->image)); ?>" class="rounded shadow-sm mb-2" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 200px; object-fit: contain;">
+                                        <a href="<?php echo e(asset($book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover" class="btn btn-xs btn-outline-primary">
                                             <em class="icon ni ni-download"></em><span>Download</span>
                                         </a>
                                     <?php else: ?>
@@ -482,14 +482,14 @@
                                             <td><strong>Image</strong></td>
                                             <td>
                                                 <?php if(isset($book->original_data['image'])): ?>
-                                                    <img src="<?php echo e(Storage::url($book->original_data['image'])); ?>" alt="Original" style="max-height: 50px;">
+                                                    <img src="<?php echo e(asset($book->original_data['image'])); ?>" alt="Original" style="max-height: 50px;">
                                                 <?php else: ?>
                                                     N/A
                                                 <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php if($book->image): ?>
-                                                    <img src="<?php echo e(Storage::url($book->image)); ?>" alt="New" style="max-height: 50px;">
+                                                    <img src="<?php echo e(asset($book->image)); ?>" alt="New" style="max-height: 50px;">
                                                 <?php else: ?>
                                                     N/A
                                                 <?php endif; ?>
@@ -592,8 +592,8 @@
                         <div class="card card-bordered h-100">
                             <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 200px;">
                                 <?php if($book->image): ?>
-                                    <img src="<?php echo e(asset('storage/' . $book->image)); ?>" class="rounded shadow-sm mb-2" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 280px; object-fit: contain;">
-                                    <a href="<?php echo e(asset('storage/' . $book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover" class="btn btn-sm btn-outline-primary">
+                                    <img src="<?php echo e(asset($book->image)); ?>" class="rounded shadow-sm mb-2" alt="<?php echo e($book->title); ?>" style="max-width: 100%; max-height: 280px; object-fit: contain;">
+                                    <a href="<?php echo e(asset($book->image)); ?>" download="<?php echo e(Str::slug($book->title)); ?>-cover" class="btn btn-sm btn-outline-primary">
                                         <em class="icon ni ni-download"></em><span>Download Cover</span>
                                     </a>
                                 <?php else: ?>

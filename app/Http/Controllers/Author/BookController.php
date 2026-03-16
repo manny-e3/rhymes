@@ -209,6 +209,8 @@ class BookController extends Controller
        
         
         try {
+
+        
             $validated = $request->validate(
                 $this->bookService->validateBookData($request->all(), $book)
             );
