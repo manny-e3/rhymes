@@ -23,6 +23,8 @@ class UserService
         'name' => $data['name'],
         'email' => $data['email'],
         'phone' => $data['phone'] ?? null,
+        'address' => $data['address'] ?? null,
+        'account_description' => $data['account_description'] ?? null,
         
         'email_verified_at' => array_key_exists('email_verified', $data)
             ? ($data['email_verified'] ? now() : null)

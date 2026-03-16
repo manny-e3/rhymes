@@ -75,6 +75,12 @@
                                                 <span class="nk-list-meta-value"><?php echo e($user->phone); ?></span>
                                             </li>
                                         <?php endif; ?>
+                                        <?php if($user->address): ?>
+                                            <li class="nk-list-meta-item">
+                                                <span class="nk-list-meta-label">Address:</span>
+                                                <span class="nk-list-meta-value"><?php echo e($user->address); ?></span>
+                                            </li>
+                                        <?php endif; ?>
                                         <?php if($user->website): ?>
                                             <li class="nk-list-meta-item">
                                                 <span class="nk-list-meta-label">Website:</span>
@@ -93,13 +99,15 @@
                                                 <span class="nk-list-meta-value"><?php echo e($user->email_verified_at->format('M d, Y')); ?></span>
                                             </li>
                                         <?php endif; ?>
+
+                                        
                                     </ul>
                                 </div>
                                 
-                                <?php if($user->bio): ?>
+                                <?php if($user->bio || $user->account_description): ?>
                                     <div class="user-bio mt-4">
                                         <h6 class="overline-title-alt">About</h6>
-                                        <p><?php echo e($user->bio); ?></p>
+                                        <p><?php echo e($user->account_description ?? $user->bio); ?></p>
                                     </div>
                                 <?php endif; ?>
                             </div>

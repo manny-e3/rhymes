@@ -20,6 +20,16 @@
                                 <input type="text" class="form-control form-control-lg" id="phone-no" name="phone" value="<?php echo e($user->phone ?? ''); ?>" placeholder="Phone Number">
                             </div>
                         </div>
+
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label" for="phone-no">Bio</label>
+                                <textarea type="text" class="form-control form-control-lg" id="phone-no" name="account_description" placeholder="Description"><?php echo e($user->account_description ?? ''); ?></textarea>
+                            </div>
+                        </div>
+
+
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="form-label" for="address-line-1">Address</label>

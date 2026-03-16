@@ -75,19 +75,30 @@
                 </div>
             </div>
         </div>
-        {{-- <div class="col-lg-6">
+        <div class="col-lg-6">
             <div class="form-group">
-                <label class="form-label" for="website">Website URL</label>
+                <label class="form-label" for="address">Address</label>
                 <div class="form-control-wrap">
-                    <input type="url" class="form-control @error('website') error @enderror" id="website" name="website" value="{{ old('website', $user->website) }}" placeholder="https://example.com">
-                    @error('website')
+                    <input type="text" class="form-control @error('address') error @enderror" id="address" name="address" value="{{ old('address', $user->address) }}" placeholder="Enter your address">
+                    @error('address')
                         <span class="form-note-error">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-        </div> --}}
-      
-        
+        </div>
+
+        <div class="col-lg-12">
+            <div class="form-group">
+                <label class="form-label" for="account_description">Bio</label>
+                <div class="form-control-wrap">
+                    <textarea class="form-control @error('account_description') error @enderror" id="account_description" name="account_description" placeholder="Enter your bio">{{ old('account_description', $user->account_description) }}</textarea>
+                    @error('account_description')
+                        <span class="form-note-error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
         <!-- Role Management -->
         <div class="col-12">
             <div class="form-group">

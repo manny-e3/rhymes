@@ -62,6 +62,7 @@ class AuthorProfileController extends Controller
             'address' => 'nullable|string|max:500',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',
+            'account_description' => 'nullable|string|max:5000',
             'social_links.facebook' => 'nullable|url|max:255',
             'social_links.twitter' => 'nullable|url|max:255',
             'social_links.instagram' => 'nullable|url|max:255',
@@ -87,6 +88,7 @@ class AuthorProfileController extends Controller
         $user->address = $request->address;
         $user->bio = $request->bio;
         $user->website = $request->website;
+        $user->account_description = $request->account_description;
         $user->social_links = $request->social_links ?? [];
         
         $user->save();

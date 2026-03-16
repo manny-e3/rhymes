@@ -77,14 +77,13 @@
                                                 <span class="nk-list-meta-value">{{ $user->phone }}</span>
                                             </li>
                                         @endif
-                                        @if($user->website)
+                                        @if($user->address)
                                             <li class="nk-list-meta-item">
-                                                <span class="nk-list-meta-label">Website:</span>
-                                                <span class="nk-list-meta-value">
-                                                    <a href="{{ $user->website }}" target="_blank" class="link">{{ $user->website }}</a>
-                                                </span>
+                                                <span class="nk-list-meta-label">Address:</span>
+                                                <span class="nk-list-meta-value">{{ $user->address }}</span>
                                             </li>
                                         @endif
+                                        
                                         <li class="nk-list-meta-item">
                                             <span class="nk-list-meta-label">Member Since:</span>
                                             <span class="nk-list-meta-value">{{ $user->created_at->format('M d, Y') }}</span>
@@ -95,13 +94,15 @@
                                                 <span class="nk-list-meta-value">{{ $user->email_verified_at->format('M d, Y') }}</span>
                                             </li>
                                         @endif
+
+                                        
                                     </ul>
                                 </div>
                                 
-                                @if($user->bio)
+                                @if($user->bio || $user->account_description)
                                     <div class="user-bio mt-4">
                                         <h6 class="overline-title-alt">About</h6>
-                                        <p>{{ $user->bio }}</p>
+                                        <p>{{ $user->account_description ?? $user->bio }}</p>
                                     </div>
                                 @endif
                             </div>

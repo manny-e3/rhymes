@@ -156,6 +156,8 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'account_description' => 'nullable|string|max:5000',
             'roles' => 'sometimes|array',
             'email_verified' => 'boolean'
         ]);

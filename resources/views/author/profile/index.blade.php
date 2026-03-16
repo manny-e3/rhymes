@@ -103,15 +103,15 @@
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
                                     </div><!-- data-item -->
-                                    {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
+                                    <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                         <div class="data-col">
                                             <span class="data-label">Bio</span>
-                                            <span class="data-value {{ !isset($user->profile_data['bio']) ? 'text-soft' : '' }}">
-                                                {{ $user->profile_data['bio'] ?? 'Not added yet' }}
+                                            <span class="data-value {{ !isset($user->profile_data['account_description']) ? 'text-soft' : '' }}">
+                                                {{ $user->account_description ?? 'Not added yet' }}
                                             </span>
                                         </div>
                                         <div class="data-col data-col-end"><span class="data-more"><em class="icon ni ni-forward-ios"></em></span></div>
-                                    </div> --}}
+                                    </div>
                                     {{-- <div class="data-item" data-bs-toggle="modal" data-bs-target="#profile-edit">
                                         <div class="data-col">
                                             <span class="data-label">Website</span>
