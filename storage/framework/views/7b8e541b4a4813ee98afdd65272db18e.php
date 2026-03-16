@@ -48,7 +48,7 @@
                 <strong>Need help?</strong>
             </p>
             <p style="font-size: 14px; color: #6b7280; margin-top: 5px;">
-                Contact our support team at hello@travaiq.com if you have any questions.
+                Contact our support team at support@rhbooks.com.ng if you have any questions.
             </p>
         </div>
         

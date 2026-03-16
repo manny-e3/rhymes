@@ -23,7 +23,7 @@ class PayoutController extends Controller
         $filters = $request->only(['status']);
         
         $payoutData = $this->payoutService->getPayoutOverview($user, $filters);
-        $payoutInfo = $this->payoutService->getPayoutInformation();
+         $payoutInfo = $this->payoutService->getPayoutInformation();
         
         // Debug: Log the payout info
         Log::info('Payout Info in Controller', ['payoutInfo' => $payoutInfo]);

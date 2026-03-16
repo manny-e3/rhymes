@@ -123,7 +123,7 @@
                         <div class="card card-bordered mt-4">
                             <div class="card-inner">
                                 <h6 class="title mb-3">Payout Information</h6>
-                                <ul class="list="list-group list-group-flush">
+                                <ul class="list=list-group list-group-flush">
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Minimum Payout</span>
                                         <strong>₦{{ number_format($payoutInfo['minimum_amount'] ?? 300000, 2) }}</strong>
@@ -136,6 +136,13 @@
                                         <span>Frequency Limit</span>
                                         <strong>Once every {{ $payoutInfo['frequency_days'] ?? 30 }} days</strong>
                                     </li>
+                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span>Platform Commission (For every Withdrawal)</span>
+                                        <strong>  {{ 100 - ($payoutInfo['author_commission_percentage'] ) }}%</strong>
+                                    </li>
+
+                                    
+                                    
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Payment Method</span>
                                         <strong>{{ auth()->user()->payment_details ? 'Configured' : 'Not Set' }}</strong>

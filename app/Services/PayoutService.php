@@ -312,6 +312,7 @@ class PayoutService
             'processing_time_max' => $this->getSetting('payout_processing_time_max', 5),
             'frequency_days' => $this->getSetting('payout_frequency_days', 1),
             'fee_percentage' => $this->getSetting('payout_fee', 0),
+            'author_commission_percentage' => $this->getAuthorCommissionPercentage(),
         ];
     }
 
