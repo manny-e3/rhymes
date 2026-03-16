@@ -166,7 +166,7 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        $this->authorize('update', $book);
+       
         
         // Fetch categories from ERPREV API
         $categoriesResult = $this->revService->getItemCategories();
