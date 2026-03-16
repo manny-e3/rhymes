@@ -20,7 +20,7 @@ class BookController extends Controller
     ) {
         $this->bookService = $bookService;
         $this->revService = $revService;
-        $this->middleware(['auth', 'role:author|admin']);
+        //$this->middleware(['auth', 'role:author|admin']);
     }
 
     /**
