@@ -247,8 +247,8 @@
                                             @foreach($user->payouts->take(5) as $payout)
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
-                                                        <span class="tb-lead">${{ number_format($payout->amount_requested, 2) }}</span>
-                                                        <span class="tb-sub">Fee: ${{ number_format($payout->processing_fee, 2) }}</span>
+                                                        <span class="tb-lead">₦{{ number_format($payout->amount_requested, 2) }}</span>
+                                                        <span class="tb-sub">Fee: ₦{{ number_format($payout->processing_fee, 2) }}</span>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
                                                         @if($payout->status === 'pending')

@@ -19,9 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'otp' => \App\Http\Middleware\RequireOTP::class,
+            'role'       => \App\Http\Middleware\RoleMiddleware::class,
+            'verified'   => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'otp'        => \App\Http\Middleware\RequireOTP::class,
+            'basic.auth' => \App\Http\Middleware\BasicAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

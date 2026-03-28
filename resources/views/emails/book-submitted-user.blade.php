@@ -22,7 +22,7 @@
                 <p><strong>Title:</strong> {{ $book->title }}</p>
                 <p><strong>ISBN:</strong> {{ $book->isbn }}</p>
                 <p><strong>Genre:</strong> {{ $book->genre }}</p>
-                <p><strong>Price:</strong> ${{ number_format($book->price, 2) }}</p>
+                <p><strong>Price:</strong> ₦{{ number_format($book->price, 2) }}</p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">

@@ -36,7 +36,7 @@
             <div class="nk-block">
                 <x-sales-metrics 
                     title1="Total Revenue" 
-                    value1="${{ number_format($totalRevenue, 2) }}" 
+                    value1="₦{{ number_format($totalRevenue, 2) }}" 
                     change1="{{ number_format($revenueChange, 1) }}"
                     chartId1="revenueMiniChart"
                     
@@ -46,7 +46,7 @@
                     chartId2="salesMiniChart"
                     
                     title3="Avg. Order Value" 
-                    value3="${{ number_format($avgOrderValue, 2) }}" 
+                    value3="₦{{ number_format($avgOrderValue, 2) }}" 
                     change3="{{ number_format($aovChange, 1) }}"
                     chartId3="aovMiniChart"
                     
@@ -174,7 +174,7 @@
                                     <span>{{ $book->sales_count }}</span>
                                 </div>
                                 <div class="nk-tb-col">
-                                    <span class="tb-lead">${{ number_format($book->total_revenue, 2) }}</span>
+                                    <span class="tb-lead">₦{{ number_format($book->total_revenue, 2) }}</span>
                                 </div>
                             </div>
                             @endforeach

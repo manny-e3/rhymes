@@ -206,7 +206,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="nk-tb-col tb-col-end">
-                                                    <span class="tb-lead">${{ number_format($author->total_earnings, 2) }}</span>
+                                                    <span class="tb-lead">₦{{ number_format($author->total_earnings, 2) }}</span>
                                                     <span class="tb-sub">Total earnings</span>
                                                 </div>
                                             </div>
@@ -369,7 +369,7 @@
                                                 </div>
                                                 <div class="inbox-item-body">
                                                     <p class="inbox-item-text">Gross Revenue</p>
-                                                    <h4 class="inbox-item-title">${{ number_format($analytics['gross_revenue'], 0) }}</h4>
+                                                    <h4 class="inbox-item-title">₦{{ number_format($analytics['gross_revenue'], 0) }}</h4>
                                                 </div>
                                             </div>
                                         </div>
@@ -384,7 +384,7 @@
                                                 </div>
                                                 <div class="inbox-item-body">
                                                     <p class="inbox-item-text">Platform Fee</p>
-                                                    <h4 class="inbox-item-title">${{ number_format($analytics['platform_revenue'], 0) }}</h4>
+                                                    <h4 class="inbox-item-title">₦{{ number_format($analytics['platform_revenue'], 0) }}</h4>
                                                 </div>
                                             </div>
                                         </div>
@@ -399,7 +399,7 @@
                                                 </div>
                                                 <div class="inbox-item-body">
                                                     <p class="inbox-item-text">Author Earnings</p>
-                                                    <h4 class="inbox-item-title">${{ number_format($analytics['author_earnings'], 0) }}</h4>
+                                                    <h4 class="inbox-item-title">₦{{ number_format($analytics['author_earnings'], 0) }}</h4>
                                                 </div>
                                             </div>
                                         </div>
@@ -414,7 +414,7 @@
                                                 </div>
                                                 <div class="inbox-item-body">
                                                     <p class="inbox-item-text">Payouts Paid</p>
-                                                    <h4 class="inbox-item-title">${{ number_format($analytics['payouts_paid'], 0) }}</h4>
+                                                    <h4 class="inbox-item-title">₦{{ number_format($analytics['payouts_paid'], 0) }}</h4>
                                                 </div>
                                             </div>
                                         </div>

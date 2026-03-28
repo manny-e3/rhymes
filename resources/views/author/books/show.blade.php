@@ -65,7 +65,7 @@
                                         <div class="form-group">
                                             <label class="form-label">Price</label>
                                             <div class="form-control-wrap">
-                                                <input type="text" class="form-control" value="${{ number_format($book->price, 2) }}" readonly>
+                                                <input type="text" class="form-control" value="₦{{ number_format($book->price, 2) }}" readonly>
                                             </div>
                                         </div>
                                     </div>

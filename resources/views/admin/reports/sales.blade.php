@@ -92,7 +92,7 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">${{ number_format($metrics['total_revenue'], 2) }}</span>
+                                    <span class="amount">₦{{ number_format($metrics['total_revenue'], 2) }}</span>
                                     @if($metrics['revenue_change'] > 0)
                                         <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em>{{ number_format($metrics['revenue_change'], 1) }}%</span>
                                     @elseif($metrics['revenue_change'] < 0)
@@ -140,7 +140,7 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">${{ number_format($metrics['avg_order_value'], 2) }}</span>
+                                    <span class="amount">₦{{ number_format($metrics['avg_order_value'], 2) }}</span>
                                     @if($metrics['aov_change'] > 0)
                                         <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em>{{ number_format($metrics['aov_change'], 1) }}%</span>
                                     @elseif($metrics['aov_change'] < 0)
@@ -164,7 +164,7 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">${{ number_format($metrics['platform_commission'], 2) }}</span>
+                                    <span class="amount">₦{{ number_format($metrics['platform_commission'], 2) }}</span>
                                     <span class="sub-title">{{ number_format($metrics['commission_rate'], 1) }}% rate</span>
                                 </div>
                             </div>
@@ -250,7 +250,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="nk-tb-col tb-col-end">
-                                                    <span class="tb-lead">${{ number_format($book->total_revenue, 2) }}</span>
+                                                    <span class="tb-lead">₦{{ number_format($book->total_revenue, 2) }}</span>
                                                     <span class="tb-sub">{{ $book->sales_count }} sales</span>
                                                 </div>
                                             </div>
@@ -317,7 +317,7 @@
                                             <span class="tb-sub">{{ $transaction->user->email }}</span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            <span class="tb-lead text-success">${{ number_format($transaction->amount, 2) }}</span>
+                                            <span class="tb-lead text-success">₦{{ number_format($transaction->amount, 2) }}</span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
                                             <span>{{ $transaction->created_at->format('M d, Y') }}</span>
