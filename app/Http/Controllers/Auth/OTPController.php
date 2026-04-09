@@ -85,11 +85,11 @@ class OTPController extends Controller
         
         // Redirect based on user role
         if ($user->hasRole('admin')) {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back, Admin!');
+            return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, Admin!');
         } elseif ($user->hasRole('author')) {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back to your Author Dashboard!');
+            return redirect()->intended(route('author.dashboard'))->with('success', 'Welcome back to your Author Dashboard!');
         } else {
-            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back! Ready to submit your next book?');
+            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back!');
         }
     }
 

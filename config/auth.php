@@ -112,4 +112,15 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | OTP Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This option determines if OTP verification is required during login.
+    |
+    */
+
+    'otp_enabled' => env('LOGIN_OTP_ENABLED', true),
+
 ];

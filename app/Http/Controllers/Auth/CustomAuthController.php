@@ -96,15 +96,41 @@ class CustomAuthController extends Controller
             ]);
         }
 
-        // Generate and send OTP
-        $user->generateOTP();
+        // Check if OTP is enabled
+        if (config('auth.otp_enabled')) {
+            // Generate and send OTP
+            $user->generateOTP();
 
-        // Store pending login data in session
-        $request->session()->put('pending_login_email', $request->email);
-        $request->session()->put('pending_login_remember', $request->boolean('remember'));
+            // Store pending login data in session
+            $request->session()->put('pending_login_email', $request->email);
+            $request->session()->put('pending_login_remember', $request->boolean('remember'));
 
-        // Redirect to OTP verification page
-        return redirect()->route('otp.show');
+            // Redirect to OTP verification page
+            return redirect()->route('otp.show');
+        }
+
+        // OTP is disabled, log the user in immediately
+        Auth::login($user, $request->boolean('remember'));
+
+        // Regenerate session
+        $request->session()->regenerate();
+
+        // Redirect based on user role
+        return $this->redirectAfterLogin($user);
+    }
+
+    /**
+     * Redirect user based on their role after login
+     */
+    protected function redirectAfterLogin($user): RedirectResponse
+    {
+        if ($user->hasRole('admin')) {
+            return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, Admin!');
+        } elseif ($user->hasRole('author')) {
+            return redirect()->intended(route('author.dashboard'))->with('success', 'Welcome back to your Author Dashboard!');
+        } else {
+            return redirect()->intended(route('dashboard'))->with('success', 'Welcome back!');
+        }
     }
 
     /**
