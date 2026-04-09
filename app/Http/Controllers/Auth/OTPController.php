@@ -76,11 +76,7 @@ class OTPController extends Controller
 
         // Check if user has verified their email
         if (!$user->hasVerifiedEmail()) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect()->route('login')->with('error', 'You must verify your email address before logging in. Please check your email for the verification link.');
+            return redirect()->route('verification.notice');
         }
         
         // Redirect based on user role

@@ -21,12 +21,13 @@
 </div>
 
 <div class="mt-4 d-flex justify-content-between">
-    <form method="POST" action="{{ route('verification.send') }}" class="w-100 me-2">
+    <form id="resend-form" method="POST" action="{{ route('verification.send') }}" class="w-100 me-2">
         @csrf
 
         <div>
-            <button type="submit" class="btn btn-lg btn-primary btn-block">
-                {{ __('Resend Verification Email') }}
+            <button type="submit" id="resend-btn" class="btn btn-lg btn-primary btn-block">
+                <span id="resend-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span id="resend-text">{{ __('Resend Verification Email') }}</span>
             </button>
         </div>
     </form>
@@ -39,4 +40,19 @@
         </button>
     </form>
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('resend-form').addEventListener('submit', function() {
+        const btn = document.getElementById('resend-btn');
+        const spinner = document.getElementById('resend-spinner');
+        const text = document.getElementById('resend-text');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        spinner.classList.add('me-1');
+        text.innerText = 'Sending...';
+    });
+</script>
+@endpush
 @endsection

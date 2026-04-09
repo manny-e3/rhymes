@@ -124,6 +124,11 @@ class CustomAuthController extends Controller
      */
     protected function redirectAfterLogin($user): RedirectResponse
     {
+        // Check if user has verified their email
+        if (!$user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         if ($user->hasRole('admin')) {
             return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, Admin!');
         } elseif ($user->hasRole('author')) {

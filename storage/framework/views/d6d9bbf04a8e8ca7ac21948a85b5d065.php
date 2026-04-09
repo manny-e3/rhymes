@@ -21,13 +21,13 @@
 </div>
 
 <div class="mt-4 d-flex justify-content-between">
-    <form method="POST" action="<?php echo e(route('verification.send')); ?>" class="w-100 me-2">
+    <form id="resend-form" method="POST" action="<?php echo e(route('verification.send')); ?>" class="w-100 me-2">
         <?php echo csrf_field(); ?>
 
         <div>
-            <button type="submit" class="btn btn-lg btn-primary btn-block">
-                <?php echo e(__('Resend Verification Email')); ?>
-
+            <button type="submit" id="resend-btn" class="btn btn-lg btn-primary btn-block">
+                <span id="resend-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span id="resend-text"><?php echo e(__('Resend Verification Email')); ?></span>
             </button>
         </div>
     </form>
@@ -41,5 +41,20 @@
         </button>
     </form>
 </div>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+    document.getElementById('resend-form').addEventListener('submit', function() {
+        const btn = document.getElementById('resend-btn');
+        const spinner = document.getElementById('resend-spinner');
+        const text = document.getElementById('resend-text');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        spinner.classList.add('me-1');
+        text.innerText = 'Sending...';
+    });
+</script>
+<?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.auth', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/auth/verify-email.blade.php ENDPATH**/ ?>

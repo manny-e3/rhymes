@@ -33,7 +33,7 @@ use App\Services\WalletService;
 
 
 // Author routes
-Route::middleware('role:author')->group(function () {
+Route::middleware(['role:author', 'verified'])->group(function () {
     Route::prefix('author')->name('author.')->group(function () {
         // Dashboard
         Route::get('/', [AuthorController::class, 'dashboard'])->name('dashboard');
@@ -58,7 +58,7 @@ Route::middleware('role:author')->group(function () {
 });
 
 // Admin routes
-Route::middleware('role:admin')->group(function () {
+Route::middleware(['role:admin', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboards
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -168,7 +168,7 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Notifications
