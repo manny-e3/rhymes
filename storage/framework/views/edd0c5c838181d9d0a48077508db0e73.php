@@ -217,7 +217,7 @@ unset($__errorArgs, $__bag); ?>
                 <div class="form-control-wrap">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" value="1" 
-                            <?php echo e($user->isActive() ? 'checked' : ''); ?> disabled>
+                            <?php echo e($user->isActive() ? 'checked' : ''); ?>>
                         <label class="custom-control-label" for="account_active">
                             <?php if($user->isActive()): ?>
                                 <span class="badge badge-sm badge-dim bg-outline-success">Active</span>
@@ -281,8 +281,8 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
-                        <!-- Account Actions -->
-                        <div class="card card-bordered card-full mb-4">
+                       
+                        <!-- <div class="card card-bordered card-full mb-4">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-3">
                                     <div class="card-title">
@@ -319,7 +319,7 @@ unset($__errorArgs, $__bag); ?>
                                         </a>
                                     </div>
                     
-                                    <!-- Account Status Management -->
+                                   
                                     <div class="col-12">
                                         <?php if($user->isActive()): ?>
                                             <form method="POST" action="<?php echo e(route('admin.users.deactivate', $user)); ?>">
@@ -341,7 +341,7 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
-                        <!-- Danger Zone -->
+                     
                         <div class="card card-bordered card-full">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-3">
@@ -364,7 +364,7 @@ unset($__errorArgs, $__bag); ?>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

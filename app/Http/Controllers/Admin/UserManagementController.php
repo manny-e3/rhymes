@@ -159,7 +159,8 @@ class UserManagementController extends Controller
             'address' => 'nullable|string|max:500',
             'account_description' => 'nullable|string|max:5000',
             'roles' => 'sometimes|array',
-            'email_verified' => 'boolean'
+            'email_verified' => 'boolean',
+            'account_active' => 'boolean'
         ]);
 
         $this->userService->updateUser($user, $validated);

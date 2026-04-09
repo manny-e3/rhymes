@@ -29,6 +29,10 @@ class UserService
         'email_verified_at' => array_key_exists('email_verified', $data)
             ? ($data['email_verified'] ? now() : null)
             : $user->email_verified_at,
+
+        'is_active' => array_key_exists('account_active', $data)
+            ? (bool)$data['account_active']
+            : false,
     ];
 
     $user->update($updateData);

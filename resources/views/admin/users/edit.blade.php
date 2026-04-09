@@ -141,7 +141,7 @@
                 <div class="form-control-wrap">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="account_active" name="account_active" value="1" 
-                            {{ $user->isActive() ? 'checked' : '' }} disabled>
+                            {{ $user->isActive() ? 'checked' : '' }}>
                         <label class="custom-control-label" for="account_active">
                             @if($user->isActive())
                                 <span class="badge badge-sm badge-dim bg-outline-success">Active</span>
@@ -205,8 +205,8 @@
                             </div>
                         </div>
 
-                        <!-- Account Actions -->
-                        <div class="card card-bordered card-full mb-4">
+                       
+                        <!-- <div class="card card-bordered card-full mb-4">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-3">
                                     <div class="card-title">
@@ -243,7 +243,7 @@
                                         </a>
                                     </div>
                     
-                                    <!-- Account Status Management -->
+                                   
                                     <div class="col-12">
                                         @if($user->isActive())
                                             <form method="POST" action="{{ route('admin.users.deactivate', $user) }}">
@@ -265,7 +265,7 @@
                             </div>
                         </div>
 
-                        <!-- Danger Zone -->
+                     
                         <div class="card card-bordered card-full">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-3">
@@ -288,7 +288,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

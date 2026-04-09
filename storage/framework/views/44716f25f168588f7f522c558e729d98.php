@@ -81,14 +81,7 @@
                                                 <span class="nk-list-meta-value"><?php echo e($user->address); ?></span>
                                             </li>
                                         <?php endif; ?>
-                                        <?php if($user->website): ?>
-                                            <li class="nk-list-meta-item">
-                                                <span class="nk-list-meta-label">Website:</span>
-                                                <span class="nk-list-meta-value">
-                                                    <a href="<?php echo e($user->website); ?>" target="_blank" class="link"><?php echo e($user->website); ?></a>
-                                                </span>
-                                            </li>
-                                        <?php endif; ?>
+                                        
                                         <li class="nk-list-meta-item">
                                             <span class="nk-list-meta-label">Member Since:</span>
                                             <span class="nk-list-meta-value"><?php echo e($user->created_at->format('M d, Y')); ?></span>
@@ -252,8 +245,8 @@
                                             <?php $__currentLoopData = $user->payouts->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payout): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
-                                                        <span class="tb-lead">$<?php echo e(number_format($payout->amount_requested, 2)); ?></span>
-                                                        <span class="tb-sub">Fee: $<?php echo e(number_format($payout->processing_fee, 2)); ?></span>
+                                                        <span class="tb-lead">₦<?php echo e(number_format($payout->amount_requested, 2)); ?></span>
+                                                        <span class="tb-sub">Fee: ₦<?php echo e(number_format($payout->processing_fee, 2)); ?></span>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
                                                         <?php if($payout->status === 'pending'): ?>
