@@ -270,24 +270,22 @@
 
              <div class="status-box delivery-info">
                     
-                    <p>Thank you for submitting your book details to us. We appreciate your interest in partnering with Rovingheights. As the next step in our review process, we require a copy of your book for evaluation: <strong><?php echo e($book->title); ?></strong>.</p>
+                    <p>Thank you for submitting your book details to us. We appreciate your interest in partnering with Rovingheights. As the next step in our review process, we require a copy of your book for evaluation, <strong><?php echo e($book->title); ?></strong>.</p>
                     
-                     <p>If you are in Lagos, please submit a copy to:</p>
+                    <p>If you are in Lagos, please submit a copy to:</p>
                     
                     <div class="address">
-                        <strong>Lagos Drop-off Location:</strong>
-                        <p>Digital Bridge Institute</p>
-                        <p>1, Nitel Road, Cappa Oshodi, Lagos</p>
-                        <p>Contact: Bidemi – 0810 411 3185</p>
+                        <strong>Rovingheights Bookstore</strong>
+                        <p>28, Ogunlana Drive, Surulere.</p>
+                        <p>Contact: 0810 979 5365</p>
                     </div>
                     
+                    <p>If you are in Abuja, please submit a copy to:</p>
 
-                     <p>If you are in Abuja, please submit a copy to:</p>
                     <div class="address">
-                        <strong>Abuja Drop-off Location:</strong>
-                        <p>CVS Plaza, Shop 4.1, Block B</p>
-                        <p>145, Ademola Adetokunbo Crescent, opposite Oti Carpets, Wuse 2, Abuja</p>
-                        <p>Contact: 0902 666 6195</p>
+                        <strong>Rovingheights Bookstore</strong>
+                        <p>Shop S01, 2nd floor, City Centre Mall, Gimbiya Street, Area 11, Garki.</p>
+                        <p>Contact: 0802 828 7089</p>
                     </div>
                     
                     <p>The review process typically takes 1–2 weeks. Once it is completed, we will communicate our final stocking decision. If we are unable to proceed with stocking your book, we will notify you. Please note that submitted copies are not returned.</p>
@@ -303,9 +301,7 @@
                     <p>We look forward to your submission.</p>
 
                     <p>Regards,</p>
-                    <p>Team Rovingheights</p>
-                    
-                
+                    <p>Team Rovingheights.</p>
                     
                     <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
                         <div class="admin-notes">
@@ -382,11 +378,11 @@
                     </a>
                 </div>
             <?php elseif(trim($newStatus) === 'recalled'): ?>
-                <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong><?php echo e(ucfirst(str_replace('_', ' ', $newStatus))); ?></strong>.</p>
+                <p>Your book "<strong><?php echo e($book->title); ?></strong>" status has been updated to <strong>Retrieved</strong>.</p>
                 
                 <div class="status-box rejected-info">
-                    <h3 class="status-title"><i>⚠️</i> Book Recalled</h3>
-                    <p>Your book has been recalled from our inventory.</p>
+                    <h3 class="status-title"><i>⚠️</i> Book Retrieved</h3>
+                    <p>Your book has been retrieved from our inventory.</p>
                     
                     <?php if((isset($adminNotes) && $adminNotes) || $book->admin_notes): ?>
                         <div class="admin-notes">
@@ -403,7 +399,7 @@
                         <p>No additional notes provided.</p>
                     <?php endif; ?>
                     
-                    <p>If you have questions about this recall, please contact us.</p>
+                    <p>If you have questions about this retrieval, please contact us.</p>
                 </div>
                 
                 <div class="cta-button-container">

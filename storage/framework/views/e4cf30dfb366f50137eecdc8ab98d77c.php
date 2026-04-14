@@ -21,7 +21,7 @@
                 <p><strong>Author:</strong> <?php echo e($book->user->name); ?></p>
                 <p><strong>ISBN:</strong> <?php echo e($book->isbn); ?></p>
                 <p><strong>Genre:</strong> <?php echo e($book->genre); ?></p>
-                <p><strong>Price:</strong> $<?php echo e(number_format($book->price, 2)); ?></p>
+                <p><strong>Price:</strong> ₦<?php echo e(number_format($book->price, 2)); ?></p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
