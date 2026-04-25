@@ -252,61 +252,9 @@
                                                                         </form>
                                                                     </li>
                                                                 @else
-                                                                    @if($book->status === 'pending_review')
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}"><em class="icon ni ni-mail"></em><span>Send Review Copy</span></button>
-                                                                        </li>
-                                                                       
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}"><em class="icon ni ni-cross"></em><span>Reject</span></button>
-                                                                        </li>
-                                                                    @elseif($book->status === 'send_review_copy')
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}"><em class="icon ni ni-check"></em><span>Approve for Delivery</span></button>
-                                                                        </li>
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}"><em class="icon ni ni-cross"></em><span>Reject</span></button>
-                                                                        </li>
-                                                                    @elseif($book->status === 'approved_awaiting_delivery')
-                                                                        <!-- Button to trigger the quantity modal instead of directly stocking -->
-                                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#quantityModal-{{$book->id}}"><em class="icon ni ni-package"></em><span>Stock Book</span></button>
-                                                                    @elseif($book->status === 'rejected')
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
-                                                                        </li>
-                                                                    @elseif($book->status === 'stocked')
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
-                                                                        </li>
-                                                                        @if($book->status === 'retrieval_requested')
-                                                                        <li class="divider"></li>
-                                                                        <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRetrievalModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Retrieval</span></a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRetrievalModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Retrieval</span></a>
-                                                                        </li>
-                                                                        @else
-                                                                        <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#recallBookModal-{{ $book->id }}"><em class="icon ni ni-exclamation-circle"></em><span>Retrieve Book</span></a>
-                                                                        </li>
-                                                                        @endif
-                                                                                                                                            
-                                                                    @elseif($book->status === 'edited_pending_approval')
-                                                                        <li>
-                                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Edit Status</span></button>
-                                                                        </li>
-                                                                        @if($book->status === 'retrieval_requested')
-                                                                        <li class="divider"></li>
-                                                                        <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#approveRetrievalModal-{{ $book->id }}"><em class="icon ni ni-check"></em><span>Approve Retrieval</span></a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#denyRetrievalModal-{{ $book->id }}"><em class="icon ni ni-cross"></em><span>Deny Retrieval</span></a>
-                                                                        </li>
-                                                                        @endif
-                                                                    @else
-                                                                    @endif
+                                                                    <li>
+                                                                        <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#changeStatusModal-{{$book->id}}"><em class="icon ni ni-edit"></em><span>Change Status</span></a>
+                                                                    </li>
                                                                     <li class="divider"></li>
                                                                     <li>
                                                                         <form method="POST" action="{{ route('admin.books.bulk-action') }}" style="display:inline;" class="sweet-alert-form" data-message="This action will soft delete the book. You can restore it later.">
@@ -361,263 +309,6 @@
 </div>
 
 @foreach($books as $book)
-
-<!-- Review Modal -->
-<div class="modal fade" tabindex="-1" id="reviewModal-{{$book->id}}" aria-labelledby="reviewModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reviewModalLabel-{{$book->id}}">Review Book: {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="reviewForm-{{$book->id}}" method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <div class="modal-body">
-                    <div class="row g-4 mb-3">
-                        <div class="col-md-4">
-                            <div class="card card-bordered h-100">
-                                <div class="card-inner d-flex flex-column align-items-center justify-content-center p-2 bg-light" style="min-height: 150px;">
-                                    @if($book->image)
-                                        <img src="{{ asset($book->image) }}" class="rounded shadow-sm mb-2" alt="{{ $book->title }}" style="max-width: 100%; max-height: 200px; object-fit: contain;">
-                                        <a href="{{ asset($book->image) }}" download="{{ Str::slug($book->title) }}-cover" class="btn btn-xs btn-outline-primary">
-                                            <em class="icon ni ni-download"></em><span>Download</span>
-                                        </a>
-                                    @else
-                                        <div class="text-center text-soft">
-                                            <em class="icon ni ni-book-read" style="font-size: 32px;"></em>
-                                            <p class="mt-1 small">No Cover</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Author:</strong> {{ $book->user->name }}</p>
-                            <p><strong>Email:</strong> {{ $book->user->email }}</p>
-                            <p><strong>Genre:</strong> {{ $book->genre }}</p>
-                            <p><strong>Price:</strong> ₦{{ number_format($book->price, 2) }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Status:</strong> 
-                                @if($book->status === 'pending_review')
-                                    <span class="badge badge-sm badge-dim bg-outline-warning">Pending Review</span>
-                                @elseif($book->status === 'send_review_copy')
-                                    <span class="badge badge-sm badge-dim bg-outline-info">Send Review Copy</span>
-                                @elseif($book->status === 'approved_awaiting_delivery')
-                                    <span class="badge badge-sm badge-dim bg-outline-success">Approved - AWaiting Delivery</span>
-                                    @elseif($book->status === 'retrieval_requested')
-                                        <span class="badge badge-sm badge-dim bg-outline-warning">Retrieval Requested</span>
-                                    @elseif($book->status === 'recalled')
-                                        <span class="badge badge-sm badge-dim bg-outline-danger">Retrieved</span>
-                                @elseif($book->status === 'rejected')
-                                    <span class="badge badge-sm badge-dim bg-outline-danger">Rejected</span>
-                                @elseif($book->status === 'stocked')
-                                    <span class="badge badge-sm badge-dim bg-outline-info">Stocked</span>
-                                @elseif($book->status === 'edited_pending_approval')
-                                    <span class="badge badge-sm badge-dim bg-outline-warning">Edited - Awaiting Approval</span>
-                                @endif
-                            </p>
-                            @if($book->status === 'stocked' && $book->quantity)
-                            <p><strong>Quantity:</strong> {{ $book->quantity }} copies</p>
-                            @endif
-                            <p><strong>Sales:</strong> {{ $book->getSalesCount() }}</p>
-                            <p><strong>Revenue:</strong> ₦{{ number_format($book->getTotalSales(), 2) }}</p>
-                            <p><strong>Submitted:</strong> {{ $book->created_at->format('M d, Y') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-                                    
-                    <!-- Original vs New Data Comparison for edited books -->
-                    @if($book->status === 'edited_pending_approval' && $book->original_data)
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6>Changes Comparison:</h6>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Field</th>
-                                            <th>Original Value</th>
-                                            <th>New Value</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>Title</strong></td>
-                                            <td>{{ $book->original_data['title'] ?? 'N/A' }}</td>
-                                            <td>{{ $book->title }}</td>
-                                            <td>
-                                                @if(($book->original_data['title'] ?? '') !== $book->title)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>ISBN</strong></td>
-                                            <td>{{ $book->original_data['isbn'] ?? 'N/A' }}</td>
-                                            <td>{{ $book->isbn }}</td>
-                                            <td>
-                                                @if(($book->original_data['isbn'] ?? '') !== $book->isbn)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Genre</strong></td>
-                                            <td>{{ $book->original_data['genre'] ?? 'N/A' }}</td>
-                                            <td>{{ $book->genre }}</td>
-                                            <td>
-                                                @if(($book->original_data['genre'] ?? '') !== $book->genre)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Price</strong></td>
-                                            <td>₦{{ number_format($book->original_data['price'] ?? 0, 2) }}</td>
-                                            <td>₦{{ number_format($book->price, 2) }}</td>
-                                            <td>
-                                                @if(($book->original_data['price'] ?? 0) !== $book->price)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Type</strong></td>
-                                            <td>{{ $book->original_data['book_type'] ?? 'N/A' }}</td>
-                                            <td>{{ $book->book_type }}</td>
-                                            <td>
-                                                @if(($book->original_data['book_type'] ?? '') !== $book->book_type)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Description</strong></td>
-                                            <td>{{ Str::limit($book->original_data['description'] ?? '', 50) }}</td>
-                                            <td>{{ Str::limit($book->description, 50) }}</td>
-                                            <td>
-                                                @if(($book->original_data['description'] ?? '') !== $book->description)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Image</strong></td>
-                                            <td>
-                                                @if(isset($book->original_data['image']))
-                                                    <img src="{{ asset($book->original_data['image']) }}" alt="Original" style="max-height: 50px;">
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($book->image)
-                                                    <img src="{{ asset($book->image) }}" alt="New" style="max-height: 50px;">
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if(($book->original_data['image'] ?? '') !== $book->image)
-                                                    <span class="badge bg-warning">Changed</span>
-                                                @else
-                                                    <span class="badge bg-success">Unchanged</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                    
-                    @if($book->description)
-                    <div class="form-group mb-3">
-                        <label class="form-label"><strong>Description:</strong></label>
-                        <div class="form-control-wrap">
-                            <p>{{ $book->description }}</p>
-                        </div>
-                    </div>
-                    @endif
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">Admin Decision</label>
-                        <div class="form-control-wrap">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="pending-review-{{$book->id}}" value="pending_review" 
-                                       {{ $book->status === 'pending_review' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="pending-review-{{$book->id}}">Pending Review</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="send-review-copy-{{$book->id}}" value="send_review_copy" 
-                                       {{ $book->status === 'send_review_copy' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="send-review-copy-{{$book->id}}">Send Review Copy</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="approve-delivery-{{$book->id}}" value="approved_awaiting_delivery" 
-                                       {{ $book->status === 'approved_awaiting_delivery' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="approve-delivery-{{$book->id}}">Approve for Delivery</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="reject-{{$book->id}}" value="rejected" 
-                                       {{ $book->status === 'rejected' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="reject-{{$book->id}}">Reject</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="stock-{{$book->id}}" value="stocked" 
-                                       {{ $book->status === 'stocked' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="stock-{{$book->id}}">Stock</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="recalled-{{$book->id}}" value="recalled" 
-                                       {{ $book->status === 'recalled' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="recalled-{{$book->id}}">Retrieve Book</label>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
-                    <div class="form-group mb-3" id="adminNotesGroup-{{$book->id}}">
-                        <label class="form-label">Admin Notes</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes for the author...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author (except for Rejected status).</div>
-                    </div>
-                    
-                    
-                    
-                    <div class="form-group mb-3" id="revBookIdGroup-{{$book->id}}" style="{{ $book->status !== 'stocked' ? 'display: none;' : '' }}">
-                        <label class="form-label">REV Book ID</label>
-                        <input type="text" class="form-control" name="rev_book_id" placeholder="Enter REV system book ID" value="{{ $book->rev_book_id }}">
-                        <div class="form-note">This will be automatically populated when the book is registered with the ERP system.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- View Details Modal -->
 <div class="modal fade" tabindex="-1" id="viewDetailsModal-{{$book->id}}" aria-labelledby="viewDetailsModalLabel-{{$book->id}}" aria-hidden="true">
@@ -828,295 +519,53 @@
 </div>
 @endforeach
 
-<!-- Quantity Modal for each book -->
+<!-- Change Status Modal for each book -->
 @foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="quantityModal-{{$book->id}}" aria-labelledby="quantityModalLabel-{{$book->id}}" aria-hidden="true">
+<div class="modal fade" tabindex="-1" id="changeStatusModal-{{$book->id}}" aria-labelledby="changeStatusModalLabel-{{$book->id}}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="quantityModalLabel-{{$book->id}}">Enter Quantity for {{ $book->title }}</h5>
+                <h5 class="modal-title" id="changeStatusModalLabel-{{$book->id}}">Change Status: {{ $book->title }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('admin.books.review', $book) }}">
                 @csrf
                 @method('PATCH')
-                <input type="hidden" name="status" value="stocked">
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select status-select" data-book-id="{{ $book->id }}" required>
+                            <option value="pending_review" {{ $book->status === 'pending_review' ? 'selected' : '' }}>Pending Review</option>
+                            <option value="send_review_copy" {{ $book->status === 'send_review_copy' ? 'selected' : '' }}>Send Review Copy</option>
+                            <option value="approved_awaiting_delivery" {{ $book->status === 'approved_awaiting_delivery' ? 'selected' : '' }}>Approved - Awaiting Delivery</option>
+                            <option value="rejected" {{ $book->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="stocked" {{ $book->status === 'stocked' ? 'selected' : '' }}>Stocked</option>
+                            <!-- <option value="edited_pending_approval" {{ $book->status === 'edited_pending_approval' ? 'selected' : '' }}>Edited - Awaiting Approval</option> -->
+                            <option value="retrieval_requested" {{ $book->status === 'retrieval_requested' ? 'selected' : '' }}>Retrieval Requested</option>
+                            <option value="recalled" {{ $book->status === 'recalled' ? 'selected' : '' }}>Retrieved</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group mb-3 quantity-group-{{$book->id}}" style="{{ $book->status === 'stocked' ? 'display: block;' : 'display: none;' }}">
                         <label class="form-label">Quantity</label>
-                        <input type="number" class="form-control" name="quantity" placeholder="Enter quantity" min="1" required>
+                        <input type="number" class="form-control quantity-input-{{$book->id}}" name="quantity" value="{{ $book->quantity }}" placeholder="Enter quantity" min="1">
                         <div class="form-note">Enter the number of copies being stocked in inventory.</div>
                     </div>
-                    <div class="form-group mt-3">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="3" placeholder="Optional notes for the author...">{{ $book->admin_notes }}</textarea>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Stock Book</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
+                    
+                    <!-- <div class="form-group mb-3 rev-book-id-group-{{$book->id}}" id="revBookIdGroup-{{$book->id}}" style="{{ $book->status === 'stocked' ? 'display: block;' : 'display: none;' }}">
+                        <label class="form-label">REV Book ID</label>
+                        <input type="text" class="form-control" name="rev_book_id" placeholder="Enter REV system book ID" value="{{ $book->rev_book_id }}">
+                        <div class="form-note">This will be automatically populated when the book is registered with the ERP system.</div>
+                    </div> -->
 
-<!-- Send Review Copy Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="sendReviewCopyModal-{{$book->id}}" aria-labelledby="sendReviewCopyModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sendReviewCopyModalLabel-{{$book->id}}">Send Review Copy for {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="send_review_copy">
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <p>This will send a review copy of the book to the author and update the book status to "Send Review Copy".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
+                    <div class="form-group mb-3 admin-notes-group-{{$book->id}}" id="adminNotesGroup-{{$book->id}}" style="{{ $book->status === 'rejected' ? 'display: none;' : 'display: block;' }}">
+                        <label class="form-label">Admin Notes</label>
+                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes for the author...">{{ $book->admin_notes }}</textarea>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send Review Copy</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Approve for Delivery Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="approveForDeliveryModal-{{$book->id}}" aria-labelledby="approveForDeliveryModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approveForDeliveryModalLabel-{{$book->id}}">Approve for Delivery - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="approved_awaiting_delivery">
-                <div class="modal-body">
-                    <div class="alert alert-success">
-                        <p>This will approve the book for delivery and update the book status to "Approved - Awaiting Delivery".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Approve for Delivery</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Reject Book Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="rejectBookModal-{{$book->id}}" aria-labelledby="rejectBookModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="rejectBookModalLabel-{{$book->id}}">Reject Book - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="rejected">
-                <div class="modal-body">
-                    <div class="alert alert-danger">
-                        <p>Are you sure you want to reject this book? This will update the book status to "Rejected".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Required for rejection)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reasons for rejection...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject Book</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Pending Review Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="pendingReviewModal-{{$book->id}}" aria-labelledby="pendingReviewModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="pendingReviewModalLabel-{{$book->id}}">Set to Pending Review - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="pending_review">
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <p>This will set the book status back to "Pending Review".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Set Pending Review</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Stock Book Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="stockBookModal-{{$book->id}}" aria-labelledby="stockBookModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="stockBookModalLabel-{{$book->id}}">Stock Book - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="stocked">
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <p>This will stock the book in inventory and update the book status to "Stocked".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Optional notes to include in the email to the author...">{{ $book->admin_notes }}</textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-info">Stock Book</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Deny Retrieval Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="denyRetrievalModal-{{$book->id}}" aria-labelledby="denyRetrievalModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="denyRetrievalModalLabel-{{$book->id}}">Deny Retrieval Request - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.retrieval-action', $book) }}">
-                @csrf
-                <input type="hidden" name="action" value="deny">
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <p>Are you sure you want to deny this retrieval request? This will cancel the retrieval and maintain the book's current status.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about why the retrieval was denied..."></textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Deny Retrieval</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Approve Recall Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="approveRecallModal-{{$book->id}}" aria-labelledby="approveRecallModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approveRetrievalModalLabel-{{$book->id}}">Approve Retrieval Request - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.retrieval-action', $book) }}">
-                @csrf
-                <input type="hidden" name="action" value="approve">
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <p>Are you sure you want to approve this retrieval request? This will update the book status to "Retrieved".</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Optional)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Add notes for the author about the recall approval..."></textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Approve Retrieval</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
-
-<!-- Retrieval Book Modal for each book -->
-@foreach($books as $book)
-<div class="modal fade" tabindex="-1" id="recallBookModal-{{$book->id}}" aria-labelledby="recallBookModalLabel-{{$book->id}}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="recallBookModalLabel-{{$book->id}}">Retrieve Book - {{ $book->title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('admin.books.review', $book) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="recalled">
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <p>Are you sure you want to retrieve this book? This will change the book status to "Retrieved" and notify the author.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Admin Notes (Required)</label>
-                        <textarea class="form-control" name="admin_notes" rows="4" placeholder="Please provide reason for retrieving the book..." required></textarea>
-                        <div class="form-note">These notes will be included in the email sent to the author.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Retrieve Book</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -1127,45 +576,51 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Show/hide REV Book ID and admin notes fields based on status selection
+// Show/hide fields based on status selection
 function toggleRevBookIdField(bookId) {
-    const modal = document.getElementById(`reviewModal-${bookId}`);
+    const modal = document.getElementById(`changeStatusModal-${bookId}`);
     if (!modal) return;
     
-    const statusInputs = modal.querySelectorAll('input[name="status"]');
+    const statusSelect = modal.querySelector('select[name="status"]');
+    if (!statusSelect) return;
+    
     const revBookIdGroup = document.getElementById(`revBookIdGroup-${bookId}`);
-    const quantityGroup = document.getElementById(`quantityGroup-${bookId}`); // Added quantity group
+    const quantityGroup = modal.querySelector(`.quantity-group-${bookId}`);
     const adminNotesGroup = document.getElementById(`adminNotesGroup-${bookId}`);
     
-    statusInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            // Handle REV Book ID field
-            if (this.value === 'stocked') {
-                if (revBookIdGroup) revBookIdGroup.style.display = 'block';
-                if (quantityGroup) quantityGroup.style.display = 'block'; // Show quantity field
-            } else if (this.value === 'edited_pending_approval') {
-                if (revBookIdGroup) revBookIdGroup.style.display = 'none';
-                if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field
-            } else {
-                if (revBookIdGroup) revBookIdGroup.style.display = 'none';
-                if (quantityGroup) quantityGroup.style.display = 'none'; // Hide quantity field
-            }
-            
-            // Hide admin notes field only for rejected status
-            if (this.value === 'rejected') {
-                if (adminNotesGroup) adminNotesGroup.style.display = 'none';
-            } else {
-                if (adminNotesGroup) adminNotesGroup.style.display = 'block';
-            }
-        });
-    });
+    // Function to handle the actual toggling
+    function updateVisibility() {
+        const value = statusSelect.value;
+        
+        if (value === 'stocked') {
+            if (revBookIdGroup) revBookIdGroup.style.display = 'block';
+            if (quantityGroup) quantityGroup.style.display = 'block';
+        } else {
+            if (revBookIdGroup) revBookIdGroup.style.display = 'none';
+            if (quantityGroup) quantityGroup.style.display = 'none';
+        }
+        
+        if (value === 'rejected') {
+            if (adminNotesGroup) adminNotesGroup.style.display = 'none';
+        } else {
+            if (adminNotesGroup) adminNotesGroup.style.display = 'block';
+        }
+    }
+    
+    // Remove old listener to prevent duplicates if toggled multiple times
+    statusSelect.removeEventListener('change', updateVisibility);
+    // Add new listener
+    statusSelect.addEventListener('change', updateVisibility);
+    
+    // Call once to set initial state
+    updateVisibility();
 }
 
 // Initialize when a modal is shown
 document.addEventListener('shown.bs.modal', function (event) {
     const modal = event.target;
-    if (modal.id && modal.id.startsWith('reviewModal-')) {
-        const bookId = modal.id.replace('reviewModal-', '');
+    if (modal.id && modal.id.startsWith('changeStatusModal-')) {
+        const bookId = modal.id.replace('changeStatusModal-', '');
         if (bookId) {
             toggleRevBookIdField(bookId);
         }

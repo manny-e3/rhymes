@@ -215,12 +215,5 @@ Route::get('/errors/{code}', function ($code) {
 
 
 
-Route::get('/clear-cache', function () {
-    Artisan::call('cache:clear');
-    Artisan::call('view:clear');
-    Artisan::call('config:clear');
-    Artisan::call('config:cache');
-    return "Cache cleared successfully!";
-});
 
 require __DIR__.'/auth.php';

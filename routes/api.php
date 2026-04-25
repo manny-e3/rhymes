@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RevSalesSyncController;
-use App\Http\Controllers\Api\FileManagerController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +23,3 @@ use App\Http\Controllers\Api\FileManagerController;
     });
 // });
 
-// File / Folder management — protected by HTTP Basic Auth
-Route::middleware('basic.auth')->prefix('file-manager')->name('api.file-manager.')->group(function () {
-    Route::delete('/delete', [FileManagerController::class, 'delete'])->name('delete');
-});
