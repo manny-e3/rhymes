@@ -87,6 +87,7 @@
                 <th>Genre</th>
                 <th class="text-right">Price</th>
                 <th>Status</th>
+                <th class="text-center">Quantity</th>
                 <th class="text-right">Sales</th>
                 <th class="text-right">Revenue</th>
                 <th>Submitted</th>
@@ -104,23 +105,24 @@
                     <td>{{ $book->genre }}</td>
                     <td class="text-right">₦{{ number_format($book->price, 2) }}</td>
                     <td>
-                        @if($book->status === 'pending')
+                        @if($book->status === 'pending_review')
                             <span style="color: #ffc107;">Pending</span>
-                        @elseif($book->status === 'accepted')
-                            <span style="color: #28a745;">Published</span>
-                        @elseif($book->status === 'rejected')
-                            <span style="color: #dc3545;">Rejected</span>
                         @elseif($book->status === 'stocked')
                             <span style="color: #17a2b8;">Stocked</span>
+                        @elseif($book->status === 'rejected')
+                            <span style="color: #dc3545;">Rejected</span>
+                        @else
+                            <span style="color: #666;">{{ ucfirst(str_replace('_', ' ', $book->status)) }}</span>
                         @endif
                     </td>
+                    <td class="text-center">{{ $book->quantity ?? 0 }}</td>
                     <td class="text-right">{{ $salesCount }}</td>
                     <td class="text-right">₦{{ number_format($revenue, 2) }}</td>
                     <td>{{ $book->created_at->format('M d, Y') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="text-center">No books found</td>
+                    <td colspan="9" class="text-center">No books found</td>
                 </tr>
             @endforelse
         </tbody>

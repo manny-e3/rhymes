@@ -70,7 +70,10 @@
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                             </div>
-                                            <div class="form-wrap flex-md-nowrap">
+                                             <div class="form-wrap w-100px">
+                                                 <input type="number" name="quantity" class="form-control form-control-sm" placeholder="Qty" value="<?php echo e(request('quantity')); ?>">
+                                             </div>
+                                             <div class="form-wrap flex-md-nowrap">
                                                 <div class="form-icon form-icon-right">
                                                     <em class="icon ni ni-search"></em>
                                                 </div>
@@ -443,7 +446,7 @@
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
-                <?php if($book->status === 'pending_review'): ?>
+                <!-- <?php if($book->status === 'pending_review'): ?>
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-<?php echo e($book->id); ?>">Send Review Copy</button>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-<?php echo e($book->id); ?>">Approve for Delivery</button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-<?php echo e($book->id); ?>">Reject</button>
@@ -452,7 +455,7 @@
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-<?php echo e($book->id); ?>">Reject</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-<?php echo e($book->id); ?>">Set Pending Review</button>
                 <?php elseif($book->status === 'approved_awaiting_delivery'): ?>
-                <!-- Button to trigger the quantity modal instead of directly stocking -->
+              
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#quantityModal-<?php echo e($book->id); ?>">Stock Book</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-<?php echo e($book->id); ?>">Set Pending Review</button>
                 <?php elseif($book->status === 'rejected'): ?>
@@ -471,7 +474,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-<?php echo e($book->id); ?>">View Details</button>
                 <?php else: ?>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-<?php echo e($book->id); ?>" data-bs-dismiss="modal">Edit Status</button>
-                <?php endif; ?>
+                <?php endif; ?> -->
             </div>
         </div>
     </div>

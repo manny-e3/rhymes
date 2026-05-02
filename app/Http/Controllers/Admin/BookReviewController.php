@@ -48,6 +48,10 @@ class BookReviewController extends Controller
         if ($request->filled('genre')) {
             $query->where('genre', $request->genre);
         }
+
+        if ($request->filled('quantity')) {
+            $query->where('quantity', $request->quantity);
+        }
         
         $books = $query->orderBy('updated_at', 'desc')->paginate(15);
         
@@ -383,11 +387,15 @@ class BookReviewController extends Controller
         if ($request->filled('genre')) {
             $query->where('genre', $request->genre);
         }
+
+        if ($request->filled('quantity')) {
+            $query->where('quantity', $request->quantity);
+        }
         
         $books = $query->get();
 
         // Create CSV content
-        $headers = ['Title', 'Author', 'Genre', 'Price', 'Status', 'Sales Count', 'Total Revenue', 'Submitted At'];
+        $headers = ['Title', 'Author', 'Genre', 'Price', 'Status', 'Quantity', 'Sales Count', 'Total Revenue', 'Submitted At'];
         $csvData = [];
 
         foreach ($books as $book) {
@@ -400,6 +408,7 @@ class BookReviewController extends Controller
                 $book->genre,
                 '₦' . number_format($book->price, 2),
                 ucfirst(str_replace('_', ' ', $book->status)),
+                $book->quantity ?? 0,
                 $salesCount,
                 '₦' . number_format($revenue, 2),
                 $book->created_at->format('Y-m-d H:i:s')
@@ -450,6 +459,10 @@ class BookReviewController extends Controller
         if ($request->filled('genre')) {
             $query->where('genre', $request->genre);
         }
+
+        if ($request->filled('quantity')) {
+            $query->where('quantity', $request->quantity);
+        }
         
         $books = $query->get();
 
@@ -460,7 +473,8 @@ class BookReviewController extends Controller
             'filters' => [
                 'status' => $request->status,
                 'search' => $request->search,
-                'genre' => $request->genre
+                'genre' => $request->genre,
+                'quantity' => $request->quantity
             ]
         ];
 

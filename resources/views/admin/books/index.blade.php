@@ -71,7 +71,10 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-wrap flex-md-nowrap">
+                                             <div class="form-wrap w-100px">
+                                                 <input type="number" name="quantity" class="form-control form-control-sm" placeholder="Qty" value="{{ request('quantity') }}">
+                                             </div>
+                                             <div class="form-wrap flex-md-nowrap">
                                                 <div class="form-icon form-icon-right">
                                                     <em class="icon ni ni-search"></em>
                                                 </div>
@@ -484,7 +487,7 @@
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
-                @if($book->status === 'pending_review')
+                <!-- @if($book->status === 'pending_review')
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendReviewCopyModal-{{$book->id}}">Send Review Copy</button>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveForDeliveryModal-{{$book->id}}">Approve for Delivery</button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}">Reject</button>
@@ -493,7 +496,7 @@
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBookModal-{{$book->id}}">Reject</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
                 @elseif($book->status === 'approved_awaiting_delivery')
-                <!-- Button to trigger the quantity modal instead of directly stocking -->
+              
                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#quantityModal-{{$book->id}}">Stock Book</button>
                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#pendingReviewModal-{{$book->id}}">Set Pending Review</button>
                 @elseif($book->status === 'rejected')
@@ -512,7 +515,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-{{$book->id}}">View Details</button>
                 @else
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal-{{$book->id}}" data-bs-dismiss="modal">Edit Status</button>
-                @endif
+                @endif -->
             </div>
         </div>
     </div>
