@@ -115,7 +115,8 @@
                                             <div class="form-group">
                                                 <label class="form-label" for="isbn">ISBN <span class="text-danger">*</span></label>
                                                 <div class="form-control-wrap">
-                                                    <input type="text" class="form-control <?php $__errorArgs = ['isbn'];
+                                                    <input type="text" inputmode="numeric" pattern="[0-9]*"
+                                                           class="form-control <?php $__errorArgs = ['isbn'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -123,7 +124,8 @@ $message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                                           id="isbn" name="isbn" value="<?php echo e(old('isbn')); ?>" required>
+                                                           id="isbn" name="isbn" value="<?php echo e(old('isbn')); ?>"
+                                                           oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                                                     <?php $__errorArgs = ['isbn'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :

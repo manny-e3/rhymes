@@ -45,7 +45,7 @@
                         
                         <div class="card-inner mb-3">
                             <form method="GET" action="<?php echo e(route('admin.erprev.sales')); ?>" class="row g-3 align-items-end">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label" for="lastupdated">Last Updated</label>
                                         <div class="form-control-wrap">
@@ -68,7 +68,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label" for="name">Product Name</label>
                                         <div class="form-control-wrap">
@@ -76,14 +76,23 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="barcode">Barcode/ISBN</label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="barcode" name="barcode" placeholder="Enter barcode" value="<?php echo e(request('barcode')); ?>">
+                                        </div>
+                                    </div>
+                                </div>
                                 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <div class="form-control-wrap">
                                             <button type="submit" class="btn btn-primary me-2"><em class="icon ni ni-filter-alt"></em><span>Apply Filter</span></button>
-                                            <?php if(request('lastupdated') || request('name')): ?>
+                                            <!-- <?php if(request('lastupdated') || request('name') || request('barcode')): ?>
                                                 <a href="<?php echo e(route('admin.erprev.sales')); ?>" class="btn btn-secondary"><em class="icon ni ni-reload"></em><span>Clear Filter</span></a>
-                                            <?php endif; ?>
+                                            <?php endif; ?> -->
                                         </div>
                                     </div>
                                 </div>
@@ -134,7 +143,8 @@
                                     <div>
                                         <?php echo e($paginator->appends([
                                            'lastupdated' => request('lastupdated'),
-                                           'name' => request('name')
+                                           'name' => request('name'),
+                                           'barcode' => request('barcode')
                                         ])->links('vendor.pagination.bootstrap-4')); ?>
 
                                     </div>

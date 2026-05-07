@@ -130,17 +130,17 @@ class ErpRevController extends Controller
         // Get the name search parameter
         $nameSearch = $request->get('name', '');
         
+        // Get the barcode search parameter
+        $barcodeSearch = $request->get('barcode', '');
+        
         $filters = [];
         
-        // Add lastupdated filter if provided and valid
+        // Only pass lastupdated to the ERP API URL.
+        // Name/Barcode are handled locally after fetching, because multi-word
+        // searches with spaces break ERP URL path segments (e.g. /Name/50%20Secrets/).
         $validLastUpdatedValues = ['', 'all', '5m', '10m', '30m', '1h', '4h', '6h', '24h', '7d', '30d', '60d', '100d'];
         if (in_array($lastUpdated, $validLastUpdatedValues) && $lastUpdated !== '') {
             $filters['lastupdated'] = $lastUpdated;
-        }
-        
-        // Add name search filter if provided
-        if (!empty($nameSearch)) {
-            $filters['Name'] = $nameSearch;
         }
         
         // For sales data, we'll fetch all records and paginate on our side
@@ -168,7 +168,25 @@ class ErpRevController extends Controller
         }
         
         // Extract all records from the response
-        $allSalesData = $result['data']['records'] ?? [];
+        $allSalesData = $result['data']['records'] ?? $result['data']['data'] ?? [];
+        
+        // Local filtering as a fallback if the API returns all records
+        if (!empty($nameSearch) || !empty($barcodeSearch)) {
+            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $barcodeSearch) {
+                $match = true;
+                if (!empty($nameSearch)) {
+                    $itemName = $item['Name'] ?? $item['name'] ?? '';
+                    $match = $match && stripos($itemName, $nameSearch) !== false;
+                }
+                if (!empty($barcodeSearch)) {
+                    $itemBarcode = $item['Barcode'] ?? $item['barcode'] ?? '';
+                    $match = $match && ($itemBarcode == $barcodeSearch);
+                }
+                return $match;
+            });
+            // Reset array keys after filtering
+            $allSalesData = array_values($allSalesData);
+        }
         
         // Extract pagination info from ERPREV response
         $paginationInfo = $result['data']['pagenation'] ?? [];
@@ -221,6 +239,7 @@ class ErpRevController extends Controller
         // Pass the filters to the view
         $filters['lastupdated'] = $lastUpdated;
         $filters['name'] = $nameSearch;
+        $filters['barcode'] = $barcodeSearch;
         
         return view('admin.erprev.sales', compact('paginator', 'filters'));
     }
@@ -242,15 +261,11 @@ class ErpRevController extends Controller
         
         $filters = [];
         
-        // Add lastupdated filter if provided and valid
+        // Only pass lastupdated to the ERP API URL.
+        // Product/Barcode are handled locally to support multi-word searches.
         $validLastUpdatedValues = ['', 'all', '5m', '10m', '30m', '1h', '4h', '6h', '24h', '7d', '30d', '60d', '100d'];
         if (in_array($lastUpdated, $validLastUpdatedValues) && $lastUpdated !== '') {
             $filters['lastupdated'] = $lastUpdated;
-        }
-        
-        // Add product search filter if provided
-        if (!empty($productSearch)) {
-            $filters['Product'] = $productSearch;
         }
         
         Log::info('ERPREV Controller - Calling getStockList with filters', [
@@ -274,7 +289,25 @@ class ErpRevController extends Controller
         }
         
         // Extract all records from the response
-        $allInventoryData = $result['data']['records'] ?? [];
+        $allInventoryData = $result['data']['records'] ?? $result['data']['data'] ?? [];
+        
+        // Local filtering fallback
+        $barcodeSearch = $request->get('barcode');
+        if (!empty($productSearch) || !empty($barcodeSearch)) {
+            $allInventoryData = array_filter($allInventoryData, function($item) use ($productSearch, $barcodeSearch) {
+                $match = true;
+                if (!empty($productSearch)) {
+                    $itemName = $item['Product'] ?? $item['product'] ?? $item['Name'] ?? '';
+                    $match = $match && stripos($itemName, $productSearch) !== false;
+                }
+                if (!empty($barcodeSearch)) {
+                    $itemBarcode = $item['Barcode'] ?? $item['barcode'] ?? '';
+                    $match = $match && ($itemBarcode == $barcodeSearch);
+                }
+                return $match;
+            });
+            $allInventoryData = array_values($allInventoryData);
+        }
         
         // Extract pagination info from ERPREV response
         $paginationInfo = $result['data']['pagenation'] ?? [];
@@ -327,6 +360,7 @@ class ErpRevController extends Controller
         // Pass the filters to the view
         $filters['lastupdated'] = $lastUpdated;
         $filters['product'] = $productSearch;
+        $filters['barcode'] = $request->get('barcode');
         
         return view('admin.erprev.inventory', compact('paginator', 'filters'));
     }
@@ -345,10 +379,8 @@ class ErpRevController extends Controller
         
         $filters = [];
         
-        // Add name search filter if provided
-        if (!empty($nameSearch)) {
-            $filters['Name'] = $nameSearch;
-        }
+        // No filters are passed to the ERP API URL for products.
+        // Name/Barcode are handled locally to support multi-word searches.
         
         Log::info('ERPREV Controller - Calling getProductsList with filters', [
             'filters' => $filters,
@@ -371,7 +403,25 @@ class ErpRevController extends Controller
         }
         
         // Extract all records from the response
-        $allProducts = $result['data']['records'] ?? [];
+        $allProducts = $result['data']['records'] ?? $result['data']['data'] ?? [];
+        
+        // Local filtering fallback
+        $barcodeSearch = $request->get('barcode');
+        if (!empty($nameSearch) || !empty($barcodeSearch)) {
+            $allProducts = array_filter($allProducts, function($item) use ($nameSearch, $barcodeSearch) {
+                $match = true;
+                if (!empty($nameSearch)) {
+                    $itemName = $item['Name'] ?? $item['name'] ?? '';
+                    $match = $match && stripos($itemName, $nameSearch) !== false;
+                }
+                if (!empty($barcodeSearch)) {
+                    $itemBarcode = $item['Barcode'] ?? $item['barcode'] ?? '';
+                    $match = $match && ($itemBarcode == $barcodeSearch);
+                }
+                return $match;
+            });
+            $allProducts = array_values($allProducts);
+        }
         
         // Extract pagination info from ERPREV response
         $paginationInfo = $result['data']['pagenation'] ?? [];
@@ -423,6 +473,7 @@ class ErpRevController extends Controller
         
         // Pass the filters to the view
         $filters['name'] = $nameSearch;
+        $filters['barcode'] = $request->get('barcode');
         
         return view('admin.erprev.products', compact('paginator', 'filters'));
     }

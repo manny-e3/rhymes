@@ -99,6 +99,7 @@ Route::middleware(['role:admin', 'verified'])->group(function () {
         Route::get('books/published', function() { return app(BookReviewController::class)->index(request()->merge(['status' => 'accepted'])); })->name('books.published');
         Route::get('books/{book}', [BookReviewController::class, 'show'])->name('books.show');
         Route::patch('books/{book}/review', [BookReviewController::class, 'review'])->name('books.review');
+        Route::patch('books/{book}/edit', [BookReviewController::class, 'editBook'])->name('books.edit');
         Route::post('books/{book}/retrieval-action', [BookReviewController::class, 'handleRetrievalAction'])->name('books.retrieval-action');
         Route::post('books/bulk-action', [BookReviewController::class, 'bulkAction'])->name('books.bulk-action');
         Route::get('books/logs', [BookReviewController::class, 'reviewLogs'])->name('books.logs');

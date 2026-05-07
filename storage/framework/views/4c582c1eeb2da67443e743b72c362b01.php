@@ -45,24 +45,33 @@
                             </div>
                         </div>
                         
-                        <div class="card-inner mb-3">
-                            <form method="GET" action="<?php echo e(route('admin.erprev.products')); ?>" class="row g-3 align-items-end">
-                                <div class="col-md-8">
+                        <div class="card-inner mb-2">
+                            <form method="GET" action="<?php echo e(route('admin.erprev.products')); ?>" class="row g-2 align-items-end">
+                                <div class="col-md-4">
                                     <div class="form-group">
-                                        <label class="form-label" for="name">Product Name</label>
+                                        <label class="form-label small mb-1" for="name">Product Name</label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter product name" value="<?php echo e(request('name')); ?>">
+                                            <input type="text" class="form-control form-control-sm" id="name" name="name" placeholder="Enter product name" value="<?php echo e(request('name')); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label small mb-1" for="barcode">Barcode/ISBN</label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control form-control-sm" id="barcode" name="barcode" placeholder="Enter barcode" value="<?php echo e(request('barcode')); ?>">
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <div class="form-control-wrap">
                                             <button type="submit" class="btn btn-primary me-2"><em class="icon ni ni-filter-alt"></em><span>Apply Filter</span></button>
-                                            <?php if(request('name')): ?>
+                                            <!-- <?php if(request('name') || request('barcode')): ?>
                                                 <a href="<?php echo e(route('admin.erprev.products')); ?>" class="btn btn-secondary"><em class="icon ni ni-reload"></em><span>Clear Filter</span></a>
-                                            <?php endif; ?>
+                                            <?php endif; ?> -->
                                         </div>
                                     </div>
                                 </div>
@@ -109,7 +118,8 @@
                                              <?php if($paginator->hasPages()): ?>
                                     <div>
                                         <?php echo e($paginator->appends([
-                                           'name' => request('name')
+                                           'name' => request('name'),
+                                           'barcode' => request('barcode')
                                         ])->links('vendor.pagination.bootstrap-4')); ?>
 
                                     </div>

@@ -197,12 +197,14 @@ class RevService
             // Handle special parameters that need to be in the URL path
             $url = $this->baseUrl . '/get-products-list/json/';
             
-            // Extract Name filter if present (lastupdated doesn't work for products)
+            // Extract Name or Barcode filter if present
             $nameFilter = '';
             if (isset($filters['Name']) && !empty($filters['Name'])) {
                 $nameFilter = $filters['Name'];
-                // Remove from filters as it goes in the URL path
                 unset($filters['Name']);
+            } elseif (isset($filters['Barcode']) && !empty($filters['Barcode'])) {
+                $nameFilter = $filters['Barcode'];
+                unset($filters['Barcode']);
             }
             
             // Add Name to URL path if specified
@@ -266,12 +268,14 @@ class RevService
                 unset($filters['lastupdated']);
             }
             
-            // Extract Product filter if present
+            // Extract Product or Barcode filter if present
             $productFilter = '';
             if (isset($filters['Product']) && !empty($filters['Product'])) {
                 $productFilter = $filters['Product'];
-                // Remove from filters as it goes in the URL path
                 unset($filters['Product']);
+            } elseif (isset($filters['Barcode']) && !empty($filters['Barcode'])) {
+                $productFilter = $filters['Barcode'];
+                unset($filters['Barcode']);
             }
             
             // Add lastupdated to URL path if specified
@@ -344,16 +348,19 @@ class RevService
             $nameFilter = '';
             if (isset($filters['Name']) && !empty($filters['Name'])) {
                 $nameFilter = $filters['Name'];
-                // Remove from filters as it goes in the URL path
                 unset($filters['Name']);
             }
+            
+            // Note: We leave 'Barcode' in the $filters array if present. 
+            // It will be sent as a query parameter (?Barcode=...) which 
+            // is often more reliable for exact matches in the Sales endpoint.
             
             // Add lastupdated to URL path if specified
             if (!empty($lastUpdated)) {
                 $url .= 'lastupdated/' . $lastUpdated . '/';
             }
             
-            // Add Name to URL path if specified
+            // Add Name (or Barcode) to URL path if specified
             if (!empty($nameFilter)) {
                 $url .= 'Name/' . urlencode($nameFilter) . '/';
             }

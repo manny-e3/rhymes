@@ -184,6 +184,7 @@
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <ul class="link-list-opt no-bdr">
                                                                 <li><a href="#" data-bs-toggle="modal" data-bs-target="#viewDetailsModal-<?php echo e($book->id); ?>"><em class="icon ni ni-eye"></em><span>View Details</span></a></li>
+                                                                <li><a href="#" data-bs-toggle="modal" data-bs-target="#editBookModal-<?php echo e($book->id); ?>"><em class="icon ni ni-pen2"></em><span>Edit Book</span></a></li>
                                                                  <?php if($book->status == 'retrieval_requested'): ?>
                                                                         <li class="divider"></li>
                                                                         <li>
@@ -785,5 +786,89 @@ function handleRecallRequest(bookId, action) {
     });
 }
 </script>
+
+
+<?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" tabindex="-1" id="editBookModal-<?php echo e($book->id); ?>" aria-labelledby="editBookModalLabel-<?php echo e($book->id); ?>" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBookModalLabel-<?php echo e($book->id); ?>"><em class="icon ni ni-pen2 me-2"></em>Edit Book: <?php echo e($book->title); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?php echo e(route('admin.books.edit', $book)); ?>">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PATCH'); ?>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="form-label">Title <span class="text-danger">*</span></label>
+                                <div class="form-control-wrap">
+                                    <input type="text" class="form-control" name="title" value="<?php echo e($book->title); ?>" required maxlength="255">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Book Type <span class="text-danger">*</span></label>
+                                <div class="form-control-wrap">
+                                    <select name="book_type" class="form-select" required>
+                                        <option value="">Select Type</option>
+                                        <option value="paper_back" <?php echo e($book->book_type === 'paper_back' ? 'selected' : ''); ?>>Paper back</option>
+                                        <option value="hard_back" <?php echo e($book->book_type === 'hard_back' ? 'selected' : ''); ?>>Hard back</option>
+                                        <option value="both" <?php echo e($book->book_type === 'both' ? 'selected' : ''); ?>>Both</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Genre <span class="text-danger">*</span></label>
+                                <div class="form-control-wrap">
+                                    <input type="text" class="form-control" name="genre" value="<?php echo e($book->genre); ?>" required maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Price (₦) <span class="text-danger">*</span></label>
+                                <div class="form-control-wrap">
+                                    <input type="number" class="form-control" name="price" value="<?php echo e($book->price); ?>" required min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">ISBN</label>
+                                <div class="form-control-wrap">
+                                    <input type="text" class="form-control" name="isbn" value="<?php echo e($book->isbn); ?>" maxlength="50" placeholder="e.g. 9780241217931">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <div class="form-control-wrap">
+                                    <textarea class="form-control" name="description" rows="4" maxlength="5000" placeholder="Book description..."><?php echo e($book->description); ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 alert alert-warning py-2">
+                        <em class="icon ni ni-alert-circle me-1"></em>
+                        <small>Editing book details will update the information visible to the author and on the platform. It will <strong>not</strong> change the book's status or notify the author.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><em class="icon ni ni-save me-1"></em>Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/books/index.blade.php ENDPATH**/ ?>

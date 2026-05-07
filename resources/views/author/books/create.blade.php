@@ -116,8 +116,10 @@
                                             <div class="form-group">
                                                 <label class="form-label" for="isbn">ISBN <span class="text-danger">*</span></label>
                                                 <div class="form-control-wrap">
-                                                    <input type="text" class="form-control @error('isbn') error @enderror" 
-                                                           id="isbn" name="isbn" value="{{ old('isbn') }}" required>
+                                                    <input type="text" inputmode="numeric" pattern="[0-9]*"
+                                                           class="form-control @error('isbn') error @enderror" 
+                                                           id="isbn" name="isbn" value="{{ old('isbn') }}"
+                                                           oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                                                     @error('isbn')
                                                         <span class="form-note-error">{{ $message }}</span>
                                                     @enderror

@@ -269,6 +269,32 @@ class BookReviewController extends Controller
         return back()->with('error', 'Unexpected error occurred during book review.');
     }
 
+    /**
+     * Edit book details (title, genre, price, isbn, book_type, description)
+     */
+    public function editBook(Request $request, Book $book)
+    {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255',
+            'genre'       => 'required|string|max:100',
+            'price'       => 'required|numeric|min:0',
+            'isbn'        => 'nullable|string|max:50',
+            'book_type'   => 'required|in:paper_back,hard_back,both',
+            'description' => 'nullable|string|max:5000',
+        ]);
+
+        $book->update($validated);
+
+        Log::info('Admin edited book details', [
+            'book_id'    => $book->id,
+            'book_title' => $book->title,
+            'changes'    => $validated,
+            'admin_id'   => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Book details updated successfully.');
+    }
+
     public function bulkAction(Request $request)
     {
         $validated = $request->validate([
