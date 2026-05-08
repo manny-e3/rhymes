@@ -45,10 +45,10 @@
     </div> -->
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    @php
+    <?php
         $revenueLabels = $revenueData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
         $revenueValues = $revenueData['values'] ?? [12000, 19000, 15000, 18000, 22000, 25000];
         
@@ -58,17 +58,17 @@ document.addEventListener('DOMContentLoaded', function() {
         $performanceLabels = $performanceData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
         $performanceUnits = $performanceData['units'] ?? [1200, 1900, 1500, 1800, 2200, 2500];
         $performancePrices = $performanceData['prices'] ?? [25.50, 27.20, 26.80, 28.10, 29.30, 30.50];
-    @endphp
+    ?>
     
     // Revenue Chart (Line)
     const revenueCtx = document.getElementById('revenueOverviewChart').getContext('2d');
     new Chart(revenueCtx, {
         type: 'line',
         data: {
-            labels: @json($revenueLabels),
+            labels: <?php echo json_encode($revenueLabels, 15, 512) ?>,
             datasets: [{
                 label: 'Revenue',
-                data: @json($revenueValues),
+                data: <?php echo json_encode($revenueValues, 15, 512) ?>,
                 borderColor: '#559bfb',
                 backgroundColor: 'rgba(85, 155, 251, 0.1)',
                 borderWidth: 2,
@@ -109,10 +109,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(metricsCtx, {
         type: 'bar',
         data: {
-            labels: @json($metricsLabels),
+            labels: <?php echo json_encode($metricsLabels, 15, 512) ?>,
             datasets: [{
                 label: 'Current Period',
-                data: @json($metricsValues),
+                data: <?php echo json_encode($metricsValues, 15, 512) ?>,
                 backgroundColor: [
                     'rgba(85, 155, 251, 0.7)',
                     'rgba(30, 224, 172, 0.7)',
@@ -147,16 +147,16 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(performanceCtx, {
         type: 'bar',
         data: {
-            labels: @json($performanceLabels),
+            labels: <?php echo json_encode($performanceLabels, 15, 512) ?>,
             datasets: [{
                 label: 'Units Sold',
-                data: @json($performanceUnits),
+                data: <?php echo json_encode($performanceUnits, 15, 512) ?>,
                 backgroundColor: 'rgba(85, 155, 251, 0.7)',
                 borderColor: 'rgba(85, 155, 251, 1)',
                 borderWidth: 1
             }, {
                 label: 'Avg. Price',
-                data: @json($performancePrices),
+                data: <?php echo json_encode($performancePrices, 15, 512) ?>,
                 type: 'line',
                 borderColor: '#1ee0ac',
                 backgroundColor: 'rgba(30, 224, 172, 0.1)',
@@ -212,4 +212,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/components/sales-overview.blade.php ENDPATH**/ ?>

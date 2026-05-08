@@ -1,12 +1,10 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Revenue | Admin Panel'); ?>
 
-@section('title', 'Revenue | Admin Panel')
+<?php $__env->startSection('page-title', 'Revenue'); ?>
 
-@section('page-title', 'Revenue')
+<?php $__env->startSection('page-description', 'Comprehensive sales analytics and reporting'); ?>
 
-@section('page-description', 'Comprehensive sales analytics and reporting')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="nk-content nk-content-fluid">
     <div class="container-xl wide-xl">
         <div class="nk-content-body">
@@ -24,25 +22,25 @@
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
                                     <li>
-                                        <form method="GET" action="{{ route('admin.revenue.index') }}" class="d-flex g-2 align-items-center" id="filterForm">
+                                        <form method="GET" action="<?php echo e(route('admin.revenue.index')); ?>" class="d-flex g-2 align-items-center" id="filterForm">
                                             <div class="form-control-wrap">
                                                 <select name="period" class="form-select form-select-sm" onchange="toggleCustomDates(this.value)">
-                                                    <option value="today" {{ request('period') === 'today' ? 'selected' : '' }}>Today</option>
-                                                    <option value="yesterday" {{ request('period') === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
-                                                    <option value="last_7_days" {{ request('period') === 'last_7_days' ? 'selected' : '' }}>Last 7 Days</option>
-                                                    <option value="last_30_days" {{ request('period', 'last_30_days') === 'last_30_days' ? 'selected' : '' }}>Last 30 Days</option>
-                                                    <option value="this_month" {{ request('period') === 'this_month' ? 'selected' : '' }}>This Month</option>
-                                                    <option value="last_month" {{ request('period') === 'last_month' ? 'selected' : '' }}>Last Month</option>
-                                                    <option value="this_year" {{ request('period') === 'this_year' ? 'selected' : '' }}>This Year</option>
-                                                    <option value="custom" {{ request('period') === 'custom' ? 'selected' : '' }}>Custom</option>
+                                                    <option value="today" <?php echo e(request('period') === 'today' ? 'selected' : ''); ?>>Today</option>
+                                                    <option value="yesterday" <?php echo e(request('period') === 'yesterday' ? 'selected' : ''); ?>>Yesterday</option>
+                                                    <option value="last_7_days" <?php echo e(request('period') === 'last_7_days' ? 'selected' : ''); ?>>Last 7 Days</option>
+                                                    <option value="last_30_days" <?php echo e(request('period', 'last_30_days') === 'last_30_days' ? 'selected' : ''); ?>>Last 30 Days</option>
+                                                    <option value="this_month" <?php echo e(request('period') === 'this_month' ? 'selected' : ''); ?>>This Month</option>
+                                                    <option value="last_month" <?php echo e(request('period') === 'last_month' ? 'selected' : ''); ?>>Last Month</option>
+                                                    <option value="this_year" <?php echo e(request('period') === 'this_year' ? 'selected' : ''); ?>>This Year</option>
+                                                    <option value="custom" <?php echo e(request('period') === 'custom' ? 'selected' : ''); ?>>Custom</option>
                                                 </select>
                                             </div>
-                                            <div id="custom-date-inputs" class="d-flex g-2" style="display: {{ request('period') === 'custom' ? 'flex' : 'none' }};">
+                                            <div id="custom-date-inputs" class="d-flex g-2" style="display: <?php echo e(request('period') === 'custom' ? 'flex' : 'none'); ?>;">
                                                 <div class="form-control-wrap">
-                                                    <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
+                                                    <input type="date" name="start_date" class="form-control form-control-sm" value="<?php echo e(request('start_date')); ?>">
                                                 </div>
                                                 <div class="form-control-wrap">
-                                                    <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
+                                                    <input type="date" name="end_date" class="form-control form-control-sm" value="<?php echo e(request('end_date')); ?>">
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-sm btn-primary">Apply</button>
@@ -72,14 +70,14 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">₦{{ number_format($metrics['total_revenue'], 2) }}</span>
-                                    @if($metrics['revenue_change'] > 0)
-                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em>{{ number_format($metrics['revenue_change'], 1) }}%</span>
-                                    @elseif($metrics['revenue_change'] < 0)
-                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em>{{ number_format(abs($metrics['revenue_change']), 1) }}%</span>
-                                    @else
+                                    <span class="amount">₦<?php echo e(number_format($metrics['total_revenue'], 2)); ?></span>
+                                    <?php if($metrics['revenue_change'] > 0): ?>
+                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em><?php echo e(number_format($metrics['revenue_change'], 1)); ?>%</span>
+                                    <?php elseif($metrics['revenue_change'] < 0): ?>
+                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em><?php echo e(number_format(abs($metrics['revenue_change']), 1)); ?>%</span>
+                                    <?php else: ?>
                                         <span class="sub-title">No change</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -96,14 +94,14 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">{{ number_format($metrics['total_sales']) }}</span>
-                                    @if($metrics['sales_change'] > 0)
-                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em>{{ number_format($metrics['sales_change'], 1) }}%</span>
-                                    @elseif($metrics['sales_change'] < 0)
-                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em>{{ number_format(abs($metrics['sales_change']), 1) }}%</span>
-                                    @else
+                                    <span class="amount"><?php echo e(number_format($metrics['total_sales'])); ?></span>
+                                    <?php if($metrics['sales_change'] > 0): ?>
+                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em><?php echo e(number_format($metrics['sales_change'], 1)); ?>%</span>
+                                    <?php elseif($metrics['sales_change'] < 0): ?>
+                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em><?php echo e(number_format(abs($metrics['sales_change']), 1)); ?>%</span>
+                                    <?php else: ?>
                                         <span class="sub-title">No change</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -120,14 +118,14 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">₦{{ number_format($metrics['avg_order_value'], 2) }}</span>
-                                    @if($metrics['aov_change'] > 0)
-                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em>{{ number_format($metrics['aov_change'], 1) }}%</span>
-                                    @elseif($metrics['aov_change'] < 0)
-                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em>{{ number_format(abs($metrics['aov_change']), 1) }}%</span>
-                                    @else
+                                    <span class="amount">₦<?php echo e(number_format($metrics['avg_order_value'], 2)); ?></span>
+                                    <?php if($metrics['aov_change'] > 0): ?>
+                                        <span class="sub-title text-success"><em class="icon ni ni-arrow-long-up"></em><?php echo e(number_format($metrics['aov_change'], 1)); ?>%</span>
+                                    <?php elseif($metrics['aov_change'] < 0): ?>
+                                        <span class="sub-title text-danger"><em class="icon ni ni-arrow-long-down"></em><?php echo e(number_format(abs($metrics['aov_change']), 1)); ?>%</span>
+                                    <?php else: ?>
                                         <span class="sub-title">No change</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -144,8 +142,8 @@
                                     </div>
                                 </div>
                                 <div class="card-amount">
-                                    <span class="amount">₦{{ number_format($metrics['platform_commission'], 2) }}</span>
-                                    <span class="sub-title">{{ number_format($metrics['commission_rate'], 1) }}% rate</span>
+                                    <span class="amount">₦<?php echo e(number_format($metrics['platform_commission'], 2)); ?></span>
+                                    <span class="sub-title"><?php echo e(number_format($metrics['commission_rate'], 1)); ?>% rate</span>
                                 </div>
                             </div>
                         </div>
@@ -155,11 +153,26 @@
 
             <!-- Sales Overview Component -->
             <div class="nk-block">
-                <x-sales-overview 
-                    :revenue-data="$overviewData['revenueData']"
-                    :metrics-data="$overviewData['metricsData']"
-                    :performance-data="$overviewData['performanceData']"
-                />
+                <?php if (isset($component)) { $__componentOriginal90f522c37782077ae5d1883c8a1806c0 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal90f522c37782077ae5d1883c8a1806c0 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.sales-overview','data' => ['revenueData' => $overviewData['revenueData'],'metricsData' => $overviewData['metricsData'],'performanceData' => $overviewData['performanceData']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('sales-overview'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['revenue-data' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($overviewData['revenueData']),'metrics-data' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($overviewData['metricsData']),'performance-data' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($overviewData['performanceData'])]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal90f522c37782077ae5d1883c8a1806c0)): ?>
+<?php $attributes = $__attributesOriginal90f522c37782077ae5d1883c8a1806c0; ?>
+<?php unset($__attributesOriginal90f522c37782077ae5d1883c8a1806c0); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal90f522c37782077ae5d1883c8a1806c0)): ?>
+<?php $component = $__componentOriginal90f522c37782077ae5d1883c8a1806c0; ?>
+<?php unset($__componentOriginal90f522c37782077ae5d1883c8a1806c0); ?>
+<?php endif; ?>
             </div>
 
             <div class="nk-block">
@@ -213,13 +226,13 @@
                                                 <div class="form-icon form-icon-right">
                                                     <em class="icon ni ni-search"></em>
                                                 </div>
-                                                <input type="text" class="form-control form-control-sm" id="tableSearch" value="{{ request('search') }}" placeholder="Search transactions..." onkeyup="if(event.keyCode == 13) searchTransactions()">
+                                                <input type="text" class="form-control form-control-sm" id="tableSearch" value="<?php echo e(request('search')); ?>" placeholder="Search transactions..." onkeyup="if(event.keyCode == 13) searchTransactions()">
                                             </div>
                                         </li>
                                         
                                         <li class="nk-block-tools-opt">
-                                            <a href="{{ route('admin.revenue.index') }}" class="btn btn-icon btn-primary d-md-none"><em class="icon ni ni-reload"></em></a>
-                                            <a href="{{ route('admin.revenue.index') }}" class="btn btn-primary d-none d-md-inline-flex"><em class="icon ni ni-reload"></em><span>Reset</span></a>
+                                            <a href="<?php echo e(route('admin.revenue.index')); ?>" class="btn btn-icon btn-primary d-md-none"><em class="icon ni ni-reload"></em></a>
+                                            <a href="<?php echo e(route('admin.revenue.index')); ?>" class="btn btn-primary d-none d-md-inline-flex"><em class="icon ni ni-reload"></em><span>Reset</span></a>
                                         </li>
                                     </ul>
                                 </div>
@@ -236,29 +249,29 @@
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Date</span></div>
                                 </div>
 
-                                @forelse($transactions as $transaction)
+                                <?php $__empty_1 = true; $__currentLoopData = $transactions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <div class="nk-tb-item">
                                         <div class="nk-tb-col">
-                                            <span class="tb-lead">#{{ $transaction->id }}</span>
-                                            <span class="tb-sub">{{ $transaction->type }}</span>
+                                            <span class="tb-lead">#<?php echo e($transaction->id); ?></span>
+                                            <span class="tb-sub"><?php echo e($transaction->type); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-mb">
-                                            <span class="tb-lead">{{ $transaction->book->title ?? 'N/A' }}</span>
-                                            <span class="tb-sub">{{ $transaction->book->genre ?? '' }}</span>
+                                            <span class="tb-lead"><?php echo e($transaction->book->title ?? 'N/A'); ?></span>
+                                            <span class="tb-sub"><?php echo e($transaction->book->genre ?? ''); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-md">
-                                            <span class="tb-lead">{{ $transaction->user->name }}</span>
-                                            <span class="tb-sub">{{ $transaction->user->email }}</span>
+                                            <span class="tb-lead"><?php echo e($transaction->user->name); ?></span>
+                                            <span class="tb-sub"><?php echo e($transaction->user->email); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            <span class="tb-lead text-success">₦{{ number_format($transaction->amount, 2) }}</span>
+                                            <span class="tb-lead text-success">₦<?php echo e(number_format($transaction->amount, 2)); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            <span>{{ $transaction->created_at->format('M d, Y') }}</span>
-                                            <span class="tb-sub">{{ $transaction->created_at->format('g:i A') }}</span>
+                                            <span><?php echo e($transaction->created_at->format('M d, Y')); ?></span>
+                                            <span class="tb-sub"><?php echo e($transaction->created_at->format('g:i A')); ?></span>
                                         </div>
                                     </div>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <div class="nk-tb-item">
                                         <div class="nk-tb-col">
                                             <div class="text-center py-4">
@@ -267,15 +280,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                @endforelse
+                                <?php endif; ?>
                             </div>
                         </div>
 
-                        @if($transactions->hasPages())
+                        <?php if($transactions->hasPages()): ?>
                             <div class="card-inner">
-                                {{ $transactions->appends(request()->query())->links() }}
+                                <?php echo e($transactions->appends(request()->query())->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -283,7 +297,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Revenue Chart
@@ -291,10 +305,10 @@ const ctx = document.getElementById('revenueChart').getContext('2d');
 let revenueChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: @json($chartData['labels']),
+        labels: <?php echo json_encode($chartData['labels'], 15, 512) ?>,
         datasets: [{
             label: 'Revenue',
-            data: @json($chartData['revenue']),
+            data: <?php echo json_encode($chartData['revenue'], 15, 512) ?>,
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             tension: 0.1
@@ -376,7 +390,7 @@ function exportReport(format) {
         }
     });
     
-    fetch(`{{ route('admin.reports.sales') }}?${params.toString()}`, {
+    fetch(`<?php echo e(route('admin.reports.sales')); ?>?${params.toString()}`, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
@@ -399,5 +413,6 @@ function exportReport(format) {
     });
 }
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/admin/reports/sales.blade.php ENDPATH**/ ?>

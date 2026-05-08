@@ -320,20 +320,50 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">Payment Method</label>
+                            <label class="form-label">Payment Method (User Profile)</label>
                             <div class="form-control-wrap">
-                                <input type="text" class="form-control" value="<?php echo e(ucfirst($payout->payment_method)); ?>" readonly>
+                                <?php
+                                    $profileMethod = $payout->user->payment_details['payment_method'] ?? $payout->payment_method;
+                                ?>
+                                <input type="text" class="form-control" value="<?php echo e(ucfirst(str_replace('_', ' ', $profileMethod))); ?>" readonly>
                             </div>
                         </div>
                     </div>
+                    <?php if($payout->user->payment_details): ?>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="form-label text-primary">Payment Details (User Profile)</label>
+                            <div class="form-control-wrap">
+                                <?php
+                                    $details = $payout->user->payment_details;
+                                    $method = $details['payment_method'] ?? 'bank_transfer';
+                                    $displayText = "";
+                                    if ($method === 'bank_transfer') {
+                                        $displayText = "Bank: " . ($details['bank_name'] ?? 'N/A') . "\n" .
+                                                      "Account Number: " . ($details['account_number'] ?? 'N/A') . "\n" .
+                                                      "Account Holder: " . ($details['account_holder_name'] ?? 'N/A');
+                                    } elseif ($method === 'paypal') {
+                                        $displayText = "PayPal Email: " . ($details['paypal_email'] ?? 'N/A') . "\n" .
+                                                      "Account Holder: " . ($details['account_holder_name'] ?? 'N/A');
+                                    } elseif ($method === 'stripe') {
+                                        $displayText = "Stripe ID: " . ($details['stripe_account_id'] ?? 'N/A') . "\n" .
+                                                      "Account Holder: " . ($details['account_holder_name'] ?? 'N/A');
+                                    }
+                                ?>
+                                <textarea class="form-control" rows="3" readonly><?php echo e($displayText ?: 'Payment details incomplete in profile.'); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <?php else: ?>
                     <div class="col-12">
                         <div class="form-group">
                             <label class="form-label">Payment Details</label>
-                            <div class="form-control-wrap">
-                                <textarea class="form-control" rows="2" readonly><?php echo e($payout->payment_details); ?></textarea>
+                            <div class="alert alert-warning">
+                                <em class="icon ni ni-alert-circle"></em> This user has not set up their payment details in their profile.
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
                     <?php if($payout->admin_notes): ?>
                     <div class="col-12">
                         <div class="form-group">

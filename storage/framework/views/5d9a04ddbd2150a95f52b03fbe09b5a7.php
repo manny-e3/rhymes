@@ -153,10 +153,10 @@
                                             <em class="icon ni ni-save"></em>
                                             <span>Save All Settings</span>
                                         </button>
-                                        <button type="button" class="btn btn-outline-primary" onclick="clearCache()">
+                                        <!-- <button type="button" class="btn btn-outline-primary" onclick="clearCache()">
                                             <em class="icon ni ni-reload"></em>
                                             <span>Clear Cache</span>
-                                        </button>
+                                        </button> -->
                                     </div>
                                 </div>
                             </div>

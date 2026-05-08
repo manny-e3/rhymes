@@ -25,7 +25,7 @@
                             <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
-                                    <li><a href="{{ route('admin.reports.sales-dashboard') }}" class="btn btn-primary"><em class="icon ni ni-dashboard"></em><span>Sales Dashboard</span></a></li>
+                                    <!-- <li><a href="{{ route('admin.reports.sales-dashboard') }}" class="btn btn-primary"><em class="icon ni ni-dashboard"></em><span>Sales Dashboard</span></a></li> -->
                                     <li><a href="{{ route('admin.books.index') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-eye"></em><span>Review Books</span></a></li>
                                     <li><a href="{{ route('admin.payouts.index') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-tranx"></em><span>Manage Payouts</span></a></li>
                                     <li><a href="{{ route('admin.erprev.sales') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-swap"></em><span>ERPREV Data</span></a></li>
@@ -42,7 +42,7 @@
             <div class="nk-block">
                 <!-- Overview Stats Cards -->
                 <div class="row g-gs mb-4">
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -60,7 +60,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -85,7 +85,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -103,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <!-- <div class="col-sm-6 col-lg-3">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -120,7 +120,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Secondary Stats -->

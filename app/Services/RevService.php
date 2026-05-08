@@ -199,16 +199,20 @@ class RevService
             
             // Extract Name or Barcode filter if present
             $nameFilter = '';
-            if (isset($filters['Name']) && !empty($filters['Name'])) {
+            $barcodeFilter = '';
+            
+            if (isset($filters['Barcode']) && !empty($filters['Barcode'])) {
+                $barcodeFilter = $filters['Barcode'];
+                unset($filters['Barcode']);
+            } elseif (isset($filters['Name']) && !empty($filters['Name'])) {
                 $nameFilter = $filters['Name'];
                 unset($filters['Name']);
-            } elseif (isset($filters['Barcode']) && !empty($filters['Barcode'])) {
-                $nameFilter = $filters['Barcode'];
-                unset($filters['Barcode']);
             }
             
-            // Add Name to URL path if specified
-            if (!empty($nameFilter)) {
+            // Add Barcode or Name to URL path if specified
+            if (!empty($barcodeFilter)) {
+                $url .= 'Barcode/' . urlencode($barcodeFilter) . '/';
+            } elseif (!empty($nameFilter)) {
                 $url .= 'Name/' . urlencode($nameFilter) . '/';
             }
             

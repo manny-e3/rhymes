@@ -128,18 +128,15 @@
                                 
                                 <li class="nk-menu-item has-sub">
                                     <a href="#" class="nk-menu-link nk-menu-toggle">
-                                        <span class="nk-menu-icon"><em class="icon ni ni-tranx"></em></span>
-                                        <span class="nk-menu-text">Payouts</span>
+                                        <span class="nk-menu-icon"><em class="icon ni ni-money"></em></span>
+                                        <span class="nk-menu-text">Revenue</span>
                                     </a>
                                     <ul class="nk-menu-sub">
                                         <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.payouts.index')); ?>" class="nk-menu-link"><span class="nk-menu-text">All Payouts</span></a>
+                                            <a href="<?php echo e(route('admin.revenue.index')); ?>" class="nk-menu-link"><span class="nk-menu-text">Revenue</span></a>
                                         </li>
                                         <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.payouts.pending')); ?>" class="nk-menu-link"><span class="nk-menu-text">Pending</span></a>
-                                        </li>
-                                        <li class="nk-menu-item">
-                                            <a href="<?php echo e(route('admin.payouts.completed')); ?>" class="nk-menu-link"><span class="nk-menu-text">Completed</span></a>
+                                            <a href="<?php echo e(route('admin.payouts.index')); ?>" class="nk-menu-link"><span class="nk-menu-text">Payouts</span></a>
                                         </li>
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
@@ -481,6 +478,7 @@
     </script>
     
     <?php echo $__env->yieldContent('scripts'); ?>
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 
 </html><?php /**PATH C:\xampp\htdocs\rhyme_app\resources\views/layouts/admin.blade.php ENDPATH**/ ?>

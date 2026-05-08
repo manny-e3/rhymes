@@ -118,6 +118,7 @@ Route::middleware(['role:admin', 'verified'])->group(function () {
         Route::get('payouts/export/pdf', [PayoutManagementController::class, 'exportPdf'])->name('payouts.export.pdf');
         
         // Reports & Analytics
+        Route::get('revenue', [ReportsController::class, 'sales'])->name('revenue.index');
         Route::get('reports/sales', [ReportsController::class, 'sales'])->name('reports.sales');
         Route::get('reports/sales-dashboard', [ReportsController::class, 'salesDashboard'])->name('reports.sales-dashboard');
         Route::get('reports/analytics', [ReportsController::class, 'analytics'])->name('reports.analytics');
