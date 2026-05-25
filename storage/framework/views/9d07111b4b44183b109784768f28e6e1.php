@@ -166,8 +166,17 @@
                                             <span class="tb-sub">₦<?php echo e(number_format($revenue, 2)); ?></span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            <?php if($book->status === 'stocked' && $book->quantity): ?>
-                                                <span class="tb-lead"><?php echo e($book->quantity); ?></span>
+                                            <?php if($book->status === 'stocked' && !is_null($book->quantity)): ?>
+                                                <?php
+                                                    $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                        return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                    });
+                                                    $initialQty = $book->quantity + $copiesSold;
+                                                ?>
+                                                <span class="tb-lead"><?php echo e($initialQty); ?></span>
+                                                <?php if($copiesSold > 0): ?>
+                                                    <span class="tb-sub" style="font-size: 11px; color: #e6820e; font-weight: 600;">(<?php echo e($book->quantity); ?> remaining)</span>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <span class="tb-sub">N/A</span>
                                             <?php endif; ?>
@@ -364,10 +373,21 @@
                                 <td class="text-muted">Revenue:</td>
                                 <td>₦<?php echo e(number_format($book->getTotalSales(), 2)); ?></td>
                             </tr>
-                            <?php if($book->status === 'stocked' && $book->quantity): ?>
+                            <?php if($book->status === 'stocked' && !is_null($book->quantity)): ?>
                             <tr>
                                 <td class="text-muted">Quantity:</td>
-                                <td><?php echo e($book->quantity); ?> copies</td>
+                                <td>
+                                    <?php
+                                        $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                            return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                        });
+                                        $initialQty = $book->quantity + $copiesSold;
+                                    ?>
+                                    <?php echo e($initialQty); ?> copies
+                                    <?php if($copiesSold > 0): ?>
+                                        <br><small style="color: #e6820e; font-weight: 600;">(<?php echo e($book->quantity); ?> remaining)</small>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                             <?php endif; ?>
                             <tr>

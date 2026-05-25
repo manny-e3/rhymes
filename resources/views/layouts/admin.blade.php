@@ -132,15 +132,15 @@
                                         <li class="nk-menu-item">
                                             <a href="{{ route('admin.books.index') }}" class="nk-menu-link"><span class="nk-menu-text">All Books</span></a>
                                         </li>
-                                        {{-- <li class="nk-menu-item">
+                                        <!-- <li class="nk-menu-item">
                                             <a href="{{ route('admin.books.logs') }}" class="nk-menu-link"><span class="nk-menu-text">Review Logs</span></a>
-                                        </li> --}}
+                                        </li>
                                         <li class="nk-menu-item">
                                             <a href="{{ route('admin.books.pending') }}" class="nk-menu-link"><span class="nk-menu-text">Pending Review</span></a>
                                         </li>
                                         <li class="nk-menu-item">
                                             <a href="{{ route('admin.books.published') }}" class="nk-menu-link"><span class="nk-menu-text">Published</span></a>
-                                        </li>
+                                        </li> -->
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 

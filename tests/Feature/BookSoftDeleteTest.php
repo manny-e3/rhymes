@@ -40,7 +40,7 @@ class BookSoftDeleteTest extends TestCase
         $this->book = Book::factory()->create([
             'user_id' => $this->author->id,
             'title' => 'Test Book',
-            'status' => 'pending'
+            'status' => 'pending_review'
         ]);
     }
 

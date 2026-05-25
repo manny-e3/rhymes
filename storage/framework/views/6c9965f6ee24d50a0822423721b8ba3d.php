@@ -41,6 +41,8 @@
                 <!-- Overview Stats Cards -->
                 <div class="row g-gs mb-4">
                     <div class="col-sm-6 col-lg-4">
+
+                        <a href="<?php echo e(route('admin.users.index')); ?>">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -57,8 +59,10 @@
                                 </div>
                             </div>
                         </div>
+                        </a>
                     </div>
                     <div class="col-sm-6 col-lg-4">
+                        <a href="<?php echo e(route('admin.revenue.index')); ?>">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -82,8 +86,10 @@
                                 </div>
                             </div>
                         </div>
+                        </a>
                     </div>
                     <div class="col-sm-6 col-lg-4">
+                        <a href="<?php echo e(route('admin.books.index')); ?>">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -100,30 +106,15 @@
                                 </div>
                             </div>
                         </div>
+                        </a>
                     </div>
-                    <!-- <div class="col-sm-6 col-lg-3">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <div class="card-title-group align-start mb-2">
-                                    <div class="card-title">
-                                        <h6 class="title">Pending Reviews</h6>
-                                    </div>
-                                    <div class="card-tools">
-                                        <em class="card-hint icon ni ni-clock text-warning"></em>
-                                    </div>
-                                </div>
-                                <div class="card-amount">
-                                    <span class="amount"><?php echo e(number_format($analytics['stats']['pending_books'])); ?></span>
-                                    <span class="sub-title">Need Attention</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
+                
                 </div>
 
                 <!-- Secondary Stats -->
                 <div class="row g-gs mb-4">
                     <div class="col-sm-6 col-lg-4">
+                        <a href="<?php echo e(route('admin.payouts.index')); ?>">
                         <div class="card card-bordered">
                             <div class="card-inner">
                                 <div class="card-title-group align-start mb-2">
@@ -140,6 +131,7 @@
                                 </div>
                             </div>
                         </div>
+                        </a>
                     </div>
                     <div class="col-sm-6 col-lg-4">
                         <div class="card card-bordered">

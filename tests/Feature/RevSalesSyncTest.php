@@ -15,18 +15,20 @@ class RevSalesSyncTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
-     * Test that sales sync processes books ensuring they exist in ERP inventory
+     * Test that sales sync processes books and deducts book quantity
      *
      * @return void
      */
-    public function test_sales_sync_processes_books_with_inventory_verification()
+    public function test_sales_sync_processes_sales_and_deducts_book_quantity()
     {
         // Create a user and book with ISBN
         $user = User::factory()->create();
         $book = Book::factory()->create([
             'user_id' => $user->id,
             'isbn' => '9780241217931',
-            'title' => '#Girlboss PB'
+            'title' => '#Girlboss PB',
+            'status' => 'stocked',
+            'quantity' => 20
         ]);
 
         // Mock the RevService
@@ -49,25 +51,9 @@ class RevSalesSyncTest extends TestCase
                     ]
                 ]
             ]);
-            
-        // Mock getStockList to return inventory data with UnitCostPrice
-        $mockRevService->shouldReceive('getStockList')
-            ->with([])
-            ->andReturn([
-                'success' => true,
-                'data' => [
-                    'records' => [
-                        [
-                            'Product' => '#Girlboss PB',
-                            'UnitCostPrice' => '8,835.25',
-                            'UnitsInStock' => 5
-                        ]
-                    ]
-                ]
-            ]);
 
         // Call the sync sales endpoint
-        $response = $this->getJson('/api/rev/sync-sales');
+        $response = $this->getJson(route('api.erprev.sync-sales'));
 
         // Assert the response
         $response->assertStatus(200);
@@ -76,7 +62,7 @@ class RevSalesSyncTest extends TestCase
             'statistics' => [
                 'processed' => 1,
                 'books_not_found' => 0,
-                'inventory_not_found' => 0
+                'duplicates' => 0
             ]
         ]);
 
@@ -88,33 +74,52 @@ class RevSalesSyncTest extends TestCase
         $this->assertEquals($user->id, $transaction->user_id);
         $this->assertEquals($book->id, $transaction->book_id);
         $this->assertEquals('sale', $transaction->type);
-        // Author gets raw unit cost price * quantity: 8835.25 * 2 = 17670.50
-        $this->assertEquals(17670.50, $transaction->amount);
+        // SellingPrice is used directly as wallet amount
+        $this->assertEquals(5000, $transaction->amount);
         $this->assertEquals(2, $transaction->meta['quantity_sold']);
-        $this->assertEquals(8835.25, $transaction->meta['unit_cost_price']);
         $this->assertEquals(5000, $transaction->meta['selling_price']);
+
+        // Assert book quantity was decremented
+        $this->assertEquals(18, $book->fresh()->quantity);
     }
 
     /**
-     * Test that sales sync skips books not found in inventory
+     * Test that sales sync skips duplicate sales
      *
      * @return void
      */
-    public function test_sales_sync_skips_books_not_found_in_inventory()
+    public function test_sales_sync_skips_duplicate_sales()
     {
         // Create a user and book
         $user = User::factory()->create();
         $book = Book::factory()->create([
             'user_id' => $user->id,
             'isbn' => '9780241217931',
-            'title' => 'Non-existent Book'
+            'title' => 'Test Book',
+            'status' => 'stocked',
+            'quantity' => 20
+        ]);
+
+        // Create a pre-existing transaction with the unique ID
+        $uniqueId = md5('9780241217931' . '' . 'SALE002' . '');
+        WalletTransaction::create([
+            'user_id' => $user->id,
+            'book_id' => $book->id,
+            'type' => 'sale',
+            'amount' => 5000,
+            'meta' => [
+                'erprev_unique_id' => $uniqueId,
+                'erprev_sid' => 'SALE002',
+                'quantity_sold' => 1,
+                'selling_price' => 5000
+            ]
         ]);
 
         // Mock the RevService
         $mockRevService = Mockery::mock('App\Services\RevService');
         $this->app->instance('App\Services\RevService', $mockRevService);
         
-        // Mock getSalesItems to return a sale record
+        // Mock getSalesItems to return the same sale record
         $mockRevService->shouldReceive('getSalesItems')
             ->andReturn([
                 'success' => true,
@@ -130,25 +135,9 @@ class RevSalesSyncTest extends TestCase
                     ]
                 ]
             ]);
-            
-        // Mock getStockList to return empty inventory data (no matching products)
-        $mockRevService->shouldReceive('getStockList')
-            ->with([])
-            ->andReturn([
-                'success' => true,
-                'data' => [
-                    'records' => [
-                        [
-                            'Product' => 'Different Book',
-                            'UnitCostPrice' => '5000',
-                            'UnitsInStock' => 3
-                        ]
-                    ]
-                ]
-            ]);
 
         // Call the sync sales endpoint
-        $response = $this->getJson('/api/rev/sync-sales');
+        $response = $this->getJson(route('api.erprev.sync-sales'));
 
         // Assert the response
         $response->assertStatus(200);
@@ -156,12 +145,15 @@ class RevSalesSyncTest extends TestCase
             'success' => true,
             'statistics' => [
                 'processed' => 0,
-                'inventory_not_found' => 1
+                'duplicates' => 1
             ]
         ]);
 
-        // Assert that no wallet transaction was created
-        $this->assertEquals(0, WalletTransaction::count());
+        // Assert that no new wallet transaction was created (still only 1)
+        $this->assertEquals(1, WalletTransaction::count());
+
+        // Assert book quantity was not decremented
+        $this->assertEquals(20, $book->fresh()->quantity);
     }
 
     /**
@@ -191,19 +183,9 @@ class RevSalesSyncTest extends TestCase
                     ]
                 ]
             ]);
-            
-        // Mock getStockList to return inventory data
-        $mockRevService->shouldReceive('getStockList')
-            ->with([])
-            ->andReturn([
-                'success' => true,
-                'data' => [
-                    'records' => []
-                ]
-            ]);
 
         // Call the sync sales endpoint
-        $response = $this->getJson('/api/rev/sync-sales');
+        $response = $this->getJson(route('api.erprev.sync-sales'));
 
         // Assert the response
         $response->assertStatus(200);

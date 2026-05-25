@@ -16,7 +16,8 @@ class BookService
      */
     public function getUserBooks(User $user, int $perPage = 10): LengthAwarePaginator
     {
-        return Book::where('user_id', $user->id)
+        return Book::with(['walletTransactions'])
+            ->where('user_id', $user->id)
             ->whereNull('deleted_at')
             ->orderBy('updated_at', 'desc')
             ->paginate($perPage);

@@ -111,8 +111,16 @@
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-lg">
-                                                            <?php if($book->status === 'stocked' && $book->quantity): ?>
-                                                                <span class="tb-amount"><?php echo e($book->quantity); ?></span>
+                                                            <?php if($book->status === 'stocked' && !is_null($book->quantity)): ?>
+                                                                <?php
+                                                                    $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                                        return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                                    });
+                                                                ?>
+                                                                <span class="tb-amount"><?php echo e($book->quantity + $copiesSold); ?></span>
+                                                                <?php if($copiesSold > 0): ?>
+                                                                    <span class="tb-sub" style="font-size: 11px; color: #e6820e; font-weight: 600;">(<?php echo e($book->quantity); ?> remaining)</span>
+                                                                <?php endif; ?>
                                                             <?php else: ?>
                                                                 <span class="tb-sub">N/A</span>
                                                             <?php endif; ?>
@@ -302,15 +310,24 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <?php if($book->status === 'stocked' && $book->quantity): ?>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Quantity</label>
-                                                <div class="form-control-wrap">
-                                                    <input type="text" class="form-control" value="<?php echo e($book->quantity); ?> copies" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <?php if($book->status === 'stocked' && !is_null($book->quantity)): ?>
+                                             <?php
+                                                 $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                     return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                 });
+                                                 $initialQty = $book->quantity + $copiesSold;
+                                             ?>
+                                             <div class="col-md-6">
+                                                 <div class="form-group">
+                                                     <label class="form-label">Quantity</label>
+                                                     <div class="form-control-wrap">
+                                                          <input type="text" class="form-control" value="<?php echo e($initialQty); ?> copies" readonly>
+                                                          <?php if($copiesSold > 0): ?>
+                                                              <small style="color: #e6820e; font-weight: 600;">(<?php echo e($book->quantity); ?> remaining)</small>
+                                                          <?php endif; ?>
+                                                     </div>
+                                                 </div>
+                                             </div>
                                         <?php endif; ?>
                                         <div class="col-12">
                                             <div class="form-group">

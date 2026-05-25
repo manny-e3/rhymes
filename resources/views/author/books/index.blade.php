@@ -112,8 +112,16 @@
                                                         </td>
                                             
                                                         <td class="nk-tb-col tb-col-lg">
-                                                            @if($book->status === 'stocked' && $book->quantity)
-                                                                <span class="tb-amount">{{ $book->quantity }}</span>
+                                                            @if($book->status === 'stocked' && !is_null($book->quantity))
+                                                                @php
+                                                                    $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                                        return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                                    });
+                                                                @endphp
+                                                                <span class="tb-amount">{{ $book->quantity + $copiesSold }}</span>
+                                                                @if($copiesSold > 0)
+                                                                    <span class="tb-sub" style="font-size: 11px; color: #e6820e; font-weight: 600;">({{ $book->quantity }} remaining)</span>
+                                                                @endif
                                                             @else
                                                                 <span class="tb-sub">N/A</span>
                                                             @endif
@@ -303,15 +311,24 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        @if($book->status === 'stocked' && $book->quantity)
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Quantity</label>
-                                                <div class="form-control-wrap">
-                                                    <input type="text" class="form-control" value="{{$book->quantity}} copies" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @if($book->status === 'stocked' && !is_null($book->quantity))
+                                             @php
+                                                 $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                     return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                 });
+                                                 $initialQty = $book->quantity + $copiesSold;
+                                             @endphp
+                                             <div class="col-md-6">
+                                                 <div class="form-group">
+                                                     <label class="form-label">Quantity</label>
+                                                     <div class="form-control-wrap">
+                                                          <input type="text" class="form-control" value="{{ $initialQty }} copies" readonly>
+                                                          @if($copiesSold > 0)
+                                                              <small style="color: #e6820e; font-weight: 600;">({{ $book->quantity }} remaining)</small>
+                                                          @endif
+                                                     </div>
+                                                 </div>
+                                             </div>
                                         @endif
                                         <div class="col-12">
                                             <div class="form-group">

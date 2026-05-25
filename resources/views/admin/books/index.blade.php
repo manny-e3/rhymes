@@ -208,8 +208,17 @@
                                             <span class="tb-sub">₦{{ number_format($revenue, 2) }}</span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            @if($book->status === 'stocked' && $book->quantity)
-                                                <span class="tb-lead">{{ $book->quantity }}</span>
+                                            @if($book->status === 'stocked' && !is_null($book->quantity))
+                                                @php
+                                                    $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                        return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                    });
+                                                    $initialQty = $book->quantity + $copiesSold;
+                                                @endphp
+                                                <span class="tb-lead">{{ $initialQty }}</span>
+                                                @if($copiesSold > 0)
+                                                    <span class="tb-sub" style="font-size: 11px; color: #e6820e; font-weight: 600;">({{ $book->quantity }} remaining)</span>
+                                                @endif
                                             @else
                                                 <span class="tb-sub">N/A</span>
                                             @endif
@@ -405,10 +414,21 @@
                                 <td class="text-muted">Revenue:</td>
                                 <td>₦{{ number_format($book->getTotalSales(), 2) }}</td>
                             </tr>
-                            @if($book->status === 'stocked' && $book->quantity)
+                            @if($book->status === 'stocked' && !is_null($book->quantity))
                             <tr>
                                 <td class="text-muted">Quantity:</td>
-                                <td>{{ $book->quantity }} copies</td>
+                                <td>
+                                    @php
+                                        $copiesSold = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                            return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                        });
+                                        $initialQty = $book->quantity + $copiesSold;
+                                    @endphp
+                                    {{ $initialQty }} copies
+                                    @if($copiesSold > 0)
+                                        <br><small style="color: #e6820e; font-weight: 600;">({{ $book->quantity }} remaining)</small>
+                                    @endif
+                                </td>
                             </tr>
                             @endif
                             <tr>

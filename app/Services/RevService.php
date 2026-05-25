@@ -484,8 +484,11 @@ class RevService
      */
     private function logSync($area, $status, $message, $payload = null)
     {
+        $allowedAreas = ['books', 'sales', 'inventory', 'products'];
+        $dbArea = in_array($area, $allowedAreas) ? $area : 'products';
+
         RevSyncLog::create([
-            'area' => $area,
+            'area' => $dbArea,
             'status' => $status,
             'message' => $message,
             'payload' => $payload,

@@ -99,6 +99,9 @@ class SyncRevInventoryJob implements ShouldQueue
                                      (isset($item['quantity_on_hand']) ? $item['quantity_on_hand'] : 
                                      (isset($item['QuantityOnHand']) ? $item['QuantityOnHand'] : 0));
                     
+                    // Update book quantity
+                    $book->update(['quantity' => $quantityOnHand]);
+                    
                     $previousStatus = $book->status;
                     $statusChanged = false;
                     

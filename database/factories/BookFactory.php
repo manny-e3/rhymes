@@ -25,16 +25,16 @@ class BookFactory extends Factory
             'price' => $this->faker->randomFloat(2, 5, 50),
             'book_type' => $this->faker->randomElement(['physical', 'digital', 'both']),
             'description' => $this->faker->paragraph(),
-            'status' => 'pending',
+            'status' => 'pending_review',
         ];
     }
 
-    /**
-     * Generate a random ISBN-13
-     */
     private function generateISBN(): string
     {
-        $isbn = '978' . $this->faker->randomNumber(10, true);
-        return substr($isbn, 0, 13);
+        $digits = '';
+        for ($i = 0; $i < 10; $i++) {
+            $digits .= mt_rand(0, 9);
+        }
+        return '978' . $digits;
     }
 }

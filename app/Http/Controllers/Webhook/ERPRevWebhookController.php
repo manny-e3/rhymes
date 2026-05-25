@@ -103,7 +103,6 @@ class ERPRevWebhookController extends Controller
         // Calculate author earnings (assuming 70% goes to author)
         $authorEarnings = $totalAmount * 0.7;
         
-        // Create wallet transaction for the author
         WalletTransaction::create([
             'user_id' => $book->user_id,
             'book_id' => $book->id,
@@ -120,6 +119,10 @@ class ERPRevWebhookController extends Controller
                 'description' => "Sale of {$quantity} copies of '{$book->title}' (Webhook)",
             ],
         ]);
+
+        if ($book->quantity !== null) {
+            $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
+        }
         
         Log::info('Processed sale webhook for book', [
             'book_id' => $book->id,
@@ -156,6 +159,9 @@ class ERPRevWebhookController extends Controller
             return response()->json(['error' => 'Book not found'], 404);
         }
         
+        // Update book quantity
+        $book->update(['quantity' => $quantityOnHand]);
+
         // Update book status based on inventory levels
         if ($book->status === 'accepted' && $quantityOnHand > 0) {
             $book->update(['status' => 'stocked']);

@@ -143,6 +143,10 @@ class SyncRevSalesJob implements ShouldQueue
                             'description' => "Sale of {$quantity} copies of '{$book->title}'",
                         ],
                     ]);
+
+                    if ($book->quantity !== null) {
+                        $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
+                    }
                     
                     // Also create a transaction for the platform fee
                     WalletTransaction::create([

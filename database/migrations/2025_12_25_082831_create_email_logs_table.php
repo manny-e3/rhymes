@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::createIfNotExists('email_logs', function (Blueprint $table) {
+        Schema::create('email_logs', function (Blueprint $table) {
             $table->id();
             $table->string('type'); // 'bulk', 'personal', 'newsletter', 'sales_report'
             $table->unsignedBigInteger('sent_by')->nullable();

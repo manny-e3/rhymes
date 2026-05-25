@@ -29,7 +29,7 @@ class RevSalesSyncController extends Controller
     {
         try {
             // Get all books with ISBN for matching
-            $books = Book::whereNotNull('isbn')->get(['id', 'isbn', 'rev_book_id', 'title', 'price', 'status', 'user_id']);
+            $books = Book::whereNotNull('isbn')->get(['id', 'isbn', 'rev_book_id', 'title', 'price', 'status', 'user_id', 'quantity']);
             $isbnMap = [];
             
             foreach ($books as $book) {
@@ -256,6 +256,10 @@ class RevSalesSyncController extends Controller
                             'description' => "Sale of {$quantity} copies of '{$book->title}' at {$sellingPrice} each",
                         ],
                     ]);
+
+                    if ($book->quantity !== null) {
+                        $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
+                    }
                     
                     $processedCount++;
                 } catch (\Exception $e) {
