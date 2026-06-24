@@ -1,0 +1,143 @@
+/* Dark Mode Styles */
+.dark-mode {
+    --nk-body-bg: #1a1d29;
+    --nk-sidebar-bg: #151823;
+    --nk-header-bg: #151823;
+    --nk-card-bg: #1e2139;
+    --nk-text-base: #c4c4c4;
+    --nk-text-light: #9ca3af;
+    --nk-border-light: #2d3748;
+}
+
+.dark-mode .nk-body {
+    background-color: var(--nk-body-bg);
+    color: var(--nk-text-base);
+}
+
+.dark-mode .nk-sidebar {
+    background-color: var(--nk-sidebar-bg);
+}
+
+.dark-mode .nk-header {
+    background-color: var(--nk-header-bg);
+    border-bottom: 1px solid var(--nk-border-light);
+}
+
+.dark-mode .card,
+.dark-mode .nk-block,
+.dark-mode .dropdown-menu {
+    background-color: var(--nk-card-bg);
+    border-color: var(--nk-border-light);
+}
+
+.dark-mode .text-base {
+    color: var(--nk-text-base);
+}
+
+.dark-mode .text-light {
+    color: var(--nk-text-light);
+}
+
+.dark-mode .border-light {
+    border-color: var(--nk-border-light) !important;
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e85347;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Notification Items */
+.notification-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .notification-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Profile Avatar */
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Login Activity Modal Styles */
+.login-activity-modal .modal-content {
+    border-radius: 8px;
+}
+
+.login-activity-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.login-activity-item:last-child {
+    border-bottom: none;
+}
+
+.dark-mode .login-activity-item {
+    border-bottom-color: var(--nk-border-light);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.activity-success {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.activity-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.dark-mode .activity-success {
+    background-color: rgba(22, 163, 74, 0.2);
+}
+
+.dark-mode .activity-warning {
+    background-color: rgba(217, 119, 6, 0.2);
+}

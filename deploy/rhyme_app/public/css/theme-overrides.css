@@ -1,0 +1,341 @@
+/* Theme Color Overrides */
+/* Replacing accent colors with primary (#da251c) and secondary (#000000) */
+
+/* Body background for auth pages */
+body.pg-auth .nk-content {
+  background: 
+    /* Subtle geometric pattern overlay */
+    radial-gradient(circle at 10% 20%, rgba(218, 37, 28, 0.03) 0%, transparent 2%),
+    radial-gradient(circle at 90% 80%, rgba(0, 0, 0, 0.03) 0%, transparent 2%),
+    /* Base gradient */
+    linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background-size: 100px 100px, 150px 150px, cover;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Add a subtle wave effect at the bottom */
+body.pg-auth .nk-content::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23da251c' fill-opacity='0.05' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,261.3C672,256,768,224,864,218.7C960,213,1056,235,1152,250.7C1248,267,1344,277,1392,282.7L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom;
+  background-size: cover;
+}
+
+/* Additional floating elements for depth */
+body.pg-auth .nk-content::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 5%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(218, 37, 28, 0.05);
+  z-index: -1;
+}
+
+body.pg-auth .nk-content .floating-element {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  background: rgba(0, 0, 0, 0.03);
+  z-index: -1;
+  animation: float 15s infinite ease-in-out;
+}
+
+body.pg-auth .nk-content .floating-element:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+body.pg-auth .nk-content .floating-element:nth-child(2) {
+  bottom: 30%;
+  left: 15%;
+  animation-delay: -5s;
+  width: 40px;
+  height: 40px;
+}
+
+body.pg-auth .nk-content .floating-element:nth-child(3) {
+  top: 40%;
+  right: 10%;
+  animation-delay: -10s;
+  width: 50px;
+  height: 50px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(20px, 20px) rotate(90deg); }
+  50% { transform: translate(0, 40px) rotate(180deg); }
+  75% { transform: translate(-20px, 20px) rotate(270deg); }
+}
+
+/* Primary Color Overrides */
+/* Using black for certain elements instead of red */
+.accent-color,
+.link-color,
+.nk-menu-link:hover,
+.nk-menu-link.active,
+.nk-menu-sub .nk-menu-link:hover,
+.nk-menu-sub .nk-menu-link.active,
+.user-avatar[class*="-color"],
+.badge-outline-primary,
+.badge-dim.bg-primary,
+.badge-dim.bg-outline-primary,
+.alert-pro.alert-primary,
+.icon-circle[class*="bg-primary-dim"],
+.is-theme .toggle-overlay,
+.is-theme .sidebar-badge,
+.ui-bordered.ui-accordion .ui-accordion-header-active,
+.ui-bordered.ui-accordion .ui-accordion-header:focus,
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-link:hover,
+.nav-pills .nav-link.active,
+.page-item.active .page-link,
+.custom-control-input:checked ~ .custom-control-label::before,
+.custom-control-input:checked ~ .custom-control-label::after,
+.custom-checkbox .custom-control-input:indeterminate ~ .custom-control-label::before,
+.custom-radio .custom-control-input:checked ~ .custom-control-label::after {
+  color: #000000 !important;
+}
+
+/* Keeping red for these specific elements */
+.toggle-content .toggle-close:hover,
+.nk-news-icon,
+.attachments .icon,
+.table-action li a:hover,
+.user-card.unverified .user-avatar,
+.user-avatar[class*="-color"]:hover {
+  color: #da251c !important;
+}
+
+.bg-primary,
+.bg-accent,
+.badge-primary,
+.badge-outline-primary,
+.badge-dim.bg-primary,
+.alert-primary,
+.alert-outline.alert-primary,
+.alert-pro.alert-primary,
+.custom-control-input:checked ~ .custom-control-label::before,
+.custom-checkbox .custom-control-input:indeterminate ~ .custom-control-label::before,
+.icon-circle[class*="bg-primary-dim"] {
+  background-color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Keeping red for these specific elements */
+.btn-primary,
+.progress-bar {
+  background-color: #da251c !important;
+  border-color: #da251c !important;
+}
+
+.border-primary,
+.alert-primary,
+.alert-outline.alert-primary {
+  border-color: #000000 !important;
+}
+
+/* Secondary Color Overrides */
+.bg-secondary,
+.text-secondary,
+.border-secondary {
+  background-color: #000000 !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Form Element Overrides */
+.form-control:focus,
+.form-select:focus,
+.custom-select:focus,
+.custom-file-input:focus ~ .custom-file-label {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Link Overrides */
+a {
+  color: #000000;
+}
+
+a:hover {
+  color: #333333;
+}
+
+/* Keeping red for these specific links */
+.toggle-content .toggle-close:hover,
+.nk-news-icon,
+.attachments .icon,
+.table-action li a:hover,
+.user-card.unverified .user-avatar,
+.user-avatar[class*="-color"]:hover,
+.nk-order-ovwg-data.highlight .amount,
+.nk-order-ovwg-data.highlight .info strong,
+.nk-support-content .chat-msg-sender.send-me .chat-msg-text,
+.dropzone .dz-message .dz-button,
+.invoice-contact ul li span,
+.nk-kycfm-label,
+.nk-wg7-content .amount,
+.nk-wg7-stats li strong,
+.nk-wg7-note span,
+.nk-wgm-icon,
+.is-scrollable .simplebar-scrollbar:before,
+.nk-tb-list .tb-lead a.title,
+.nk-tb-list .tb-amount span,
+.nk-tb-list .tb-amount a,
+.nk-tb-list .tb-product a.title,
+.nk-refwg-invite .nk-refwg-channel li a:hover,
+.user-balance-sub span,
+.user-balance-alt span,
+.nk-sale-data .amount,
+.nk-sale-data .sub-title,
+.nk-iv-wg5-amount.ui-v2 span,
+.nk-iv-wg5-meta li strong,
+.nk-iv-scheme-item .amount-exchange,
+.nk-iv-scheme-item .amount-saving,
+.nk-iv-scheme-item .amount-old,
+.nk-iv-scheme-item.current,
+.nk-support-ticket .user-info span,
+.nk-reply-meta-info .attach-msg .title,
+.nk-reply-form-header .title,
+.nk-reply-form-tools li a:hover,
+.nk-msg-menu-item a:hover,
+.nk-msg-menu-item.active a,
+.nk-msg-item.active,
+.nk-msg-item.current,
+.nk-msg-item.unread,
+.project-progress-percent,
+.nk-order-progress li.active .amount,
+.nk-order-progress li.done .amount,
+.nk-order-progress li.active .title,
+.nk-order-progress li.done .title,
+.nk-add-project-grid .project-title,
+.nk-add-project-grid .project-sub,
+.nk-file-name .asterisk,
+.nk-file-name-text a.title:hover,
+.nk-file-name-text .title:hover,
+.nk-file-meta li .tag,
+.nk-file-statistics li:first-child .amount,
+.nk-files-view-grid .nk-file.active .nk-file-name-text .title,
+.nk-files-view-group .nk-file.active .nk-file-name-text .title {
+  color: #da251c !important;
+}
+
+/* Background variants */
+.bg-lighter {
+  background-color: #f8f8f8 !important;
+}
+
+/* Enhanced card styling for auth pages */
+.card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: none;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Auth body enhancements */
+.nk-auth-body {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* SVG Icons */
+svg[class*="text-primary"] {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Typography enhancements */
+.nk-block-title {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #1a1a1a;
+}
+
+/* Form enhancements */
+.form-control, .form-select, .custom-select {
+  border-radius: 6px;
+  border: 1px solid #e1e5eb;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus, .custom-select:focus {
+  border-color: #da251c;
+  box-shadow: 0 0 0 0.2rem rgba(218, 37, 28, 0.15);
+}
+
+/* Button enhancements */
+.btn-primary {
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(218, 37, 28, 0.25);
+}
+
+/* Link styling */
+a {
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Brand header for auth pages */
+.nk-auth-body .brand-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.nk-auth-body .brand-header h4 {
+  color: #000000;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.nk-auth-body .brand-header p {
+  color: #6c757d;
+  font-size: 1rem;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+/* Divider enhancement */
+.overline-title-sap span {
+  background: #ffffff;
+  padding: 0 15px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.overline-title-sap::before {
+  border-top: 1px solid #e1e5eb;
+}

@@ -232,6 +232,8 @@
                                     <div class="nk-tb-col"><span class="sub-text">Transaction</span></div>
                                     <div class="nk-tb-col tb-col-mb"><span class="sub-text">Book</span></div>
                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Author</span></div>
+                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Qty</span></div>
+                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Warehouse</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Amount</span></div>
                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Date</span></div>
                                 </div>
@@ -241,6 +243,10 @@
                                         <div class="nk-tb-col">
                                             <span class="tb-lead">#{{ $transaction->id }}</span>
                                             <span class="tb-sub">{{ $transaction->type }}</span>
+                                            <span class="tb-sub">{{ $transaction->book->isbn ?? 'No ISBN' }}</span>
+                                            @if(!empty($transaction->meta['invoice_id']))
+                                                <span class="tb-sub text-primary">Invoice: #{{ $transaction->meta['invoice_id'] }}</span>
+                                            @endif
                                         </div>
                                         <div class="nk-tb-col tb-col-mb">
                                             <span class="tb-lead">{{ $transaction->book->title ?? 'N/A' }}</span>
@@ -249,6 +255,12 @@
                                         <div class="nk-tb-col tb-col-md">
                                             <span class="tb-lead">{{ $transaction->user->name }}</span>
                                             <span class="tb-sub">{{ $transaction->user->email }}</span>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-md">
+                                            <span class="tb-lead">{{ $transaction->meta['quantity_sold'] ?? 1 }}</span>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-lg">
+                                            <span class="tb-lead">{{ $transaction->meta['location'] ?? 'N/A' }}</span>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
                                             <span class="tb-lead text-success">₦{{ number_format($transaction->amount, 2) }}</span>
@@ -273,7 +285,7 @@
 
                         @if($transactions->hasPages())
                             <div class="card-inner">
-                                {{ $transactions->appends(request()->query())->links() }}
+                                {{ $transactions->appends(request()->query())->links('vendor.pagination.bootstrap-4') }}
                             </div>
                         @endif
                     </div>
@@ -308,7 +320,7 @@ let revenueChart = new Chart(ctx, {
                 beginAtZero: true,
                 ticks: {
                     callback: function(value) {
-                        return '$' + value.toLocaleString();
+                        return '₦' + value.toLocaleString();
                     }
                 }
             }
@@ -317,7 +329,7 @@ let revenueChart = new Chart(ctx, {
             tooltip: {
                 callbacks: {
                     label: function(context) {
-                        return 'Revenue: $' + context.parsed.y.toLocaleString();
+                        return 'Revenue: ₦' + context.parsed.y.toLocaleString();
                     }
                 }
             }

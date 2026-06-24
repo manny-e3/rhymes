@@ -1,0 +1,53 @@
+/* Custom Color Overrides */
+:root {
+  --primary-color: #da251c;
+  --secondary-color: #000000;
+}
+
+/* Primary color overrides */
+.btn-primary,
+.bg-primary,
+.text-primary {
+  background-color: #da251c !important;
+  border-color: #da251c !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #b51f18 !important;
+  border-color: #b51f18 !important;
+}
+
+.link {
+  color: #da251c !important;
+}
+
+.link:hover {
+  color: #b51f18 !important;
+}
+
+/* Secondary color overrides */
+.text-secondary,
+.bg-secondary {
+  color: #000000 !important;
+}
+
+.border-secondary {
+  border-color: #000000 !important;
+}
+
+/* Form controls with primary color */
+.form-control:focus,
+.form-select:focus {
+  border-color: #da251c !important;
+  box-shadow: 0 0 0 0.2rem rgba(218, 37, 28, 0.25) !important;
+}
+
+/* Alert and notification colors */
+.alert-primary {
+  background-color: #f9dada !important;
+  border-color: #f5c7c7 !important;
+  color: #8d1d17 !important;
+}

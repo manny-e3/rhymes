@@ -118,14 +118,17 @@ class ErpRevController extends Controller
     public function salesData(Request $request)
     {
 
-         Log::info('ERPREV Controller - salesData called', [
+         Log::info('ERPREV Controller - salesData called with sold-products-view', [
             'filters' => $request->all(),
             'request_method' => $request->method(),
             'request_url' => $request->fullUrl(),
         ]);
         
-        // Get the lastupdated filter parameter
-        $lastUpdated = $request->get('lastupdated', '');
+        // Get the lastupdated filter parameter (default to 100d)
+        $lastUpdated = $request->get('lastupdated');
+        if ($lastUpdated === null) {
+            $lastUpdated = '100d';
+        }
         
         // Get the name search parameter
         $nameSearch = $request->get('name', '');
@@ -135,23 +138,32 @@ class ErpRevController extends Controller
         
         $filters = [];
         
-        // Only pass lastupdated to the ERP API URL.
-        // Name/Barcode are handled locally after fetching, because multi-word
-        // searches with spaces break ERP URL path segments (e.g. /Name/50%20Secrets/).
         $validLastUpdatedValues = ['', 'all', '5m', '10m', '30m', '1h', '4h', '6h', '24h', '7d', '30d', '60d', '100d'];
-        if (in_array($lastUpdated, $validLastUpdatedValues) && $lastUpdated !== '') {
+        if (in_array($lastUpdated, $validLastUpdatedValues)) {
             $filters['lastupdated'] = $lastUpdated;
+        } else {
+            $filters['lastupdated'] = '100d';
+        }
+
+        // Pass Barcode or Name filter directly to the API if searched, to ensure we get results even if
+        // the item is outside the default record limit.
+        if (!empty($barcodeSearch)) {
+            // sold-products-view has ProductID, not Barcode, but we pass it anyway
+            $filters['ProductID'] = $barcodeSearch;
+        } elseif (!empty($nameSearch)) {
+            $keyword = $this->getBestSearchKeyword($nameSearch);
+            if (!empty($keyword)) {
+                $filters['Product'] = $keyword;
+            }
         }
         
-        // For sales data, we'll fetch all records and paginate on our side
-        // This ensures we have full control over pagination
-        Log::info('ERPREV Controller - Calling getSalesItems with filters', [
+        Log::info('ERPREV Controller - Calling getSoldProductsView with filters', [
             'filters' => $filters,
         ]);
         
-        $result = $this->revService->getSalesItems($filters);
+        $result = $this->revService->getSoldProductsView($filters);
         
-        Log::info('ERPREV Controller - salesData result received', [
+        Log::info('ERPREV Controller - salesData result received from sold-products-view', [
             'success' => $result['success'] ?? false,
             'has_data' => isset($result['data']),
             'data_keys' => isset($result['data']) ? array_keys($result['data']) : [],
@@ -159,7 +171,7 @@ class ErpRevController extends Controller
         ]);
         
         if (!$result['success']) {
-            Log::error('ERPREV Controller - salesData failed', [
+            Log::error('ERPREV Controller - salesData failed to fetch sold-products-view', [
                 'message' => $result['message'] ?? 'Unknown error',
                 'full_result' => $result,
             ]);
@@ -172,15 +184,33 @@ class ErpRevController extends Controller
         
         // Local filtering as a fallback if the API returns all records
         if (!empty($nameSearch) || !empty($barcodeSearch)) {
-            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $barcodeSearch) {
+            $targetProductId = null;
+            $targetTitle = null;
+            if (!empty($barcodeSearch)) {
+                $book = \App\Models\Book::where('isbn', $barcodeSearch)
+                    ->orWhere('rev_book_id', $barcodeSearch)
+                    ->first();
+                if ($book) {
+                    $targetProductId = $book->rev_book_id;
+                    $targetTitle = $book->title;
+                }
+            }
+
+            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $barcodeSearch, $targetProductId, $targetTitle) {
                 $match = true;
                 if (!empty($nameSearch)) {
-                    $itemName = $item['Name'] ?? $item['name'] ?? '';
+                    $itemName = $item['Product'] ?? $item['product'] ?? $item['Name'] ?? $item['name'] ?? '';
                     $match = $match && stripos($itemName, $nameSearch) !== false;
                 }
                 if (!empty($barcodeSearch)) {
-                    $itemBarcode = $item['Barcode'] ?? $item['barcode'] ?? '';
-                    $match = $match && ($itemBarcode == $barcodeSearch);
+                    $itemProductId = $item['ProductID'] ?? $item['product_id'] ?? '';
+                    $itemName = $item['Product'] ?? $item['product'] ?? '';
+                    
+                    $barcodeMatch = ($itemProductId == $barcodeSearch) ||
+                                    ($targetProductId && $itemProductId == $targetProductId) ||
+                                    ($targetTitle && stripos($itemName, $targetTitle) !== false);
+                                    
+                    $match = $match && $barcodeMatch;
                 }
                 return $match;
             });
@@ -189,7 +219,7 @@ class ErpRevController extends Controller
         }
         
         // Extract pagination info from ERPREV response
-        $paginationInfo = $result['data']['pagenation'] ?? [];
+        $paginationInfo = $result['data']['pagenation'] ?? $result['data']['pagination'] ?? [];
         $totalRecords = (int)($paginationInfo['TotalRecords'] ?? count($allSalesData));
         
         // Log pagination info for debugging
@@ -197,7 +227,7 @@ class ErpRevController extends Controller
             'pagination_info' => $paginationInfo,
             'total_records_from_api' => $totalRecords,
             'records_received' => count($allSalesData),
-            'actual_records_count' => count($allSalesData), // Add this for clarity
+            'actual_records_count' => count($allSalesData),
         ]);
         
         // Implement our own pagination with 100 records per page
@@ -208,17 +238,13 @@ class ErpRevController extends Controller
         // Slice the data to show only the records for the current page
         $salesData = array_slice($allSalesData, $offset, $perPage);
         
-        // Create a paginator manually since we're getting data from an external API
         $currentPage = $page;
-        
-        // Use the actual count of records received for pagination, not the TotalRecords from API
-        // This fixes the issue where filtered results were showing incorrect counts
         $totalRecords = count($allSalesData);
         
         // Create a simple pagination object
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $salesData, // Only the sliced data for current page
-            $totalRecords, // Total records from API
+            $salesData,
+            $totalRecords,
             $perPage,
             $currentPage,
             [
@@ -256,8 +282,9 @@ class ErpRevController extends Controller
         // Get the lastupdated filter parameter
         $lastUpdated = $request->get('lastupdated', '');
         
-        // Get the product search parameter
+        // Get search parameters
         $productSearch = $request->get('product', '');
+        $barcodeSearch = $request->get('barcode', '');
         
         $filters = [];
         
@@ -266,6 +293,17 @@ class ErpRevController extends Controller
         $validLastUpdatedValues = ['', 'all', '5m', '10m', '30m', '1h', '4h', '6h', '24h', '7d', '30d', '60d', '100d'];
         if (in_array($lastUpdated, $validLastUpdatedValues) && $lastUpdated !== '') {
             $filters['lastupdated'] = $lastUpdated;
+        }
+
+        // Pass Barcode or Product filter directly to the API if searched, to ensure we get results even if
+        // the item is outside the default record limit.
+        if (!empty($barcodeSearch)) {
+            $filters['Barcode'] = $barcodeSearch;
+        } elseif (!empty($productSearch)) {
+            $keyword = $this->getBestSearchKeyword($productSearch);
+            if (!empty($keyword)) {
+                $filters['Product'] = $keyword;
+            }
         }
         
         Log::info('ERPREV Controller - Calling getStockList with filters', [
@@ -374,13 +412,25 @@ class ErpRevController extends Controller
             'filters' => $request->all(),
         ]);
         
-        // Get the name search parameter (lastupdated doesn't work for products)
+        // Get search parameters
+        $idSearch = $request->get('id', '');
         $nameSearch = $request->get('name', '');
+        $barcodeSearch = $request->get('barcode', '');
         
         $filters = [];
         
-        // No filters are passed to the ERP API URL for products.
-        // Name/Barcode are handled locally to support multi-word searches.
+        // Pass ID, Barcode, or Name filter directly to the API if searched, to ensure we get results even if
+        // the item is outside the default record limit.
+        if (!empty($idSearch)) {
+            $filters['ID'] = $idSearch;
+        } elseif (!empty($barcodeSearch)) {
+            $filters['Barcode'] = $barcodeSearch;
+        } elseif (!empty($nameSearch)) {
+            $keyword = $this->getBestSearchKeyword($nameSearch);
+            if (!empty($keyword)) {
+                $filters['Name'] = $keyword;
+            }
+        }
         
         Log::info('ERPREV Controller - Calling getProductsList with filters', [
             'filters' => $filters,
@@ -406,10 +456,13 @@ class ErpRevController extends Controller
         $allProducts = $result['data']['records'] ?? $result['data']['data'] ?? [];
         
         // Local filtering fallback
-        $barcodeSearch = $request->get('barcode');
-        if (!empty($nameSearch) || !empty($barcodeSearch)) {
-            $allProducts = array_filter($allProducts, function($item) use ($nameSearch, $barcodeSearch) {
+        if (!empty($idSearch) || !empty($nameSearch) || !empty($barcodeSearch)) {
+            $allProducts = array_filter($allProducts, function($item) use ($idSearch, $nameSearch, $barcodeSearch) {
                 $match = true;
+                if (!empty($idSearch)) {
+                    $itemId = $item['ID'] ?? $item['id'] ?? '';
+                    $match = $match && ($itemId == $idSearch);
+                }
                 if (!empty($nameSearch)) {
                     $itemName = $item['Name'] ?? $item['name'] ?? '';
                     $match = $match && stripos($itemName, $nameSearch) !== false;
@@ -472,8 +525,9 @@ class ErpRevController extends Controller
         ]);
         
         // Pass the filters to the view
+        $filters['id'] = $idSearch;
         $filters['name'] = $nameSearch;
-        $filters['barcode'] = $request->get('barcode');
+        $filters['barcode'] = $barcodeSearch;
         
         return view('admin.erprev.products', compact('paginator', 'filters'));
     }
@@ -549,5 +603,100 @@ class ErpRevController extends Controller
         ]);
         
         return view('admin.erprev.summary', compact('paginator', 'filters'));
+    }
+
+    /**
+     * Display the endpoint tester view
+     */
+    public function testEndpoints(Request $request)
+    {
+        $endpoints = [
+            'get-invoices' => 'Sales/Invoice View',
+            'sold-products-view' => 'Sold Products View',
+            'rendered-services-view' => 'Sold/Rendered Services View',
+            'get-quotations' => 'Order/Quotation View',
+            'quotation-products-view' => 'Order/Quotation Products View',
+            'quotation-services-view' => 'Order/Quotation Services View',
+        ];
+
+        return view('admin.erprev.test_endpoints', compact('endpoints'));
+    }
+
+    /**
+     * Run the selected endpoint test
+     */
+    public function runTestEndpoint(Request $request)
+    {
+        $request->validate([
+            'endpoint' => 'required|string',
+            'lastupdated' => 'nullable|string',
+            'startRow' => 'nullable|integer|min:0',
+            'TotalRecords' => 'nullable|integer|min:0',
+            'ProductID' => 'nullable|string',
+        ]);
+
+        $endpoint = $request->input('endpoint');
+        $filters = [
+            'lastupdated' => $request->input('lastupdated', 'all'),
+        ];
+
+        if ($request->filled('startRow')) {
+            $filters['startRow'] = $request->input('startRow');
+        }
+
+        if ($request->filled('TotalRecords')) {
+            $filters['TotalRecords'] = $request->input('TotalRecords');
+        }
+
+        if ($request->filled('ProductID')) {
+            $filters['ProductID'] = $request->input('ProductID');
+        }
+
+        $result = $this->revService->getEndpointData($endpoint, $filters);
+
+        $endpoints = [
+            'get-invoices' => 'Sales/Invoice View',
+            'sold-products-view' => 'Sold Products View',
+            'rendered-services-view' => 'Sold/Rendered Services View',
+            'get-quotations' => 'Order/Quotation View',
+            'quotation-products-view' => 'Order/Quotation Products View',
+            'quotation-services-view' => 'Order/Quotation Services View',
+        ];
+
+        $selectedEndpoint = $endpoint;
+        $selectedLastUpdated = $filters['lastupdated'];
+        $selectedStartRow = $request->input('startRow');
+        $selectedTotalRecords = $request->input('TotalRecords');
+        $selectedProductID = $request->input('ProductID');
+
+        return view('admin.erprev.test_endpoints', compact(
+            'endpoints', 
+            'result', 
+            'selectedEndpoint', 
+            'selectedLastUpdated', 
+            'selectedStartRow', 
+            'selectedTotalRecords',
+            'selectedProductID'
+        ));
+    }
+
+    /**
+     * Get the best alphanumeric keyword for ERPREV search
+     * to avoid API URL routing breakage.
+     */
+    private function getBestSearchKeyword($string)
+    {
+        if (preg_match_all('/[a-zA-Z0-9]+/', $string, $matches)) {
+            $words = $matches[0];
+            foreach ($words as $word) {
+                if (strlen($word) >= 3) {
+                    return $word;
+                }
+            }
+            if (count($words) > 0) {
+                return $words[0];
+            }
+        }
+        return '';
     }
 }
