@@ -181,9 +181,9 @@
                                         <!-- <li class="nk-menu-item">
                                             <a href="{{ route('admin.erprev.test-endpoints') }}" class="nk-menu-link"><span class="nk-menu-text">Test Endpoints</span></a>
                                         </li> -->
-                                        <li class="nk-menu-item">
+                                        <!-- <li class="nk-menu-item">
                                             <a href="{{ route('admin.erprev.monitoring') }}" class="nk-menu-link"><span class="nk-menu-text">Sync Monitoring</span></a>
-                                        </li>
+                                        </li> -->
                                     </ul><!-- .nk-menu-sub -->
                                 </li><!-- .nk-menu-item -->
                                 
