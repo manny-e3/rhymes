@@ -158,13 +158,15 @@
                                             <?php endif; ?>
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            <?php
-                                                $salesCount = $book->walletTransactions->where('type', 'sale')->count();
-                                                $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
-                                            ?>
-                                            <span class="tb-lead"><?php echo e($salesCount); ?></span>
-                                            <span class="tb-sub">₦<?php echo e(number_format($revenue, 2)); ?></span>
-                                        </div>
+                                             <?php
+                                                 $salesCount = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                     return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                 });
+                                                 $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
+                                             ?>
+                                             <span class="tb-lead"><?php echo e($salesCount); ?></span>
+                                             <span class="tb-sub">₦<?php echo e(number_format($revenue, 2)); ?></span>
+                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
                                             <?php if($book->status === 'stocked' && !is_null($book->quantity)): ?>
                                                 <?php

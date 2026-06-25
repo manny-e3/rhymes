@@ -83,11 +83,19 @@ class BookReviewController extends Controller
     {
         $book->load(['user', 'walletTransactions']);
         
+        $salesTransactions = $book->walletTransactions->where('type', 'sale');
+        
+        $totalSales = $salesTransactions->sum(function ($t) {
+            return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+        });
+        
+        $totalRevenue = $salesTransactions->sum('amount');
+        
         // Calculate book statistics
         $stats = [
-            'total_sales' => $book->walletTransactions()->where('type', 'sale')->count(),
-            'total_revenue' => $book->walletTransactions()->where('type', 'sale')->sum('amount'),
-            'average_sale_price' => $book->walletTransactions()->where('type', 'sale')->avg('amount') ?? 0,
+            'total_sales' => $totalSales,
+            'total_revenue' => $totalRevenue,
+            'average_sale_price' => $totalSales > 0 ? ($totalRevenue / $totalSales) : 0,
         ];
         
         return view('admin.books.show', compact('book', 'stats'));
@@ -425,7 +433,9 @@ class BookReviewController extends Controller
         $csvData = [];
 
         foreach ($books as $book) {
-            $salesCount = $book->walletTransactions->where('type', 'sale')->count();
+            $salesCount = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+            });
             $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
             
             $csvData[] = [

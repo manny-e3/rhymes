@@ -297,10 +297,9 @@ class RevSalesSyncController extends Controller
                         continue;
                     }
                     
-                    // Calculate author earnings using commission settings from PayoutService
-                    $payoutService = app('App\\Services\\PayoutService');
-                    $authorEarnings = $payoutService->calculateAuthorEarnings($totalAmount);
-                    $platformFee = $payoutService->calculatePlatformFee($totalAmount);
+                    // Use UnitPrice * Qty as the main and only price (no splitting)
+                    $authorEarnings = $unitPrice * $quantity;
+                    $platformFee = 0.0;
                     
                     // Additional check: Look for similar transactions that might be duplicates
                     $potentialDuplicate = WalletTransaction::where('book_id', $book->id)
@@ -348,43 +347,6 @@ class RevSalesSyncController extends Controller
                     if ($book->quantity !== null) {
                         $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
                     }
-                    
-                    // Create transaction for the platform fee (positive amount on platform user's wallet)
-                    $platformUserId = 1;
-                    try {
-                        $admin = User::role('admin')->first();
-                        if ($admin) {
-                            $platformUserId = $admin->id;
-                        } else {
-                            $firstUser = User::first();
-                            $platformUserId = $firstUser ? $firstUser->id : 1;
-                        }
-                    } catch (\Exception $e) {
-                        $firstUser = User::first();
-                        $platformUserId = $firstUser ? $firstUser->id : 1;
-                    }
-
-                    $platformTx = new WalletTransaction([
-                        'user_id' => $platformUserId,
-                        'book_id' => $book->id,
-                        'type' => 'adjustment',
-                        'amount' => $platformFee,
-                        'meta' => [
-                            'erprev_sale_id' => $saleId,
-                            'erprev_unique_id' => $uniqueId,
-                            'author_id' => $book->user_id,
-                            'quantity_sold' => $quantity,
-                            'unit_price' => $unitPrice,
-                            'total_amount' => $totalAmount,
-                            'platform_fee' => $platformFee,
-                            'sale_date' => $saleDate,
-                            'description' => "Platform fee from sale of '{$book->title}' (Author ID: {$book->user_id})",
-                        ],
-                    ]);
-                    $platformTx->timestamps = false;
-                    $platformTx->created_at = $saleCarbonDate;
-                    $platformTx->updated_at = $saleCarbonDate;
-                    $platformTx->save();
                     
                     $processedCount++;
                 } catch (\Exception $e) {
@@ -687,9 +649,9 @@ class RevSalesSyncController extends Controller
                         $totalAmount = $quantity * $unitPrice;
                     }
 
-                    // Calculate payouts
-                    $authorEarnings = $payoutService->calculateAuthorEarnings($totalAmount);
-                    $platformFee = $payoutService->calculatePlatformFee($totalAmount);
+                    // Use UnitPrice * Qty as the main and only price (no splitting)
+                    $authorEarnings = $unitPrice * $quantity;
+                    $platformFee = 0.0;
 
                     $totalAuthorEarnings += $authorEarnings;
                     $totalPlatformFees += $platformFee;
@@ -718,28 +680,6 @@ class RevSalesSyncController extends Controller
                         $authorTx->created_at = $saleDate;
                         $authorTx->updated_at = $saleDate;
                         $authorTx->save();
-
-                        // Create platform fee adjustment transaction
-                        $platformTx = new WalletTransaction([
-                            'user_id' => $platformUserId,
-                            'book_id' => $book->id,
-                            'type' => 'adjustment',
-                            'amount' => $platformFee,
-                            'meta' => [
-                                'erprev_sale_id' => $saleId,
-                                'author_id' => $book->user_id,
-                                'quantity_sold' => $quantity,
-                                'unit_price' => $unitPrice,
-                                'total_amount' => $totalAmount,
-                                'platform_fee' => $platformFee,
-                                'sale_date' => $saleDate->toDateTimeString(),
-                                'description' => "Platform fee from sale of '{$book->title}' (Author ID: {$book->user_id})",
-                            ],
-                        ]);
-                        $platformTx->timestamps = false;
-                        $platformTx->created_at = $saleDate;
-                        $platformTx->updated_at = $saleDate;
-                        $platformTx->save();
 
                         // Update book quantity in database
                         if ($book->quantity !== null) {

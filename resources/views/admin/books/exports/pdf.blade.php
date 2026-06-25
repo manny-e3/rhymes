@@ -96,7 +96,9 @@
         <tbody>
             @forelse($books as $book)
                 @php
-                    $salesCount = $book->walletTransactions->where('type', 'sale')->count();
+                    $salesCount = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                        return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                    });
                     $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
                 @endphp
                 <tr>

@@ -95,6 +95,9 @@ class Book extends Model
     {
         return $this->walletTransactions()
             ->where('type', 'sale')
-            ->count();
+            ->get()
+            ->sum(function ($t) {
+                return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+            });
     }
 }

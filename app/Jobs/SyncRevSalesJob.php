@@ -203,10 +203,9 @@ class SyncRevSalesJob implements ShouldQueue
                         continue;
                     }
                     
-                    // Calculate author earnings using commission settings from PayoutService
-                    $payoutService = app('App\\Services\\PayoutService');
-                    $authorEarnings = $payoutService->calculateAuthorEarnings($totalAmount);
-                    $platformFee = $payoutService->calculatePlatformFee($totalAmount);
+                    // Use UnitPrice * Qty as the main and only price (no splitting)
+                    $authorEarnings = $unitPrice * $quantity;
+                    $platformFee = 0.0;
                     
                     // Create wallet transaction for the author
                     $transaction = WalletTransaction::create([
@@ -231,39 +230,6 @@ class SyncRevSalesJob implements ShouldQueue
                     if ($book->quantity !== null) {
                         $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
                     }
-                    
-                    // Find the platform/admin user ID to assign the platform fee
-                    $platformUserId = 1;
-                    try {
-                        $admin = User::role('admin')->first();
-                        if ($admin) {
-                            $platformUserId = $admin->id;
-                        } else {
-                            $firstUser = User::first();
-                            $platformUserId = $firstUser ? $firstUser->id : 1;
-                        }
-                    } catch (\Exception $e) {
-                        $firstUser = User::first();
-                        $platformUserId = $firstUser ? $firstUser->id : 1;
-                    }
-
-                    // Create a transaction for the platform fee (positive amount on the platform user's wallet)
-                    WalletTransaction::create([
-                        'user_id' => $platformUserId,
-                        'book_id' => $book->id,
-                        'type' => 'adjustment',
-                        'amount' => $platformFee, // Positive since it is platform revenue
-                        'meta' => [
-                            'erprev_sale_id' => $saleId,
-                            'author_id' => $book->user_id,
-                            'quantity_sold' => $quantity,
-                            'unit_price' => $unitPrice,
-                            'total_amount' => $totalAmount,
-                            'platform_fee' => $platformFee,
-                            'sale_date' => $saleDate,
-                            'description' => "Platform fee from sale of '{$book->title}' (Author ID: {$book->user_id})",
-                        ],
-                    ]);
                     
                     // Update total earnings
                     $totalEarnings += $authorEarnings;

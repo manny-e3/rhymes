@@ -143,6 +143,19 @@ class SyncRevInventoryJob implements ShouldQueue
                     
                     // Process sales value if option is enabled
                     if ($this->processSalesValue) {
+                        // Extract unit price first
+                        $unitPrice = isset($item['SellingPrice']) ? $item['SellingPrice'] : 
+                                     (isset($item['selling_price']) ? $item['selling_price'] : 
+                                     (isset($item['UnitPrice']) ? $item['UnitPrice'] : 0));
+                        // Handle currency values for unit price
+                        if (is_string($unitPrice)) {
+                            $unitPrice = preg_replace('/[^\d.-]/', '', $unitPrice);
+                        }
+                        $unitPrice = is_numeric($unitPrice) ? (float)$unitPrice : 0.0;
+                        if ($unitPrice <= 0 && $book->price > 0) {
+                            $unitPrice = (float)$book->price;
+                        }
+
                         // Try different possible field names for sales value
                         $salesValue = 0;
                         $possibleSalesFields = ['SalesValue', 'sales_value', 'TotalSales', 'total_sales', 'SalesAmount', 'sales_amount', 'Value', 'value'];
@@ -162,20 +175,8 @@ class SyncRevInventoryJob implements ShouldQueue
                         }
                         
                         // If still no sales value found, try to calculate from available fields
-                        if ($salesValue == 0) {
-                            $unitPrice = isset($item['SellingPrice']) ? $item['SellingPrice'] : 
-                                        (isset($item['selling_price']) ? $item['selling_price'] : 
-                                        (isset($item['UnitPrice']) ? $item['UnitPrice'] : 0));
-                            // Handle currency values for unit price
-                            if (is_string($unitPrice)) {
-                                $unitPrice = preg_replace('/[^\d.-]/', '', $unitPrice);
-                            }
-                            if (is_numeric($unitPrice)) {
-                                $unitPrice = (float)$unitPrice;
-                                if ($unitPrice > 0 && $quantityOnHand > 0) {
-                                    $salesValue = $unitPrice * $quantityOnHand;
-                                }
-                            }
+                        if ($salesValue == 0 && $unitPrice > 0 && $quantityOnHand > 0) {
+                            $salesValue = $unitPrice * $quantityOnHand;
                         }
                         
                         if ($salesValue > 0) {
@@ -185,10 +186,9 @@ class SyncRevInventoryJob implements ShouldQueue
                                 ->first();
                             
                             if (!$existingTransaction) {
-                                // Calculate author earnings using commission settings from PayoutService
-                                $payoutService = app('App\\Services\\PayoutService');
-                                $authorEarnings = $payoutService->calculateAuthorEarnings($salesValue);
-                                $platformFee = $payoutService->calculatePlatformFee($salesValue);
+                                // Use UnitPrice * Qty as the main and only price (no splitting)
+                                $authorEarnings = $salesValue;
+                                $platformFee = 0.0;
                                 
                                 // Create wallet transaction for the author
                                 WalletTransaction::create([
@@ -204,27 +204,6 @@ class SyncRevInventoryJob implements ShouldQueue
                                         'platform_fee' => $platformFee,
                                         'author_earnings' => $authorEarnings,
                                         'description' => "Sales value from inventory sync for '{$book->title}'",
-                                    ],
-                                ]);
-                                
-                                // Find the platform/admin user ID to assign the platform fee
-                                $admin = User::role('admin')->first();
-                                $platformUserId = $admin ? $admin->id : 1;
-
-                                // Create a transaction for the platform fee (positive amount on the platform user's wallet)
-                                WalletTransaction::create([
-                                    'user_id' => $platformUserId,
-                                    'book_id' => $book->id,
-                                    'type' => 'adjustment',
-                                    'amount' => $platformFee, // Positive since it is platform revenue
-                                    'meta' => [
-                                        'erprev_product_id' => $productId,
-                                        'author_id' => $book->user_id,
-                                        'quantity_on_hand' => $quantityOnHand,
-                                        'sales_value' => $salesValue,
-                                        'platform_fee' => $platformFee,
-                                        'erprev_inventory_sync_date' => now()->toDateString(),
-                                        'description' => "Platform fee for inventory sync of '{$book->title}' (Author ID: {$book->user_id})",
                                     ],
                                 ]);
                                 

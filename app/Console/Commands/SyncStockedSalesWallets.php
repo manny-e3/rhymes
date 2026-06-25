@@ -160,9 +160,9 @@ class SyncStockedSalesWallets extends Command
                 
                 $saleDate = Carbon::parse($sale['DateTime'] ?? now());
                 
-                // Calculate payouts
-                $authorEarnings = $payoutService->calculateAuthorEarnings($totalAmount);
-                $platformFee = $payoutService->calculatePlatformFee($totalAmount);
+                // Use UnitPrice * Qty as the main and only price (no splitting)
+                $authorEarnings = $unitPrice * $quantity;
+                $platformFee = 0.0;
                 
                 $totalAuthorEarnings += $authorEarnings;
                 $totalPlatformFees += $platformFee;
@@ -185,24 +185,6 @@ class SyncStockedSalesWallets extends Command
                             'sale_date' => $saleDate->toDateTimeString(),
                             'location' => $sale['WareHouse'] ?? $sale['location'] ?? null,
                             'description' => "Sale of {$quantity} copies of '{$book->title}' (Imported via Deep Search)",
-                        ],
-                    ]);
-                    
-                    // Create platform fee adjustment transaction
-                    WalletTransaction::create([
-                        'user_id' => $platformUserId,
-                        'book_id' => $book->id,
-                        'type' => 'adjustment',
-                        'amount' => $platformFee,
-                        'meta' => [
-                            'erprev_sale_id' => $saleId,
-                            'author_id' => $book->user_id,
-                            'quantity_sold' => $quantity,
-                            'unit_price' => $unitPrice,
-                            'total_amount' => $totalAmount,
-                            'platform_fee' => $platformFee,
-                            'sale_date' => $saleDate->toDateTimeString(),
-                            'description' => "Platform fee from sale of '{$book->title}' (Author ID: {$book->user_id})",
                         ],
                     ]);
                     

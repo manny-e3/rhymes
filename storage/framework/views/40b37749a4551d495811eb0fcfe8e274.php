@@ -59,24 +59,36 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label" for="lastupdated">Last Updated Filter</label>
+                                        <label class="form-label" for="lastupdated">Last Updated Filter (Relative or Custom Date Y-m-d)</label>
                                         <div class="form-control-wrap">
-                                            <select name="lastupdated" id="lastupdated" class="form-select">
-                                                <option value="all" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == 'all') ? 'selected' : ''); ?>>All Records (all)</option>
-                                                <option value="5m" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '5m') ? 'selected' : ''); ?>>Last 5 Minutes (5m)</option>
-                                                <option value="10m" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '10m') ? 'selected' : ''); ?>>Last 10 Minutes (10m)</option>
-                                                <option value="30m" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '30m') ? 'selected' : ''); ?>>Last 30 Minutes (30m)</option>
-                                                <option value="1h" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '1h') ? 'selected' : ''); ?>>Last 1 Hour (1h)</option>
-                                                <option value="4h" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '4h') ? 'selected' : ''); ?>>Last 4 Hours (4h)</option>
-                                                <option value="6h" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '6h') ? 'selected' : ''); ?>>Last 6 Hours (6h)</option>
-                                                <option value="24h" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '24h') ? 'selected' : ''); ?>>Last 24 Hours (24h)</option>
-                                                <option value="7d" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '7d') ? 'selected' : ''); ?>>Last 7 Days (7d)</option>
-                                                <option value="30d" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '30d') ? 'selected' : ''); ?>>Last 30 Days (30d)</option>
-                                                <option value="60d" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '60d') ? 'selected' : ''); ?>>Last 60 Days (60d)</option>
-                                                <option value="100d" <?php echo e((isset($selectedLastUpdated) && $selectedLastUpdated == '100d') ? 'selected' : ''); ?>>Last 100 Days (100d)</option>
-                                            </select>
+                                            <input type="text" class="form-control" id="lastupdated" name="lastupdated" list="lastupdated-presets" placeholder="e.g. 2026-04-01 or 100d" value="<?php echo e($selectedLastUpdated ?? '100d'); ?>">
+                                            <datalist id="lastupdated-presets">
+                                                <option value="all">All Records</option>
+                                                <option value="2026-04-01">April 2026 till date</option>
+                                                <option value="5m">Last 5 Minutes</option>
+                                                <option value="10m">Last 10 Minutes</option>
+                                                <option value="30m">Last 30 Minutes</option>
+                                                <option value="1h">Last 1 Hour</option>
+                                                <option value="4h">Last 4 Hours</option>
+                                                <option value="6h">Last 6 Hours</option>
+                                                <option value="24h">Last 24 Hours</option>
+                                                <option value="7d">Last 7 Days</option>
+                                                <option value="30d">Last 30 Days</option>
+                                                <option value="60d">Last 60 Days</option>
+                                                <option value="100d">Last 100 Days</option>
+                                            </datalist>
                                         </div>
-                                        <span class="form-note">Pass dynamic lastupdated threshold value in path segment.</span>
+                                        <span class="form-note">Pass dynamic lastupdated threshold value (e.g. 100d or custom date string like 2026-04-01). <strong class="text-warning">Warning:</strong> Querying 'all' without other filters on large tables can result in timeouts.</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label" for="Product">Product Name (Deep Search Filter)</label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="Product" name="Product" placeholder="e.g. Sanya" value="<?php echo e($selectedProduct ?? ''); ?>">
+                                        </div>
+                                        <span class="form-note">Filter by specific Product name query parameter on the server side.</span>
                                     </div>
                                 </div>
 

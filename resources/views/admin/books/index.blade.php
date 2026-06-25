@@ -200,13 +200,15 @@
                                             @endif
                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
-                                            @php
-                                                $salesCount = $book->walletTransactions->where('type', 'sale')->count();
-                                                $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
-                                            @endphp
-                                            <span class="tb-lead">{{ $salesCount }}</span>
-                                            <span class="tb-sub">₦{{ number_format($revenue, 2) }}</span>
-                                        </div>
+                                             @php
+                                                 $salesCount = $book->walletTransactions->where('type', 'sale')->sum(function ($t) {
+                                                     return $t->meta['quantity_sold'] ?? $t->meta['QuantitySold'] ?? 1;
+                                                 });
+                                                 $revenue = $book->walletTransactions->where('type', 'sale')->sum('amount');
+                                             @endphp
+                                             <span class="tb-lead">{{ $salesCount }}</span>
+                                             <span class="tb-sub">₦{{ number_format($revenue, 2) }}</span>
+                                         </div>
                                         <div class="nk-tb-col tb-col-lg">
                                             @if($book->status === 'stocked' && !is_null($book->quantity))
                                                 @php

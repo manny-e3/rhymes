@@ -243,7 +243,7 @@
                         </div>
 
                         <div class="card-inner">
-                            <?php echo e($payouts->appends(request()->query())->links()); ?>
+                            <?php echo e($payouts->appends(request()->query())->links('vendor.pagination.bootstrap-4')); ?>
 
                         </div>
                     </div>

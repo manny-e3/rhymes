@@ -627,12 +627,16 @@ class ErpRevController extends Controller
      */
     public function runTestEndpoint(Request $request)
     {
+        // Increase PHP execution time limit to allow cURL timeout (120s) to fire first
+        @set_time_limit(240);
+
         $request->validate([
             'endpoint' => 'required|string',
             'lastupdated' => 'nullable|string',
             'startRow' => 'nullable|integer|min:0',
             'TotalRecords' => 'nullable|integer|min:0',
             'ProductID' => 'nullable|string',
+            'Product' => 'nullable|string',
         ]);
 
         $endpoint = $request->input('endpoint');
@@ -652,6 +656,10 @@ class ErpRevController extends Controller
             $filters['ProductID'] = $request->input('ProductID');
         }
 
+        if ($request->filled('Product')) {
+            $filters['Product'] = $request->input('Product');
+        }
+
         $result = $this->revService->getEndpointData($endpoint, $filters);
 
         $endpoints = [
@@ -668,6 +676,7 @@ class ErpRevController extends Controller
         $selectedStartRow = $request->input('startRow');
         $selectedTotalRecords = $request->input('TotalRecords');
         $selectedProductID = $request->input('ProductID');
+        $selectedProduct = $request->input('Product');
 
         return view('admin.erprev.test_endpoints', compact(
             'endpoints', 
@@ -676,7 +685,8 @@ class ErpRevController extends Controller
             'selectedLastUpdated', 
             'selectedStartRow', 
             'selectedTotalRecords',
-            'selectedProductID'
+            'selectedProductID',
+            'selectedProduct'
         ));
     }
 
