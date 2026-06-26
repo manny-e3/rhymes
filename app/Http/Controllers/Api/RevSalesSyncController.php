@@ -92,10 +92,11 @@ class RevSalesSyncController extends Controller
             $bookId = $request->input('book_id');
             $debug = $request->input('debug', false);
             
-            // Prepare filters for the ERPREV API
+            // Build filters for the ERPREV API using the requested startDate
             $filters = [
-                'date_from' => $since->format('Y-m-d'),
-                'date_to' => Carbon::now()->format('Y-m-d'),
+                'parameters' => [
+                    'startDate' => $since->format('Y-m-d'),
+                ],
             ];
             
             // Add book_id filter if specified
@@ -259,12 +260,11 @@ class RevSalesSyncController extends Controller
                     
                     // Check if this sale has already been processed by checking our custom identifier
                     $existingTransaction = WalletTransaction::where('type', 'sale')
-                        ->where(function($query) use ($saleId, $uniqueId) {
-                            $query->where('meta->erprev_sale_id', $saleId)
-                                  ->orWhere('meta->erprev_sid', $saleId)
-                                  ->orWhere('meta->erprev_unique_id', $saleId)
-                                  ->orWhere('meta->erprev_unique_id', $uniqueId);
-                        })->first();
+    ->where(function($query) use ($saleId, $uniqueId) {
+        $query->where('meta->erprev_sale_id', $saleId)
+              ->orWhere('meta->erprev_sid', $saleId)
+              ->orWhere('meta->erprev_unique_id', $uniqueId);
+    })->first();
                     
                     if ($existingTransaction) {
                         $duplicateCount++;
@@ -399,64 +399,32 @@ class RevSalesSyncController extends Controller
     }
 
     /**
-     * Deep sync sales data from ERPREV API using sold-products-view
+     * Deep sync sales data from ERPREV sold-products-view API into wallet_transactions.
+     *
+     * POST /api/erprev/sync-sales-deep
+     * Params: start_date (required), end_date (optional), dry_run (0|1), start_row (int)
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function syncSalesDeep(Request $request)
     {
+        // Extend execution time for large fetches
+        set_time_limit(0);
+        $startTime = microtime(true);
+
         try {
-            $startTime = microtime(true);
+            // ── 1. Parse parameters ─────────────────────────────────────────
+            $startDate = $request->input('start_date', Carbon::now()->subDays(7)->format('Y-m-d'));
+            $endDate   = $request->input('end_date');
+            $dryRun    = filter_var($request->input('dry_run', false), FILTER_VALIDATE_BOOLEAN);
+            $startRow  = max(1, (int)$request->input('start_row', 1));  // allow paging from outside
 
-            // Validate request parameters
-            $request->validate([
-                'lastupdated' => 'nullable|string',
-                'dry_run' => 'nullable|boolean',
-                'page_limit' => 'nullable|integer|min:1|max:100',
-                'status' => 'nullable|string',
-                'source' => 'nullable|string|in:live,local,auto',
-                'download' => 'nullable|boolean'
-            ]);
+            // ── 2. Build book lookup maps ────────────────────────────────────
+            $books    = Book::all(['id', 'title', 'rev_book_id', 'user_id', 'quantity']);
+            $idMap    = [];   // rev_book_id => Book
+            $titleMap = [];   // normalised title => Book
 
-            $lastUpdated = $request->input('lastupdated', '1d');
-            $dryRun = filter_var($request->input('dry_run', false), FILTER_VALIDATE_BOOLEAN);
-            $pageLimit = (int)$request->input('page_limit', 20);
-            $targetStatus = $request->input('status', 'all');
-            $source = $request->input('source', 'auto');
-            $download = filter_var($request->input('download', false), FILTER_VALIDATE_BOOLEAN);
-
-            // Resolve threshold date
-            $thresholdDate = $this->resolveThresholdDate($lastUpdated);
-
-            // Determine if we should use local file scan
-            $filePath = $this->getSalesHistoryFilePath();
-            
-            if ($source === 'auto') {
-                // If lastupdated is 'all', or a date before June 20, 2026, we use local file to avoid API limitations/timeouts
-                if ($lastUpdated === 'all' || 
-                    (!preg_match('/^(\d+)([mh])$/i', $lastUpdated) && $thresholdDate->lessThan(Carbon::parse('2026-06-20 00:00:00')))) {
-                    $source = 'local';
-                } else {
-                    $source = 'live';
-                }
-            }
-
-            // If we need to download first
-            if ($download || ($source === 'local' && !file_exists($filePath))) {
-                $this->downloadSalesHistory($filePath);
-            }
-
-            // 1. Fetch books to match against
-            if ($targetStatus === 'all' || in_array('all', explode(',', $targetStatus))) {
-                $books = Book::all();
-            } else {
-                $statuses = explode(',', $targetStatus);
-                $books = Book::whereIn('status', $statuses)->get();
-            }
-
-            $idMap = [];
-            $titleMap = [];
             foreach ($books as $book) {
                 if (!empty($book->rev_book_id)) {
                     $idMap[(string)$book->rev_book_id] = $book;
@@ -464,285 +432,225 @@ class RevSalesSyncController extends Controller
                 $titleMap[strtolower(trim($book->title))] = $book;
             }
 
-            // 2. Fetch sales data based on source
-            $allSalesData = [];
-
-            if ($source === 'local') {
-                if (!file_exists($filePath)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Sales history file not found. Run with 'download=1' to download it first.",
-                    ], 400);
-                }
-                Log::info("ERPREV Deep Sales Sync - Scanning local history file", [
-                    'file' => $filePath,
-                    'threshold_date' => $thresholdDate->toDateTimeString()
-                ]);
-                $allSalesData = $this->parseLocalSalesFile($filePath, $thresholdDate, $idMap, $titleMap);
-            } else {
-                // Fetch from live API with pagination
-                $hasMore = true;
-                $startRow = 0;
-                $pageSize = 500;
-                $pageCount = 0;
-
-                while ($hasMore && $pageCount < $pageLimit) {
-                    $pageCount++;
-
-                    $params = [
-                        'lastupdated' => $lastUpdated,
-                        'startRow' => $startRow,
-                        'TotalRecords' => $pageSize,
-                    ];
-
-                    Log::info('ERPREV Deep Sales Sync - Fetching sold products page from live API', [
-                        'page' => $pageCount,
-                        'startRow' => $startRow,
-                        'lastupdated' => $lastUpdated
-                    ]);
-
-                    $result = $this->revService->getSoldProductsView($params);
-
-                    if (!$result['success']) {
-                        Log::error('ERPREV Deep Sales Sync - Failed to fetch page', [
-                            'error' => $result['message'],
-                            'page' => $pageCount
-                        ]);
-                        
-                        if (count($allSalesData) > 0) {
-                            Log::warning('ERPREV Deep Sales Sync - Proceeding with partial data');
-                            break;
-                        }
-
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Failed to fetch sales data: ' . $result['message'],
-                        ], 500);
-                    }
-
-                    $records = $result['data']['records'] ?? $result['data']['data'] ?? [];
-                    if (empty($records)) {
-                        break;
-                    }
-
-                    $allSalesData = array_merge($allSalesData, $records);
-
-                    $paginationInfo = $result['data']['pagenation'] ?? $result['data']['pagination'] ?? null;
-                    if ($paginationInfo) {
-                        $totalRecordsFromApi = isset($paginationInfo['TotalRecords']) ? (int)$paginationInfo['TotalRecords'] : null;
-                        $endRow = isset($paginationInfo['endRow']) ? (int)$paginationInfo['endRow'] : (isset($paginationInfo['EndRow']) ? (int)$paginationInfo['EndRow'] : null);
-
-                        if ($endRow !== null && $totalRecordsFromApi !== null && $endRow < $totalRecordsFromApi) {
-                            $startRow = $endRow;
-                        } else {
-                            $hasMore = false;
-                        }
-                    } else {
-                        if (count($records) < $pageSize) {
-                            $hasMore = false;
-                        } else {
-                            $startRow = count($allSalesData);
+            // ── 3. Build in-memory duplicate map ────────────────────────────
+            $existingSaleIds = [];
+            WalletTransaction::where('type', 'sale')
+                ->select(['id', 'meta'])
+                ->chunk(500, function ($txns) use (&$existingSaleIds) {
+                    foreach ($txns as $tx) {
+                        $meta = $tx->meta;
+                        if (is_array($meta) && !empty($meta['erprev_sale_id'])) {
+                            $existingSaleIds[(string)$meta['erprev_sale_id']] = $tx;
                         }
                     }
-                }
+                });
+
+            // ── 4. Fetch one page from the API ───────────────────────────────
+            //  The sold-products-view endpoint returns up to 5 000 records per
+            //  call when startRow + TotalRecords are sent as strings.
+            $apiParams = [
+                'startDate'    => $startDate,
+                'startRow'     => (string)$startRow,
+                'TotalRecords' => '5000',
+            ];
+            if (!empty($endDate)) {
+                $apiParams['stopDate'] = $endDate;
             }
 
-            // 3. Process and import sales
-            $processedCount = 0;
-            $duplicateCount = 0;
-            $bookNotFoundCount = 0;
-            $errorCount = 0;
-            $totalAuthorEarnings = 0.0;
-            $totalPlatformFees = 0.0;
+            Log::info('ERPREV syncSalesDeep - Calling sold-products-view', [
+                'params' => $apiParams,
+                'dry_run' => $dryRun,
+            ]);
 
-            // Determine platform user ID
-            $platformUserId = 1;
-            try {
-                $admin = User::role('admin')->first();
-                if ($admin) {
-                    $platformUserId = $admin->id;
-                } else {
-                    $firstUser = User::first();
-                    $platformUserId = $firstUser ? $firstUser->id : 1;
-                }
-            } catch (\Exception $e) {
-                $firstUser = User::first();
-                $platformUserId = $firstUser ? $firstUser->id : 1;
+            $result = $this->revService->getSoldProductsView($apiParams);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch sales from ERPREV: ' . ($result['message'] ?? 'unknown error'),
+                ], 500);
             }
 
-            $payoutService = app('App\\Services\\PayoutService');
+            $records       = $result['data']['records'] ?? $result['data']['data'] ?? [];
+            $paginationRaw = $result['data']['pagenation'] ?? $result['data']['pagination'] ?? [];
+            $totalInApi    = isset($paginationRaw['TotalRecords']) ? (int)$paginationRaw['TotalRecords'] : null;
+            $endRowApi     = isset($paginationRaw['endRow'])       ? (int)$paginationRaw['endRow']
+                           : (isset($paginationRaw['EndRow'])      ? (int)$paginationRaw['EndRow'] : null);
 
-            foreach ($allSalesData as $sale) {
+            Log::info('ERPREV syncSalesDeep - Page fetched', [
+                'records_in_page' => count($records),
+                'total_in_api'    => $totalInApi,
+                'end_row'         => $endRowApi,
+            ]);
+
+            // ── 5. Process records and upsert into wallet_transactions ───────
+            $inserted        = 0;
+            $updated         = 0;
+            $bookNotFound    = 0;
+            $errors          = 0;
+            $totalEarnings   = 0.0;
+
+            foreach ($records as $sale) {
                 try {
                     $saleId = (string)($sale['ID'] ?? $sale['id'] ?? '');
-                    if (empty($saleId)) {
-                        $errorCount++;
+                    if ($saleId === '') {
+                        $errors++;
                         continue;
                     }
 
-                    // Map the sale to a book
-                    $productId = (string)($sale['ProductID'] ?? '');
-                    $productName = trim($sale['Product'] ?? '');
-                    $normProdName = strtolower($productName);
+                    // Match book by ProductID (rev_book_id) then by title
+                    $productId   = (string)($sale['ProductID'] ?? '');
+                    $productName = strtolower(trim($sale['Product'] ?? ''));
 
                     $book = null;
                     if ($productId !== '' && isset($idMap[$productId])) {
                         $book = $idMap[$productId];
-                    } elseif ($normProdName !== '' && isset($titleMap[$normProdName])) {
-                        $book = $titleMap[$normProdName];
+                    } elseif ($productName !== '' && isset($titleMap[$productName])) {
+                        $book = $titleMap[$productName];
                     }
 
                     if (!$book) {
-                        $bookNotFoundCount++;
+                        $bookNotFound++;
                         continue;
                     }
 
+                    // Parse sale date (format: "01-Apr-26 09:10 AM")
                     $saleDate = Carbon::parse($sale['DateTime'] ?? now());
 
-                    // Check if duplicate transaction already exists in the database
-                    $existingTransaction = WalletTransaction::where('type', 'sale')
-                        ->where(function($query) use ($saleId) {
-                            $query->where('meta->erprev_sale_id', $saleId)
-                                  ->orWhere('meta->erprev_sid', $saleId)
-                                  ->orWhere('meta->erprev_unique_id', $saleId);
-                        })->first();
+                    // Parse amounts – strip currency symbols and commas
+                    $quantity  = max(1, (int)str_replace(',', '', $sale['Qty'] ?? '1'));
+                    $unitPrice = (float)str_replace(['₦', ',', ' ', '&amp;#x20A6;', '&#x20A6;'], '', $sale['UnitPrice'] ?? '0');
+                    $amount    = (float)str_replace(['₦', ',', ' ', '&amp;#x20A6;', '&#x20A6;'], '', $sale['Amount']    ?? '0');
+                    if ($amount <= 0 && $unitPrice > 0) {
+                        $amount = $unitPrice * $quantity;
+                    }
+                    $authorEarnings = $amount;
+                    $totalEarnings += $authorEarnings;
 
-                    if ($existingTransaction) {
-                        $duplicateCount++;
+                    $meta = [
+                        'erprev_sale_id' => $saleId,
+                        'invoice_id'     => $sale['InvoiceID'] ?? null,
+                        'product_id'     => $productId,
+                        'quantity_sold'  => $quantity,
+                        'unit_price'     => $unitPrice,
+                        'total_amount'   => $amount,
+                        'sale_date'      => $saleDate->toDateTimeString(),
+                        'location'       => $sale['WareHouse'] ?? $sale['location'] ?? null,
+                        'description'    => "Sale of {$quantity} × '{$book->title}' via ERPREV",
+                    ];
+
+                    // Upsert
+                    if (isset($existingSaleIds[$saleId])) {
+                        // Update existing
+                        $updated++;
                         if (!$dryRun) {
-                            // Update existing transaction dates to match actual sale date
-                            $formattedSaleDate = $saleDate->toDateTimeString();
-                            $existingCreatedAt = Carbon::parse($existingTransaction->created_at)->toDateTimeString();
-                            if ($existingCreatedAt !== $formattedSaleDate) {
-                                $existingTransaction->timestamps = false;
-                                $existingTransaction->created_at = $saleDate;
-                                $existingTransaction->updated_at = $saleDate;
-                                $existingTransaction->save();
-
-                                // Also update the platform fee adjustment transaction
-                                $platformTx = WalletTransaction::where('type', 'adjustment')
-                                    ->where('book_id', $book->id)
-                                    ->where('meta->erprev_sale_id', $saleId)
-                                    ->first();
-                                if ($platformTx) {
-                                    $platformTx->timestamps = false;
-                                    $platformTx->created_at = $saleDate;
-                                    $platformTx->updated_at = $saleDate;
-                                    $platformTx->save();
-                                }
+                            $tx = WalletTransaction::find($existingSaleIds[$saleId]->id);
+                            if ($tx) {
+                                $tx->timestamps  = false;
+                                $tx->user_id     = $book->user_id;
+                                $tx->book_id     = $book->id;
+                                $tx->amount      = $authorEarnings;
+                                $tx->meta        = $meta;
+                                $tx->created_at  = $saleDate;
+                                $tx->updated_at  = now();
+                                $tx->save();
                             }
                         }
-                        continue;
-                    }
+                    } else {
+                        // Insert new
+                        $inserted++;
+                        if (!$dryRun) {
+                            $tx = new WalletTransaction([
+                                'user_id' => $book->user_id,
+                                'book_id' => $book->id,
+                                'type'    => 'sale',
+                                'amount'  => $authorEarnings,
+                                'meta'    => $meta,
+                            ]);
+                            $tx->timestamps = false;
+                            $tx->created_at = $saleDate;
+                            $tx->updated_at = $saleDate;
+                            $tx->save();
 
-                    // Extract quantity and price
-                    $quantity = (int)str_replace(',', '', $sale['Qty'] ?? '1');
-                    $amountStr = $sale['Amount'] ?? '0';
-                    $amountStr = str_replace(['₦', ',', ' '], '', $amountStr);
-                    $totalAmount = (float)$amountStr;
+                            // Mark in-memory so same ID won't insert twice within this page
+                            $existingSaleIds[$saleId] = $tx;
 
-                    $unitPriceStr = $sale['UnitPrice'] ?? '0';
-                    $unitPriceStr = str_replace(['₦', ',', ' '], '', $unitPriceStr);
-                    $unitPrice = (float)$unitPriceStr;
-
-                    if ($totalAmount <= 0 && $quantity > 0 && $unitPrice > 0) {
-                        $totalAmount = $quantity * $unitPrice;
-                    }
-
-                    // Use UnitPrice * Qty as the main and only price (no splitting)
-                    $authorEarnings = $unitPrice * $quantity;
-                    $platformFee = 0.0;
-
-                    $totalAuthorEarnings += $authorEarnings;
-                    $totalPlatformFees += $platformFee;
-
-                    if (!$dryRun) {
-                        // Create wallet transaction for the author
-                        $authorTx = new WalletTransaction([
-                            'user_id' => $book->user_id,
-                            'book_id' => $book->id,
-                            'type' => 'sale',
-                            'amount' => $authorEarnings,
-                            'meta' => [
-                                'erprev_sale_id' => $saleId,
-                                'invoice_id' => $sale['InvoiceID'] ?? $sale['invoice_id'] ?? null,
-                                'quantity_sold' => $quantity,
-                                'unit_price' => $unitPrice,
-                                'total_amount' => $totalAmount,
-                                'platform_fee' => $platformFee,
-                                'author_earnings' => $authorEarnings,
-                                'sale_date' => $saleDate->toDateTimeString(),
-                                'location' => $sale['WareHouse'] ?? $sale['location'] ?? null,
-                                'description' => "Sale of {$quantity} copies of '{$book->title}' (Imported via Deep Search API)",
-                            ],
-                        ]);
-                        $authorTx->timestamps = false;
-                        $authorTx->created_at = $saleDate;
-                        $authorTx->updated_at = $saleDate;
-                        $authorTx->save();
-
-                        // Update book quantity in database
-                        if ($book->quantity !== null) {
-                            $book->update(['quantity' => max(0, $book->quantity - $quantity)]);
+                             // Decrement book stock — guard against UNSIGNED underflow
+                             if ($book->quantity !== null) {
+                                 \Illuminate\Support\Facades\DB::table('books')
+                                     ->where('id', $book->id)
+                                     ->update([
+                                         'quantity' => DB::raw("GREATEST(0, `quantity` - {$quantity})"),
+                                     ]);
+                             }
                         }
                     }
-
-                    $processedCount++;
                 } catch (\Exception $e) {
-                    Log::error("ERPREV Deep Sales Sync - Record processing error: " . $e->getMessage(), [
-                        'sale' => $sale
+                    Log::error('ERPREV syncSalesDeep - record error', [
+                        'sale_id' => $saleId ?? null,
+                        'error'   => $e->getMessage(),
                     ]);
-                    $errorCount++;
+                    $errors++;
                 }
             }
 
-            $endTime = microtime(true);
-            $executionTime = ($endTime - $startTime) * 1000;
+            $execMs = round((microtime(true) - $startTime) * 1000, 2);
 
-            Log::info('ERPREV Deep Sales Sync API - Completed', [
-                'dry_run' => $dryRun,
-                'source' => $source,
-                'processed' => $processedCount,
-                'duplicates' => $duplicateCount,
-                'books_not_found' => $bookNotFoundCount,
-                'errors' => $errorCount,
-                'execution_time_ms' => round($executionTime, 2)
+            Log::info('ERPREV syncSalesDeep - Done', [
+                'dry_run'       => $dryRun,
+                'inserted'      => $inserted,
+                'updated'       => $updated,
+                'book_not_found'=> $bookNotFound,
+                'errors'        => $errors,
+                'exec_ms'       => $execMs,
             ]);
 
+            // Determine if there are more pages
+            $nextStartRow = null;
+            if ($endRowApi !== null && $totalInApi !== null && $endRowApi < $totalInApi) {
+                $nextStartRow = $endRowApi + 1;
+            }
+
             return response()->json([
-                'success' => true,
-                'message' => $dryRun ? 'Dry run completed successfully (no database writes)' : 'Sales sync completed successfully',
-                'dry_run' => $dryRun,
-                'source' => $source,
+                'success'  => true,
+                'dry_run'  => $dryRun,
+                'message'  => $dryRun ? 'Dry run — no writes made' : 'Sync completed',
                 'statistics' => [
-                    'processed' => $processedCount,
-                    'duplicates' => $duplicateCount,
-                    'books_not_found' => $bookNotFoundCount,
-                    'errors' => $errorCount,
-                    'total_records_received' => count($allSalesData),
-                    'total_author_earnings' => $totalAuthorEarnings,
-                    'total_platform_fees' => $totalPlatformFees
+                    'inserted'         => $inserted,
+                    'updated'          => $updated,
+                    'total_upserted'   => $inserted + $updated,
+                    'books_not_found'  => $bookNotFound,
+                    'errors'           => $errors,
+                    'records_received' => count($records),
+                    'total_in_api'     => $totalInApi,
+                    'author_earnings'  => $totalEarnings,
+                ],
+                'pagination' => [
+                    'start_row'      => $startRow,
+                    'end_row'        => $endRowApi,
+                    'total_records'  => $totalInApi,
+                    'next_start_row' => $nextStartRow,
+                    'has_more'       => $nextStartRow !== null,
                 ],
                 'filters' => [
-                    'lastupdated' => $lastUpdated,
-                    'threshold_date' => $thresholdDate->toDateTimeString(),
-                    'target_status' => $targetStatus
+                    'start_date' => $startDate,
+                    'end_date'   => $endDate,
                 ],
-                'execution_time_ms' => round($executionTime, 2)
+                'execution_time_ms' => $execMs,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('ERPREV Deep Sales Sync API - Unexpected error', [
+            Log::error('ERPREV syncSalesDeep - Unexpected error', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'An unexpected error occurred: ' . $e->getMessage()
+                'message' => 'Unexpected error: ' . $e->getMessage(),
             ], 500);
         }
     }
+
 
     /**
      * Resolve lastupdated to a standard threshold date Carbon instance

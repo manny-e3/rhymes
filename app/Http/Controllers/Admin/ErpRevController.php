@@ -117,156 +117,131 @@ class ErpRevController extends Controller
      */
     public function salesData(Request $request)
     {
-
-         Log::info('ERPREV Controller - salesData called with sold-products-view', [
+        Log::info('ERPREV Controller - salesData called (API mode)', [
             'filters' => $request->all(),
-            'request_method' => $request->method(),
-            'request_url' => $request->fullUrl(),
         ]);
-        
-        // Get the lastupdated filter parameter (default to 100d)
-        $lastUpdated = $request->get('lastupdated');
-        if ($lastUpdated === null) {
-            $lastUpdated = '100d';
-        }
-        
-        // Get the name search parameter
-        $nameSearch = $request->get('name', '');
-        
-        // Get the barcode search parameter
-        $barcodeSearch = $request->get('barcode', '');
-        
+
+        // Get filter parameters
+        $lastUpdated = $request->get('lastupdated', '2026-04-01');
+        $startDate = $request->get('start_date', '');
+        $endDate = $request->get('end_date', '');
+        $nameSearch = trim($request->get('name', ''));
+        $invoiceSearch = trim($request->get('invoice_id', ''));
+
         $filters = [];
         
-        $validLastUpdatedValues = ['', 'all', '5m', '10m', '30m', '1h', '4h', '6h', '24h', '7d', '30d', '60d', '100d'];
-        if (in_array($lastUpdated, $validLastUpdatedValues)) {
-            $filters['lastupdated'] = $lastUpdated;
+        // Custom date range takes precedence over lastupdated select menu
+        if ($startDate !== '') {
+            $filters['startDate'] = $startDate;
+            if ($endDate !== '') {
+                $filters['stopDate'] = $endDate;
+            }
         } else {
-            $filters['lastupdated'] = '100d';
-        }
-
-        // Pass Barcode or Name filter directly to the API if searched, to ensure we get results even if
-        // the item is outside the default record limit.
-        if (!empty($barcodeSearch)) {
-            // sold-products-view has ProductID, not Barcode, but we pass it anyway
-            $filters['ProductID'] = $barcodeSearch;
-        } elseif (!empty($nameSearch)) {
-            $keyword = $this->getBestSearchKeyword($nameSearch);
-            if (!empty($keyword)) {
-                $filters['Product'] = $keyword;
+            // Pass lastupdated filter
+            if ($lastUpdated !== '') {
+                $filters['lastupdated'] = $lastUpdated;
             }
         }
-        
+
+        // Pass InvoiceID to the API if set
+        if ($invoiceSearch !== '') {
+            $filters['InvoiceID'] = $invoiceSearch;
+        }
+
         Log::info('ERPREV Controller - Calling getSoldProductsView with filters', [
             'filters' => $filters,
         ]);
-        
+
         $result = $this->revService->getSoldProductsView($filters);
-        
-        Log::info('ERPREV Controller - salesData result received from sold-products-view', [
+
+        Log::info('ERPREV Controller - salesData result', [
             'success' => $result['success'] ?? false,
             'has_data' => isset($result['data']),
             'data_keys' => isset($result['data']) ? array_keys($result['data']) : [],
-            'message' => $result['message'] ?? 'N/A',
         ]);
-        
+
         if (!$result['success']) {
-            Log::error('ERPREV Controller - salesData failed to fetch sold-products-view', [
+            Log::error('ERPREV Controller - salesData failed', [
                 'message' => $result['message'] ?? 'Unknown error',
-                'full_result' => $result,
             ]);
-            
+
             return back()->with('error', 'Failed to fetch sales data: ' . $result['message']);
         }
-        
+
         // Extract all records from the response
         $allSalesData = $result['data']['records'] ?? $result['data']['data'] ?? [];
-        
-        // Local filtering as a fallback if the API returns all records
-        if (!empty($nameSearch) || !empty($barcodeSearch)) {
-            $targetProductId = null;
-            $targetTitle = null;
-            if (!empty($barcodeSearch)) {
-                $book = \App\Models\Book::where('isbn', $barcodeSearch)
-                    ->orWhere('rev_book_id', $barcodeSearch)
-                    ->first();
-                if ($book) {
-                    $targetProductId = $book->rev_book_id;
-                    $targetTitle = $book->title;
-                }
-            }
 
-            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $barcodeSearch, $targetProductId, $targetTitle) {
+        // Local filtering fallback
+        if (!empty($nameSearch) || !empty($invoiceSearch)) {
+            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $invoiceSearch) {
                 $match = true;
                 if (!empty($nameSearch)) {
-                    $itemName = $item['Product'] ?? $item['product'] ?? $item['Name'] ?? $item['name'] ?? '';
+                    $itemName = $item['Product'] ?? $item['product'] ?? $item['Name'] ?? '';
                     $match = $match && stripos($itemName, $nameSearch) !== false;
                 }
-                if (!empty($barcodeSearch)) {
-                    $itemProductId = $item['ProductID'] ?? $item['product_id'] ?? '';
-                    $itemName = $item['Product'] ?? $item['product'] ?? '';
-                    
-                    $barcodeMatch = ($itemProductId == $barcodeSearch) ||
-                                    ($targetProductId && $itemProductId == $targetProductId) ||
-                                    ($targetTitle && stripos($itemName, $targetTitle) !== false);
-                                    
-                    $match = $match && $barcodeMatch;
+                if (!empty($invoiceSearch)) {
+                    $itemInvoiceId = $item['InvoiceID'] ?? $item['invoice_id'] ?? '';
+                    $match = $match && ($itemInvoiceId == $invoiceSearch);
                 }
                 return $match;
             });
-            // Reset array keys after filtering
             $allSalesData = array_values($allSalesData);
         }
-        
-        // Extract pagination info from ERPREV response
-        $paginationInfo = $result['data']['pagenation'] ?? $result['data']['pagination'] ?? [];
-        $totalRecords = (int)($paginationInfo['TotalRecords'] ?? count($allSalesData));
-        
-        // Log pagination info for debugging
-        Log::info('ERPREV Controller - Pagination Info', [
-            'pagination_info' => $paginationInfo,
-            'total_records_from_api' => $totalRecords,
-            'records_received' => count($allSalesData),
-            'actual_records_count' => count($allSalesData),
-        ]);
-        
-        // Implement our own pagination with 100 records per page
+
+        // Map elements to match what sales.blade.php expects
+        $mapped = collect($allSalesData)->map(function ($item) {
+            return [
+                'ID'             => $item['ID'] ?? $item['id'] ?? 'N/A',
+                'InvoiceID'      => $item['InvoiceID'] ?? $item['invoice_id'] ?? 'N/A',
+                'DateTime'       => $item['DateTime'] ?? $item['date_time'] ?? $item['created_at'] ?? 'N/A',
+                'Product'        => $item['Product'] ?? $item['product'] ?? 'N/A',
+                'ProductID'      => $item['ProductID'] ?? $item['product_id'] ?? '',
+                'Category'       => $item['Category'] ?? $item['category'] ?? 'N/A',
+                'WareHouse'      => $item['WareHouse'] ?? $item['warehouse'] ?? $item['Location'] ?? 'N/A',
+                'Qty'            => $item['Qty'] ?? $item['qty'] ?? $item['quantity'] ?? 1,
+                'UnitPrice'      => $item['UnitPrice'] ?? $item['unit_price'] ?? 0,
+                'Amount'         => $item['Amount'] ?? $item['amount'] ?? $item['TotalAmount'] ?? 0,
+                'Currency'       => '&#x20A6;',
+                'CustomerName'   => $item['CustomerName'] ?? $item['customer_name'] ?? 'N/A',
+                'CustomerMobile' => $item['CustomerMobile'] ?? $item['customer_mobile'] ?? '',
+            ];
+        })->toArray();
+
+        // Implement pagination with 100 records per page
         $perPage = 100;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
-        
+
         // Slice the data to show only the records for the current page
-        $salesData = array_slice($allSalesData, $offset, $perPage);
-        
-        $currentPage = $page;
-        $totalRecords = count($allSalesData);
-        
-        // Create a simple pagination object
+        $slicedData = array_slice($mapped, $offset, $perPage);
+        $totalRecords = count($mapped);
+
+        // Create the paginator manually
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $salesData,
+            $slicedData,
             $totalRecords,
             $perPage,
-            $currentPage,
+            $page,
             [
                 'path' => $request->url(),
                 'pageName' => 'page',
             ]
         );
-        
-        Log::info('ERPREV Controller - salesData processed', [
-            'total_record_count' => count($allSalesData),
-            'displayed_record_count' => count($salesData),
-            'total_records' => $totalRecords,
-            'current_page' => $currentPage,
+
+        $filters = [
+            'lastupdated' => $lastUpdated,
+            'start_date'  => $startDate,
+            'end_date'    => $endDate,
+            'name'        => $nameSearch,
+            'invoice_id'  => $invoiceSearch,
+        ];
+
+        Log::info('ERPREV Controller - salesData processed (API)', [
+            'total'    => $totalRecords,
             'per_page' => $perPage,
-            'sample_record' => count($salesData) > 0 ? $salesData[0] : null,
+            'page'     => $page,
         ]);
-        
-        // Pass the filters to the view
-        $filters['lastupdated'] = $lastUpdated;
-        $filters['name'] = $nameSearch;
-        $filters['barcode'] = $barcodeSearch;
-        
+
         return view('admin.erprev.sales', compact('paginator', 'filters'));
     }
 

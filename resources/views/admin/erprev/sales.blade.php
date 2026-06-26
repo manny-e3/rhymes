@@ -59,24 +59,42 @@
                                         <label class="form-label" for="lastupdated">Last Updated</label>
                                         <div class="form-control-wrap">
                                             <select name="lastupdated" id="lastupdated" class="form-select">
-                                                <option value="" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '' ? 'selected' : '' }}>All Time</option>
-                                                <option value="all" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == 'all' ? 'selected' : '' }}>All Records</option>
-                                                <option value="5m" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '5m' ? 'selected' : '' }}>Last 5 Minutes</option>
-                                                <option value="10m" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '10m' ? 'selected' : '' }}>Last 10 Minutes</option>
-                                                <option value="30m" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '30m' ? 'selected' : '' }}>Last 30 Minutes</option>
-                                                <option value="1h" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '1h' ? 'selected' : '' }}>Last 1 Hour</option>
-                                                <option value="4h" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '4h' ? 'selected' : '' }}>Last 4 Hours</option>
-                                                <option value="6h" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '6h' ? 'selected' : '' }}>Last 6 Hours</option>
-                                                <option value="24h" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '24h' ? 'selected' : '' }}>Last 24 Hours</option>
-                                                <option value="7d" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '7d' ? 'selected' : '' }}>Last 7 Days</option>
-                                                <option value="30d" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '30d' ? 'selected' : '' }}>Last 30 Days</option>
-                                                <option value="60d" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '60d' ? 'selected' : '' }}>Last 60 Days</option>
-                                                <option value="100d" {{ request('lastupdated', $filters['lastupdated'] ?? '100d') == '100d' ? 'selected' : '' }}>Last 100 Days</option>
+                                                <option value="2026-04-01" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '2026-04-01' ? 'selected' : '' }}>Since April 2026</option>
+                                                <option value="all" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == 'all' ? 'selected' : '' }}>All Records</option>
+                                                <option value="5m" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '5m' ? 'selected' : '' }}>Last 5 Minutes</option>
+                                                <option value="10m" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '10m' ? 'selected' : '' }}>Last 10 Minutes</option>
+                                                <option value="30m" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '30m' ? 'selected' : '' }}>Last 30 Minutes</option>
+                                                <option value="1h" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '1h' ? 'selected' : '' }}>Last 1 Hour</option>
+                                                <option value="4h" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '4h' ? 'selected' : '' }}>Last 4 Hours</option>
+                                                <option value="6h" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '6h' ? 'selected' : '' }}>Last 6 Hours</option>
+                                                <option value="24h" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '24h' ? 'selected' : '' }}>Last 24 Hours</option>
+                                                <option value="7d" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '7d' ? 'selected' : '' }}>Last 7 Days</option>
+                                                <option value="30d" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '30d' ? 'selected' : '' }}>Last 30 Days</option>
+                                                <option value="60d" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '60d' ? 'selected' : '' }}>Last 60 Days</option>
+                                                <option value="100d" {{ request('lastupdated', $filters['lastupdated'] ?? '2026-04-01') == '100d' ? 'selected' : '' }}>Last 100 Days</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                                 
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="start_date">Start Date</label>
+                                        <div class="form-control-wrap">
+                                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date', $filters['start_date'] ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="end_date">End Date</label>
+                                        <div class="form-control-wrap">
+                                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date', $filters['end_date'] ?? '') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label" for="name">Product Name</label>
@@ -88,20 +106,20 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label class="form-label" for="barcode">Barcode/ISBN/Product ID</label>
+                                        <label class="form-label" for="invoice_id">Invoice ID</label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="barcode" name="barcode" placeholder="Enter barcode or ID" value="{{ request('barcode') }}">
+                                            <input type="text" class="form-control" id="invoice_id" name="invoice_id" placeholder="Enter Invoice ID" value="{{ request('invoice_id') }}">
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-3">
+                                <div class="col-md-9">
                                     <div class="form-group">
                                         <div class="form-control-wrap">
                                             <button type="submit" class="btn btn-primary me-2"><em class="icon ni ni-filter-alt"></em><span>Apply Filter</span></button>
-                                            <!-- @if(request('lastupdated') || request('name') || request('barcode'))
+                                            @if((request('lastupdated') && request('lastupdated') !== '2026-04-01') || request('start_date') || request('end_date') || request('name') || request('invoice_id'))
                                                 <a href="{{ route('admin.erprev.sales') }}" class="btn btn-secondary"><em class="icon ni ni-reload"></em><span>Clear Filter</span></a>
-                                            @endif -->
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -163,9 +181,11 @@
                                         @if ($paginator->hasPages())
                                     <div>
                                         {{ $paginator->appends([
-                                           'lastupdated' => request('lastupdated', $filters['lastupdated'] ?? '100d'),
+                                           'lastupdated' => request('lastupdated', $filters['lastupdated'] ?? '2026-04-01'),
+                                           'start_date' => request('start_date'),
+                                           'end_date' => request('end_date'),
                                            'name' => request('name'),
-                                           'barcode' => request('barcode')
+                                           'invoice_id' => request('invoice_id')
                                         ])->links('vendor.pagination.bootstrap-4') }}
                                     </div>
                                 @endif
@@ -190,9 +210,30 @@
 @section('scripts')
 <script>
     document.getElementById('btn-sync-sales').addEventListener('click', function() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const lastUpdated = document.getElementById('lastupdated').value;
+
+        let syncUrl = '{{ route("api.erprev.sync-sales-deep") }}?dry_run=0&status=all';
+        let syncText = 'Performing deep search of sales from April 2026 to update wallets. Please wait.';
+
+        if (startDate) {
+            syncUrl += '&start_date=' + encodeURIComponent(startDate);
+            syncText = `Performing deep search of sales starting from ${startDate} to update wallets. Please wait.`;
+            if (endDate) {
+                syncUrl += '&end_date=' + encodeURIComponent(endDate);
+                syncText = `Performing deep search of sales from ${startDate} to ${endDate} to update wallets. Please wait.`;
+            }
+        } else {
+            syncUrl += '&lastupdated=' + encodeURIComponent(lastUpdated);
+            if (lastUpdated !== 'all' && lastUpdated !== '2026-04-01') {
+                syncText = `Performing search of sales from the last ${lastUpdated} to update wallets. Please wait.`;
+            }
+        }
+
         Swal.fire({
             title: 'Synchronizing Sales Data...',
-            text: 'Performing deep search of sales from April 2026 to update wallets. Please wait.',
+            text: syncText,
             allowOutsideClick: false,
             allowEscapeKey: false,
             allowEnterKey: false,
@@ -202,7 +243,7 @@
             }
         });
 
-        fetch('{{ route("api.erprev.sync-sales-deep") }}?lastupdated=2026-04-01&dry_run=0&status=all')
+        fetch(syncUrl)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');

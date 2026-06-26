@@ -862,6 +862,11 @@ class RevService
             return 'all';
         }
 
+        // If it's already an absolute date (YYYY-MM-DD), return as-is
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return $value;
+        }
+
         // Check if value matches relative format (e.g. 5m, 1h, 7d, 100d)
         if (preg_match('/^(\d+)([mhdy])$/i', $value, $matches)) {
             $amount = (int)$matches[1];
@@ -898,9 +903,98 @@ class RevService
         return $this->getEndpointData('get-invoices', $filters);
     }
 
+    /**
+     * Get sold products view using POST with parameters
+     */
     public function getSoldProductsView($filters = [])
     {
-        return $this->getEndpointData('sold-products-view', $filters);
+        if (!$this->enabled) {
+            return ['success' => false, 'message' => 'ERPREV sync is disabled'];
+        }
+
+        try {
+            $url = $this->baseUrl . '/sold-products-view/json/';
+
+            $parameters = [];
+
+            // Resolve startDate from lastupdated or direct filters
+            if (isset($filters['startDate'])) {
+                $parameters['startDate'] = $filters['startDate'];
+            } elseif (isset($filters['lastupdated']) && $filters['lastupdated'] !== 'all') {
+                $lastUpdated = $filters['lastupdated'];
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $lastUpdated)) {
+                    $parameters['startDate'] = $lastUpdated;
+                } else {
+                    $parsedDate = $this->parseLastUpdated($lastUpdated);
+                    if ($parsedDate && $parsedDate !== 'all') {
+                        $parameters['startDate'] = date('Y-m-d', strtotime($parsedDate));
+                    }
+                }
+            } else {
+                // Default fallback is 2026-04-01 (or 2018-01-01 if 'all' is specified)
+                if (isset($filters['lastupdated']) && $filters['lastupdated'] === 'all') {
+                    $parameters['startDate'] = '2018-01-01';
+                } else {
+                    $parameters['startDate'] = '2026-04-01';
+                }
+            }
+
+            // Resolve stopDate from filters
+            if (isset($filters['stopDate'])) {
+                $parameters['stopDate'] = $filters['stopDate'];
+            }
+
+            // Map pagination parameters
+            if (isset($filters['startRow'])) {
+                $parameters['startRow'] = (string)$filters['startRow'];
+            }
+            if (isset($filters['TotalRecords'])) {
+                $parameters['TotalRecords'] = (string)$filters['TotalRecords'];
+            }
+
+            // Map optional filters if passed in
+            $allowedKeys = [
+                'ProductID', 'InvoiceID', 'LocationID', 'CurrencyOption', 'Currency', 
+                'CustomerID', 'UserID', 'Note', 'StockID', 'WareHouseID', 
+                'WareHouse', 'SupplierID', 'CategoryID', 'ClassID'
+            ];
+            foreach ($allowedKeys as $key) {
+                if (isset($filters[$key])) {
+                    $parameters[$key] = $filters[$key];
+                }
+            }
+
+            $payload = [
+                'parameters' => $parameters
+            ];
+
+            Log::info("ERPREV Service - getSoldProductsView - Making POST API call", [
+                'url' => $url,
+                'payload' => $payload,
+            ]);
+
+            $response = Http::withHeaders([
+                'Authorization' => $this->getAuthHeader(),
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ])->timeout(120)->retry(3, 2000)->post($url, $payload);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                $this->logSync('sales', 'success', 'Sold products view fetched (POST)', [
+                    'count' => count($data['records'] ?? $data['data'] ?? []),
+                    'url' => $url,
+                ]);
+
+                return ['success' => true, 'data' => $data, 'url' => $url];
+            } else {
+                throw new \Exception("ERPREV API error (HTTP {$response->status()}): " . $response->body());
+            }
+        } catch (\Exception $e) {
+            $this->logSync('sales', 'error', 'Error fetching sold-products-view (POST): ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 
     public function getRenderedServicesView($filters = [])
