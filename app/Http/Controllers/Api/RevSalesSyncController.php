@@ -580,7 +580,7 @@ class RevSalesSyncController extends Controller
                                  \Illuminate\Support\Facades\DB::table('books')
                                      ->where('id', $book->id)
                                      ->update([
-                                         'quantity' => DB::raw("GREATEST(0, `quantity` - {$quantity})"),
+                                         'quantity' => \Illuminate\Support\Facades\DB::raw("GREATEST(0, `quantity` - {$quantity})"),
                                      ]);
                              }
                         }
