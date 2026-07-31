@@ -210,10 +210,12 @@
                                     <ul class="nk-block-tools g-3">
                                         <li>
                                             <div class="form-control-wrap">
-                                                <div class="form-icon form-icon-right">
-                                                    <em class="icon ni ni-search"></em>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control" id="tableSearch" value="{{ request('search') }}" placeholder="Search transactions..." onkeyup="if(event.keyCode == 13) searchTransactions()">
+                                                    <button class="btn btn-primary" type="button" onclick="searchTransactions()">
+                                                        <em class="icon ni ni-search"></em>
+                                                    </button>
                                                 </div>
-                                                <input type="text" class="form-control form-control-sm" id="tableSearch" value="{{ request('search') }}" placeholder="Search transactions..." onkeyup="if(event.keyCode == 13) searchTransactions()">
                                             </div>
                                         </li>
                                         

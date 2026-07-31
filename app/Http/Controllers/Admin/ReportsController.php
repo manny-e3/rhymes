@@ -201,8 +201,11 @@ class ReportsController extends Controller
 
         // Get transactions
         $transactionsQuery = WalletTransaction::with(['book', 'user'])
-            ->where('type', 'sale')
-            ->whereBetween('created_at', [$startDate, $endDate]);
+            ->where('type', 'sale');
+
+        if (!$request->filled('search')) {
+            $transactionsQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
 
         if ($request->filled('book_id')) {
             $transactionsQuery->where('book_id', $request->book_id);

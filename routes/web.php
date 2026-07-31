@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ErpRevController;
+use App\Http\Controllers\Admin\RevStockedBooksSyncController;
 use App\Http\Controllers\Author\AuthorController;
 use App\Http\Controllers\Author\BookController;
 use App\Http\Controllers\Author\WalletController;
@@ -229,5 +230,9 @@ Route::get('/dev-login-admin', function() {
     }
     return "No admin user found!";
 });
+
+
+Route::get('/erprev/sync-stocked-books-sales', [RevStockedBooksSyncController::class, 'syncSalesToWallet'])->name('erprev.sync-stocked-books-sales');
+
 
 require __DIR__.'/auth.php';

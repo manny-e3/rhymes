@@ -23,15 +23,16 @@
                             <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
-                                    <li>
+                                    <!-- <li>
                                         <button id="btn-sync-sales" class="btn btn-primary">
                                             <em class="icon ni ni-reload-alt"></em>
                                             <span>Sync Sales</span>
                                         </button>
-                                    </li>
-                                    <li><a href="{{ route('admin.erprev.inventory') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-package"></em><span>Inventory</span></a></li>
+                                    </li> -->
+                                    <!-- <li><a href="{{ route('admin.erprev.inventory') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-package"></em><span>Inventory</span></a></li>
                                     <li><a href="{{ route('admin.erprev.products') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-grid-add"></em><span>Products</span></a></li>
-                                    <li><a href="{{ route('admin.erprev.summary') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-bar-chart"></em><span>Summary</span></a></li>
+                                    <li><a href="{{ route('admin.erprev.summary') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-bar-chart"></em><span>Summary</span></a></li> -->
+                                    <li><a href="{{ route('admin.erprev.sync-stocked-books-sales') }}" target="_blank" class="btn btn-white btn-dim btn-outline-primary"><em class="icon ni ni-reload"></em><span>Sync Stocked Books Sales</span></a></li>
                                     <!-- <li><a href="{{ route('admin.erprev.test-endpoints') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-play-fill"></em><span>Test Endpoints</span></a></li> -->
                                 </ul>
                             </div>
@@ -112,12 +113,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="col-md-9">
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label" for="product_id">Product ID</label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="product_id" name="product_id" placeholder="Enter Product ID" value="{{ request('product_id') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <div class="form-control-wrap">
                                             <button type="submit" class="btn btn-primary me-2"><em class="icon ni ni-filter-alt"></em><span>Apply Filter</span></button>
-                                            @if((request('lastupdated') && request('lastupdated') !== '2026-04-01') || request('start_date') || request('end_date') || request('name') || request('invoice_id'))
+                                            @if((request('lastupdated') && request('lastupdated') !== '2026-04-01') || request('start_date') || request('end_date') || request('name') || request('invoice_id') || request('product_id'))
                                                 <a href="{{ route('admin.erprev.sales') }}" class="btn btn-secondary"><em class="icon ni ni-reload"></em><span>Clear Filter</span></a>
                                             @endif
                                         </div>

@@ -909,6 +909,26 @@ function handleRecallRequest(bookId, action) {
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                                <div class="form-control-wrap">
+                                    <input type="number" class="form-control" name="quantity" value="{{ $book->quantity ?? 0 }}" required min="0">
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">REV Book ID</label>
+                                <div class="form-control-wrap">
+                                    <input type="text" class="form-control" name="rev_book_id" value="{{ $book->rev_book_id }}" maxlength="50" placeholder="e.g. 1234567890">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="form-label">Description</label>

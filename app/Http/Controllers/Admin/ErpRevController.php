@@ -127,6 +127,7 @@ class ErpRevController extends Controller
         $endDate = $request->get('end_date', '');
         $nameSearch = trim($request->get('name', ''));
         $invoiceSearch = trim($request->get('invoice_id', ''));
+        $productIdSearch = trim($request->get('product_id', ''));
 
         $filters = [];
         
@@ -146,6 +147,11 @@ class ErpRevController extends Controller
         // Pass InvoiceID to the API if set
         if ($invoiceSearch !== '') {
             $filters['InvoiceID'] = $invoiceSearch;
+        }
+
+        // Pass ProductID to the API if set
+        if ($productIdSearch !== '') {
+            $filters['ProductID'] = $productIdSearch;
         }
 
         Log::info('ERPREV Controller - Calling getSoldProductsView with filters', [
@@ -172,8 +178,8 @@ class ErpRevController extends Controller
         $allSalesData = $result['data']['records'] ?? $result['data']['data'] ?? [];
 
         // Local filtering fallback
-        if (!empty($nameSearch) || !empty($invoiceSearch)) {
-            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $invoiceSearch) {
+        if (!empty($nameSearch) || !empty($invoiceSearch) || !empty($productIdSearch)) {
+            $allSalesData = array_filter($allSalesData, function($item) use ($nameSearch, $invoiceSearch, $productIdSearch) {
                 $match = true;
                 if (!empty($nameSearch)) {
                     $itemName = $item['Product'] ?? $item['product'] ?? $item['Name'] ?? '';
@@ -182,6 +188,10 @@ class ErpRevController extends Controller
                 if (!empty($invoiceSearch)) {
                     $itemInvoiceId = $item['InvoiceID'] ?? $item['invoice_id'] ?? '';
                     $match = $match && ($itemInvoiceId == $invoiceSearch);
+                }
+                if (!empty($productIdSearch)) {
+                    $itemProductId = $item['ProductID'] ?? $item['product_id'] ?? '';
+                    $match = $match && ($itemProductId == $productIdSearch);
                 }
                 return $match;
             });
@@ -234,6 +244,7 @@ class ErpRevController extends Controller
             'end_date'    => $endDate,
             'name'        => $nameSearch,
             'invoice_id'  => $invoiceSearch,
+            'product_id'  => $productIdSearch,
         ];
 
         Log::info('ERPREV Controller - salesData processed (API)', [

@@ -289,6 +289,8 @@ class BookReviewController extends Controller
             'isbn'        => 'nullable|string|max:50',
             'book_type'   => 'required|in:paper_back,hard_back,both',
             'description' => 'nullable|string|max:5000',
+            'rev_book_id' => 'nullable|string|unique:books,rev_book_id,' . $book->id . ',id',
+            'quantity'    => 'nullable|integer|min:0',
         ]);
 
         $book->update($validated);

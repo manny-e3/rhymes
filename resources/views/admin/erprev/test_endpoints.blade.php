@@ -27,6 +27,7 @@
                                     <li><a href="{{ route('admin.erprev.inventory') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-package"></em><span>Inventory</span></a></li>
                                     <li><a href="{{ route('admin.erprev.products') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-grid-add"></em><span>Products</span></a></li>
                                     <li><a href="{{ route('admin.erprev.monitoring') }}" class="btn btn-white btn-dim btn-outline-light"><em class="icon ni ni-activity-alt"></em><span>Sync Monitoring</span></a></li>
+                                    <li><a href="{{ route('admin.erprev.sync-stocked-books-sales') }}" target="_blank" class="btn btn-white btn-dim btn-outline-primary"><em class="icon ni ni-reload"></em><span>Sync Stocked Books Sales</span></a></li>
                                 </ul>
                             </div>
                         </div>
